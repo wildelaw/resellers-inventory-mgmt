@@ -1,0 +1,12 @@
+services:
+  app:
+    environment:
+      - NODE_ENV=development
+      - AUTH_SECRET=dev-secret-change-me-in-production
+      - AUTH_URL=http://localhost:3000
+      - DATABASE_PATH=sqlite.db
+      - UPLOADS_PATH=uploads
+      - BACKUPS_PATH=backups
+    volumes:
+      - .:/app:rw,z
+    read_only: false
