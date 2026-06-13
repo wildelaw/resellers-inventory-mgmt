@@ -1,0 +1,19 @@
+# Development overrides - not for production
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=development
+      - AUTH_SECRET=dev-secret-not-for-production
+      - AUTH_URL=http://localhost:3000
+      - DATABASE_PATH=sqlite.db
+      - UPLOADS_PATH=uploads
+      - BACKUPS_PATH=backups
+    volumes:
+      - .:/app:rw
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    read_only: false
