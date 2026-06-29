@@ -1,1 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+
+# Databases
+*.db
+*.db-wal
+*.db-shm
+sqlite.db
+test.db
+data/sqlite.db
+.test-db/
+
+# Uploads & backups (local dev)
+uploads/
+backups/
+data/uploads/
+data/backups/
+!data/uploads/.gitkeep
+!data/backups/.gitkeep
+
+# Certs & secrets
+certs/*.pem
+certs/*.key
+certs/*.crt
+.env
+.env.local
+.env.*.local
+
+# Drizzle meta (keep migrations, ignore snapshot cache is optional)
+# drizzle/meta/
+
+# OS files
 .DS_Store
+*.swp
+*.swo
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Playwright
+/playwright/.cache/
+test-results/

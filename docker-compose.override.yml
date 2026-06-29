@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      target: builder
+    environment:
+      - NODE_ENV=development
+      - COOKIE_SECURE=false
+    volumes:
+      - ./:/app:rw,z
+      - /app/node_modules
+    read_only: false
+    command: ["npm", "run", "dev"]
+  caddy:
+    profiles: ["https"]

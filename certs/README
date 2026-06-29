@@ -1,0 +1,5 @@
+# Place production TLS certificates here (gitignored)
+# - prod.pem  (production)
+# - prod.key
+# - uat.pem  (UAT self-signed)
+# - uat.key

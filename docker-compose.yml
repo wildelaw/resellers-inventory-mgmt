@@ -1,0 +1,59 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: resell-inv-mgmt
+    restart: unless-stopped
+    networks:
+      - frontend
+    environment:
+      - NODE_ENV=production
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_URL=${AUTH_URL:-https://inventory.cosmiccatvintage.com}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
+    volumes:
+      - ./data:/data:rw,z
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=100m
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "-O", "/dev/null", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: resell-inv-mgmt-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8443:8443"
+    networks:
+      - frontend
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/data/certs:ro
+    environment:
+      - TLS_CERT=${TLS_CERT:-/data/certs/uat.pem}
+      - TLS_KEY=${TLS_KEY:-/data/certs/uat.key}
+    profiles:
+      - https
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      - app
+
+networks:
+  frontend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "172.28.0.0/16"
