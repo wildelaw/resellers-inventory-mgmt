@@ -1,0 +1,9 @@
+services:
+  app:
+    environment:
+      - NODE_ENV=development
+      - AUTH_URL=http://localhost:3000
+      - COOKIE_SECURE=false
+    read_only: false
+    ports:
+      - "3000:3000"

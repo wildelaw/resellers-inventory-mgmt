@@ -1,0 +1,10 @@
+import { NextResponse } from 'next/server';
+import { withAuth, validateOriginOrReferer } from '@/lib/api-utils';
+import { unlockSetup } from '@/lib/db-init';
+
+export const POST = withAuth(async (req, _ctx, _session) => {
+  const originError = validateOriginOrReferer(req);
+  if (originError) return originError;
+  unlockSetup();
+  return NextResponse.json({ success: true });
+}, { requireAdmin: true });

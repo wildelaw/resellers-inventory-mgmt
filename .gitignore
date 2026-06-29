@@ -1,1 +1,39 @@
 .DS_Store
+
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# build
+dist/
+
+# data and runtime artifacts (never commit)
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+uploads/
+backups/
+certs/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# coverage and test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# misc
+*.log
+npm-debug.log*
+.idea/
+.vscode/
