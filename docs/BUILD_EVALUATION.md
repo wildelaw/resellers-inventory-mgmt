@@ -1,8 +1,10 @@
 # Build Evaluation Report — Resell Inventory Manager v2
 
-> **Date:** 2026-06-29 (updated)
+> **Date:** 2026-06-30 (updated)
 > **Scope:** Evaluation of five AI-generated builds of the Resell Inventory Manager v2 application against the specification in `docs/`, and against each other for maintainability, vulnerabilities, complexity, and variances.
 > **Method:** Static source review + real `npm ci` / lint / `tsc --noEmit` / `vitest run` per branch (see Appendix A for methodology and raw logs).
+
+> **Note on `build-ibm-bob`:** A sixth branch, `build-ibm-bob`, was attempted but **did not complete** — the agent ran out of usage quota (lowest Pro plan) mid-build before finishing the implementation. Because a partial build cannot be fairly compared against completed builds, it is **excluded from the evaluation below**. The branch exists in the repository for reference but is not scored or ranked.
 
 ---
 
@@ -10,7 +12,7 @@
 
 Five branches were generated from a single one-shot prompt (`read and execute docs/BUILD_PROMPT.md to build this application`) using three coding agents and two models. All five compile (`tsc --noEmit` clean) and pass their own test suites, and all honor the headline v2 simplifications (no CSRF token, no session revocation table, `canViewAll` toggle, `app_config` single-row, single-source `calculateProfit`, no phantom $0 sales).
 
-The newly added `build-claude-glm-5.2` is a clear step-change over the cohort: it is the only branch that ships the 9 required integration tests, the only branch whose lint pipeline passes cleanly (zero errors, zero warnings), the only branch with a live-JWT-refresh callback that makes role/canViewAll/isActive changes take effect on existing sessions, and it combines the strengths of the prior leaders (claude-5.1's spec fidelity and type discipline + opencode-5.2's explicit SameSite=Strict cookie).
+`build-claude-glm-5.2` is the clear leader: it is the only branch that ships the 9 required integration tests, the only branch whose lint pipeline passes cleanly (zero errors, zero warnings), the only branch with a live-JWT-refresh callback that makes role/canViewAll/isActive changes take effect on existing sessions, and it combines the strengths of the prior leaders (claude-5.1's spec fidelity and type discipline + opencode-5.2's explicit SameSite=Strict cookie).
 
 ### Rankings
 
@@ -68,9 +70,9 @@ The newly added `build-claude-glm-5.2` is a clear step-change over the cohort: i
 Notes:
 - All five target Next.js 16.2.x and React 19.2.4. `node_modules` installed cleanly under Node 24.15 / npm 11.12 with no peer-dep conflicts.
 - **Only `build-claude-glm-5.2` ships the 9 required integration tests.** The other four have zero. This was the single biggest shared gap in the prior cohort; claude-5.2 closes it.
-- **Only `build-claude-glm-5.2` passes `npm run lint` with exit 0.** claude-5.1 and opencode-1.17.4 have working ESLint but emit errors; opencode-5.2 and pi use the removed `next lint` command and ship no `eslint.config.mjs`, so their lint pipelines are non-functional.
-- `build-opencode-1.17.4-glm-5.1` pins **zod v3** while the others pin v4 — a future-compatibility risk since v4 changed several APIs.
-- `build-opencode-glm-5.2` and `build-pi-glm-5.1` both define `"lint": "next lint"`, which is **removed in Next.js 16**. Running `npm run lint` fails immediately with `Invalid project directory provided, no such directory: …/lint`.
+- **Only `build-claude-glm-5.2` passes `npm run lint` with exit 0.** claude-5.1 and opencode-1.17.4 have working ESLint but emit errors; opencode-5.2 and pi use the removed `next lint` command.
+- `build-opencode-1.17.4-glm-5.1` pins **zod v3** while the others pin v4 — a meaningful variance since v4 changed several APIs (`safeParse` issue shape, error customization). It still typechecks and passes tests, but mixing v3 into a v4-oriented spec is a future-compatibility risk.
+- `build-opencode-glm-5.2` and `build-pi-glm-5.1` both define `"lint": "next lint"`, which is **removed in Next.js 16**. Running `npm run lint` fails immediately with `Invalid project directory provided, no such directory: …/lint`. Neither branch ships `eslint.config.mjs`. Their lint pipeline is non-functional.
 
 ---
 
@@ -91,7 +93,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 | No auto $0 sales on donate/discard | ✓ | ✓ | ✓ | ✓ | ✓ | all set only `removalDate`; no `sales` insert on transition |
 | `app_config` single-row table | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas: `appConfig` with `id default(1)` |
 | Removed tables absent (`sessions`/`accounts`/`verification_tokens`) | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas |
-| `withAuth` wrapper pattern | ✓ | ✓ | ✓ | ◐ | ◐ | claude-5.2 & claude-5.1 & opencode-1.17.4 use `export const POST = withAuth(...)`; glm-5.2 & pi deviate (functionally equivalent) |
+| `withAuth` wrapper pattern | ✓ | ✓ | ✓ | ◐ | ◐ | claude-5.2 & claude-5.1 & opencode-1.17.4 use `export const POST = withAuth(...)`; glm-5.2 & pi use `export async function POST(req){ return withAuth(...) }` (functionally equivalent, deviates from spec's canonical form) |
 | Server Components for data pages | ✓ | ✓ | ✓ | ✓ | ✓ | `inventory/page.tsx`, `sales/page.tsx`, `reports/page.tsx`, `app/page.tsx` |
 
 ### 3.2 API surface (BUILD_PROMPT STEP 5 — 43 endpoints)
@@ -100,7 +102,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 |---|---|---|---|---|---|
 | All 43 spec endpoints present | ✓ | ✓ | ✓ | ✓ (+1 extra `/sales/export`) | ✗ missing `/mileage/export` & `/mileage/reports` |
 | Removed endpoints absent | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `/api/auth/*` exempt from Origin check | ✓ (also `/api/setup`) | ✓ | ✗ | ◐ (no explicit exemption) | ✓ (also `/api/setup` POST) |
+| `/api/auth/*` exempt from Origin check | ✓ (also `/api/setup`) | ✓ | ✗ | ◐ (in `http-utils.ts`, no explicit auth exemption — relies on routes not calling it) | ✓ (also exempts `/api/setup` POST, which is correct) |
 
 ### 3.3 Config & ops (BUILD_PROMPT STEPS 2, 6, 12)
 
@@ -118,7 +120,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 
 | Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|
-| `passwordChangedAt` session invalidation (AUTH-02) | **✓+** live-refresh on every request | ✓ | ✓ | ✓ | **✗ broken** — `passwordChangedAt` never written to JWT |
+| `passwordChangedAt` session invalidation (AUTH-02) | **✓+** live-refresh on every request | ✓ | ✓ | ✓ | **✗ broken** — `passwordChangedAt` never written to JWT in `jwt` callback; session always sees 0 |
 | `withAuth` also rejects deactivated accounts | ✓ | ✗ | ✗ | ✗ | ✗ |
 | SEC-11 admin cannot deactivate/role-change own account | ✓ | ✓ | ✓ | ✓ | ✓ |
 | USR-02 password policy (8–128 + 4 char classes) | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -128,8 +130,8 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 
 | Required suite | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|
-| 7 unit tests | ✓ 7 | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 6 |
-| 7 functional tests | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 5 | ◐ 3 |
+| 7 unit tests | ✓ 7 | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 6 (missing one) |
+| 7 functional tests | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 5 (missing `inventory-removal-date`) | ◐ 3 (missing 4: `password-invalidation`, `setup-lock`, `sale-refund-flow`, `inventory-removal-date`) |
 | 9 integration tests | **✓ 9** | ✗ 0 | ✗ 0 | ✗ 0 | ✗ 0 |
 | 5 e2e specs | **✓ 5** | **✓ 5** | ✗ 0 | ✗ 0 | ✗ 0 |
 
@@ -147,7 +149,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 | `build-pi-glm-5.1` | 26 | 37 | 10 | 2 | 75 |
 | `build-opencode-1.17.4-glm-5.1` | 60 | 36 | 1 | 0 | 97 |
 
-Both Claude branches are fully type-safe in `src/`. opencode-1.17.4 has 97 type-escape occurrences concentrated in `auth.ts` session callbacks (e.g., `(session.user as any).id`), which silence the type checker rather than fix the missing NextAuth module augmentation. Both Claude branches and opencode-5.2 ship proper `declare module 'next-auth'` augmentation; opencode-5.2 still has 9 `as any` casts in non-auth code.
+Both Claude branches are fully type-safe in `src/`. opencode-1.17.4 has 97 type-escape occurrences concentrated in `auth.ts` session callbacks and route handlers (e.g., `(session.user as any).id`), which is why it still typechecks — the escapes silence the type checker rather than fix the missing NextAuth module augmentation. Claude and opencode-5.2 both ship proper `declare module 'next-auth'` augmentation; opencode-5.2 still has 9 `as any` casts in non-auth code.
 
 ### 4.2 Lint outcomes
 
@@ -168,7 +170,7 @@ Both Claude branches are fully type-safe in `src/`. opencode-1.17.4 has 97 type-
 - `build-opencode-glm-5.2`: 21 modules — adds `http-utils.ts`, `inventory-queries.ts`, `sales-queries.ts`, `rbac.ts`. Cleaner separation of concerns but deviates further from the spec's literal module list.
 
 ### 4.4 Documentation/comments
-All five branches include JSDoc on `calculateProfit` and `withAuth`. `build-claude-glm-5.2` has the most thorough header comments — e.g. `auth.ts` opens with a multi-line block explaining the JWT refresh strategy and why it's necessary for AUTH-02, and `inventory-logic.ts` documents the removalDate side-effect rules per status transition. Both Claude branches and pi include section-banner comments in `schema.ts`.
+All five branches include JSDoc on `calculateProfit` and `withAuth`. `build-claude-glm-5.2` has the most thorough header comments — e.g. `auth.ts` opens with a multi-line block explaining the JWT refresh strategy and why it's necessary for AUTH-02, and `inventory-logic.ts` documents the removalDate side-effect rules per status transition. Both Claude branches include section-banner comments in `schema.ts`.
 
 **Maintainability winner:** `build-claude-glm-5.2`.
 
@@ -201,9 +203,13 @@ jwt: ({ token, user }) => {
   }
   return token;
 },
+session: ({ session, token }) => {
+  // ...
+  (session.user as any).passwordChangedAt = (token.passwordChangedAt as number) ?? 0;
+}
 ```
 
-Because `token.passwordChangedAt` is never written, `session.user.passwordChangedAt` is always `0`. The `withAuth` check `if (pca > 0 && iat < pca)` is therefore always false → **changing a user's password (or admin resetting it) does NOT invalidate existing JWTs.** This directly violates AUTH-02/SEC-03. The functional test `password-invalidation.test.ts` passes only because it mocks the session object directly. **Severity: High.**
+Because `token.passwordChangedAt` is never written, `session.user.passwordChangedAt` is always `0`. The `withAuth` check `if (pca > 0 && iat < pca)` is therefore always false → **changing a user's password (or admin resetting it) does NOT invalidate existing JWTs.** This directly violates AUTH-02/SEC-03. The functional test `password-invalidation.test.ts` passes only because it mocks the session object directly rather than exercising the real JWT callback chain. **Severity: High.**
 
 The other four branches correctly propagate `passwordChangedAt` through the `jwt` callback.
 
@@ -346,6 +352,7 @@ Notable interpretation differences:
 3. **Dynamic verification.** Per worktree: `npm ci --no-audit --no-fund`, then `npm run lint` (or `next lint` where scripted), then `npx tsc --noEmit`, then `npm test` (`vitest run`). All five installed cleanly under Node 24.15 / npm 11.12. E2E (`playwright test`) was not run: only the two Claude branches ship e2e specs, and running Playwright was deemed informational per the approved plan; unit/functional/integration results are weighted instead.
 4. **No patching.** Per the approved plan, branches were not modified to repair failures — a broken lint script or missing endpoint was recorded as-is to preserve "single one-shot prompt" fidelity.
 5. **No commits.** This report is the only file written to the repo; nothing was committed. Worktrees and logs under `/tmp/opencode/eval/` are throwaway.
+6. **`build-ibm-bob` excluded.** A sixth branch (`build-ibm-bob`) was attempted but did not complete — the agent exhausted its usage quota on the lowest Pro plan mid-build. Since a partial build cannot be fairly compared against completed builds, it is excluded from all evaluation sections. The branch remains in the repository for reference.
 
 ### Raw verification results
 
@@ -359,7 +366,7 @@ Notable interpretation differences:
 
 ### Endpoint inventory (per branch)
 
-All five expose the core 22 endpoints (`/api/health`, `/api/auth/[...nextauth]`, `/api/setup`, `/api/inventory*`, `/api/sales`, `/api/sales/[id]`, `/api/mileage`, `/api/mileage/[id]`, `/api/photos/[itemId]/[filename]`, `/api/profile`, `/api/reports`, `/api/import`, `/api/settings`, `/api/admin/{users,backup,restore,setup-unlock}`). Variances:
+All five expose the core 22 endpoints (`/api/health`, `/api/auth/[...nextauth]`, `/api/setup`, `/api/inventory*`, `/api/sales`, `/api/sales/[id]`, `/api/mileage`, `/api/mileage/[id]`, `/api/photos/[itemId]/[filename]`, `/api/profile`, `/api/reports`, `/api/import`, `/api/settings`, `/api/admin/{users,backup,setup-unlock}`). Variances:
 - `build-opencode-glm-5.2` adds `/api/sales/export` (not required, harmless).
 - `build-pi-glm-5.1` omits `/api/mileage/export` and `/api/mileage/reports` (required by MILE-02/MILE-03).
 - `build-claude-glm-5.2`, `build-claude-glm-5.1`, and `build-opencode-1.17.4-glm-5.1` match the spec surface exactly.
@@ -384,5 +391,6 @@ Integration tests (`tests/integration/`): **9 files in `build-claude-glm-5.2` on
 - **Most security-hardened alternative:** `build-opencode-glm-5.2` — also has explicit SameSite and clean typing, but its lint pipeline is broken (`next lint` removed in Next 16, no `eslint.config.mjs`), it lacks the live JWT refresh and `isActive` gate, and it deviates from the canonical `withAuth` signature.
 - **Avoid `build-pi-glm-5.1` as a production baseline:** its session-invalidation bug is silent and security-critical, and it is missing two required mileage endpoints.
 - **`build-opencode-1.17.4-glm-5.1`** is compact and works, but its 97 type escapes and zod v3 pin make it the worst-positioned for future maintenance despite the small footprint.
+- **`build-ibm-bob`** was not completed (agent ran out of quota on the lowest Pro plan) and is therefore excluded from the comparison. A fair evaluation would require re-running the build with sufficient quota.
 
 The prior cohort's single biggest shared gap — the **complete absence of integration tests** — is closed by `build-claude-glm-5.2` (9 integration test files, 60+ integration test cases, all passing). The other four branches still have zero integration tests.
