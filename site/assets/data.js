@@ -14,8 +14,8 @@ window.EVAL_DATA = {
     functionalEvalPath: 'docs/FUNCTIONAL_EVALUATION.md',
     functionalPromptPath: 'docs/FUNCTIONAL_EVAL_PROMPT.md',
     staticEvalDate: '2026-06-30',
-    functionalEvalDate: null, // set when FUNCTIONAL_EVALUATION.md is written
-    functionalStatus: 'pending' // 'pending' | 'partial' | 'complete'
+    functionalEvalDate: '2026-06-30', // set when FUNCTIONAL_EVALUATION.md is written
+    functionalStatus: 'complete' // 'pending' | 'partial' | 'complete'
   },
 
   // ---------- Rankings (from BUILD_EVALUATION.md §1) ----------
@@ -288,22 +288,1531 @@ window.EVAL_DATA = {
   // regressions[{id, status}], failures[{flowId, scenarioId, error, effort, prompt}],
   // functionalScore (0-100), summary.
   functional: {
-    status: 'pending', // 'pending' | 'partial' | 'complete'
-    dateCompleted: null,
-    methodology: null,
-    branches: {
-      'build-claude-glm-5.2':          { bootMode: null, flows: [], regressions: [], failures: [], functionalScore: null, summary: null },
-      'build-claude-glm-5.1':          { bootMode: null, flows: [], regressions: [], failures: [], functionalScore: null, summary: null },
-      'build-opencode-1.17.4-glm-5.1': { bootMode: null, flows: [], regressions: [], failures: [], functionalScore: null, summary: null },
-      'build-opencode-glm-5.2':       { bootMode: null, flows: [], regressions: [], failures: [], functionalScore: null, summary: null },
-      'build-pi-glm-5.1':             { bootMode: null, flows: [], regressions: [], failures: [], functionalScore: null, summary: null },
-      'build-vscode-glm-5.2':         { bootMode: null, flows: [], regressions: [], failures: [], functionalScore: null, summary: null }
+  "status": "complete",
+  "dateCompleted": "2026-06-30",
+  "methodology": "Playwright 1.61.1 chromium, next dev boot, 3 retries/flow, admin via native seed or /api/setup fallback, drizzle-kit migrate where required",
+  "branches": {
+    "build-claude-glm-5.2": {
+      "bootMode": "dev (auto-migrate via lazy proxy)",
+      "flows": [
+        {
+          "id": "auth",
+          "status": "pass",
+          "attempts": "8/8 tests pass",
+          "error": ""
+        },
+        {
+          "id": "inventory",
+          "status": "pass",
+          "attempts": "6/6 tests pass",
+          "error": ""
+        },
+        {
+          "id": "sales",
+          "status": "pass",
+          "attempts": "5/5 tests pass",
+          "error": ""
+        },
+        {
+          "id": "import",
+          "status": "pass",
+          "attempts": "3/3 tests pass",
+          "error": ""
+        },
+        {
+          "id": "rbac",
+          "status": "pass",
+          "attempts": "4/4 tests pass",
+          "error": ""
+        }
+      ],
+      "regressions": [
+        {
+          "id": "REG-01",
+          "scenario": "Create item → record sale → item status becomes \"sold\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-02",
+          "scenario": "Record sale → process refund_with_return → item becomes \"returned\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-03",
+          "scenario": "Record sale → process refund_no_return → item stays \"sold\", refund recorded",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-04",
+          "scenario": "Delete sale → item status reverts to \"available\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-05",
+          "scenario": "Bulk update items to \"donated\" → removalDate set, no $0 sales created",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-06",
+          "scenario": "Password change invalidates existing JWT sessions",
+          "category": "Auth",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-07",
+          "scenario": "Origin header required on all POST/PUT/DELETE/PATCH requests",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-08",
+          "scenario": "Origin header mismatched returns 403 INVALID_ORIGIN",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-09",
+          "scenario": "Standard user cannot access another user's items",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-10",
+          "scenario": "canViewAll user can view all data but only edit own",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-11",
+          "scenario": "Admin can manage users and edit any data",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-12",
+          "scenario": "Invalid status transition rejected (e.g., sold → available)",
+          "category": "Validation",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-13",
+          "scenario": "Status transition to \"donated\" sets removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-14",
+          "scenario": "Status transition \"returned\" → \"available\" clears removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-15",
+          "scenario": "Backup restore with invalid data → no DB changes",
+          "category": "Backup",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-16",
+          "scenario": "Setup lock prevents second admin creation",
+          "category": "Auth",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-17",
+          "scenario": "Photo upload requires item ownership",
+          "category": "Security",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-18",
+          "scenario": "Profit calculation produces correct results for all null/zero combinations",
+          "category": "Financial",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        }
+      ],
+      "failures": [],
+      "functionalScore": 100,
+      "summary": "The only fully-functional build. All 5 flows pass and all 18 regression scenarios pass. Live JWT refresh of passwordChangedAt makes REG-06 work. No remediation required."
     },
-    crossBranchMatrix: null, // populated when complete
-    aggregateFindings: null,
-    effortSummary: null,
-    functionalWinner: null,
-    recommendation: null,
-    appendix: null
-  }
+    "build-claude-glm-5.1": {
+      "bootMode": "dev (auto-migrate via app + drizzle-kit)",
+      "flows": [
+        {
+          "id": "auth",
+          "status": "fail",
+          "attempts": "5/8 tests pass",
+          "error": "Error: expect(received).toBeFalsy() | Received: true"
+        },
+        {
+          "id": "inventory",
+          "status": "fail",
+          "attempts": "0/6 tests pass",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "sales",
+          "status": "fail",
+          "attempts": "0/5 tests pass",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "import",
+          "status": "pass",
+          "attempts": "3/3 tests pass",
+          "error": ""
+        },
+        {
+          "id": "rbac",
+          "status": "fail",
+          "attempts": "1/4 tests pass",
+          "error": "Error: expect(received).toBeTruthy() | Received: undefined"
+        }
+      ],
+      "regressions": [
+        {
+          "id": "REG-01",
+          "scenario": "Create item → record sale → item status becomes \"sold\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-02",
+          "scenario": "Record sale → process refund_with_return → item becomes \"returned\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-03",
+          "scenario": "Record sale → process refund_no_return → item stays \"sold\", refund recorded",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-04",
+          "scenario": "Delete sale → item status reverts to \"available\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-05",
+          "scenario": "Bulk update items to \"donated\" → removalDate set, no $0 sales created",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-06",
+          "scenario": "Password change invalidates existing JWT sessions",
+          "category": "Auth",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBeDefined() | Received: undefined"
+        },
+        {
+          "id": "REG-07",
+          "scenario": "Origin header required on all POST/PUT/DELETE/PATCH requests",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-08",
+          "scenario": "Origin header mismatched returns 403 INVALID_ORIGIN",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-09",
+          "scenario": "Standard user cannot access another user's items",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-10",
+          "scenario": "canViewAll user can view all data but only edit own",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBeTruthy() | Received: undefined"
+        },
+        {
+          "id": "REG-11",
+          "scenario": "Admin can manage users and edit any data",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBeTruthy() | Received: false"
+        },
+        {
+          "id": "REG-12",
+          "scenario": "Invalid status transition rejected (e.g., sold → available)",
+          "category": "Validation",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-13",
+          "scenario": "Status transition to \"donated\" sets removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-14",
+          "scenario": "Status transition \"returned\" → \"available\" clears removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-15",
+          "scenario": "Backup restore with invalid data → no DB changes",
+          "category": "Backup",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-16",
+          "scenario": "Setup lock prevents second admin creation",
+          "category": "Auth",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-17",
+          "scenario": "Photo upload requires item ownership",
+          "category": "Security",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-18",
+          "scenario": "Profit calculation produces correct results for all null/zero combinations",
+          "category": "Financial",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        }
+      ],
+      "failures": [
+        {
+          "flowId": "auth",
+          "scenarioId": null,
+          "error": "Error: expect(received).toBeFalsy() | Received: true",
+          "effort": "S",
+          "prompt": "Fix per spec: fix the NextAuth credentials callback to authenticate valid credentials."
+        },
+        {
+          "flowId": "auth",
+          "scenarioId": null,
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 401 | Received: 200",
+          "effort": "M",
+          "prompt": "Fix per spec: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "auth",
+          "scenarioId": "REG-06",
+          "error": "Error: expect(received).toBeDefined() | Received: undefined",
+          "effort": "M",
+          "prompt": "Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": null,
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per spec: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-12",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per INV-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-13",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per INV-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-14",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per INV-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-05",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per INV-04: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-17",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per INV-05: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-01",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per SALE-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-02",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-03: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-03",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-03: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-04",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-02: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-18",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per SALE-04: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "rbac",
+          "scenarioId": "REG-10",
+          "error": "Error: expect(received).toBeTruthy() | Received: undefined",
+          "effort": "M",
+          "prompt": "Fix per INV-03: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "rbac",
+          "scenarioId": "REG-11",
+          "error": "Error: expect(received).toBeTruthy() | Received: false",
+          "effort": "M",
+          "prompt": "Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete."
+        },
+        {
+          "flowId": "rbac",
+          "scenarioId": "REG-15",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per BAK-02: fix the failing behavior to match the spec."
+        }
+      ],
+      "functionalScore": 35,
+      "summary": "Auth gating and CSV import work (9/26 pass), but sale and inventory creation return HTTP 500, cascading to fail REG-01..REG-05, REG-12..REG-14, REG-17, REG-18. REG-06 fails (no live JWT refresh). REG-10/REG-11 fail."
+    },
+    "build-opencode-1.17.4-glm-5.1": {
+      "bootMode": "dev (drizzle-kit migrate required)",
+      "flows": [
+        {
+          "id": "auth",
+          "status": "fail",
+          "attempts": "7/8 tests pass",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "inventory",
+          "status": "fail",
+          "attempts": "5/6 tests pass",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: \"returned\" | Received: \"sold\""
+        },
+        {
+          "id": "sales",
+          "status": "fail",
+          "attempts": "0/5 tests pass",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "import",
+          "status": "pass",
+          "attempts": "3/3 tests pass",
+          "error": ""
+        },
+        {
+          "id": "rbac",
+          "status": "fail",
+          "attempts": "3/4 tests pass",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        }
+      ],
+      "regressions": [
+        {
+          "id": "REG-01",
+          "scenario": "Create item → record sale → item status becomes \"sold\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-02",
+          "scenario": "Record sale → process refund_with_return → item becomes \"returned\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-03",
+          "scenario": "Record sale → process refund_no_return → item stays \"sold\", refund recorded",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-04",
+          "scenario": "Delete sale → item status reverts to \"available\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-05",
+          "scenario": "Bulk update items to \"donated\" → removalDate set, no $0 sales created",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-06",
+          "scenario": "Password change invalidates existing JWT sessions",
+          "category": "Auth",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-07",
+          "scenario": "Origin header required on all POST/PUT/DELETE/PATCH requests",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-08",
+          "scenario": "Origin header mismatched returns 403 INVALID_ORIGIN",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-09",
+          "scenario": "Standard user cannot access another user's items",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-10",
+          "scenario": "canViewAll user can view all data but only edit own",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-11",
+          "scenario": "Admin can manage users and edit any data",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-12",
+          "scenario": "Invalid status transition rejected (e.g., sold → available)",
+          "category": "Validation",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-13",
+          "scenario": "Status transition to \"donated\" sets removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-14",
+          "scenario": "Status transition \"returned\" → \"available\" clears removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: \"returned\" | Received: \"sold\""
+        },
+        {
+          "id": "REG-15",
+          "scenario": "Backup restore with invalid data → no DB changes",
+          "category": "Backup",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-16",
+          "scenario": "Setup lock prevents second admin creation",
+          "category": "Auth",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-17",
+          "scenario": "Photo upload requires item ownership",
+          "category": "Security",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-18",
+          "scenario": "Profit calculation produces correct results for all null/zero combinations",
+          "category": "Financial",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        }
+      ],
+      "failures": [
+        {
+          "flowId": "auth",
+          "scenarioId": "REG-06",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-14",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: \"returned\" | Received: \"sold\"",
+          "effort": "S",
+          "prompt": "Fix per INV-02: clear removalDate on returned→available and ensure refund_with_return sets returned."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-01",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per SALE-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-02",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-03: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-03",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-03: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-04",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-02: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-18",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per SALE-04: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "rbac",
+          "scenarioId": "REG-11",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete."
+        }
+      ],
+      "functionalScore": 69,
+      "summary": "18/26 pass once drizzle-kit migrate is applied. Fails concentrate in sales (POST 500), REG-14 (returned status), REG-06, and REG-11. RBAC view and most inventory flows work."
+    },
+    "build-opencode-glm-5.2": {
+      "bootMode": "dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv)",
+      "flows": [
+        {
+          "id": "auth",
+          "status": "fail",
+          "attempts": "7/8 tests pass",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "inventory",
+          "status": "pass",
+          "attempts": "6/6 tests pass",
+          "error": ""
+        },
+        {
+          "id": "sales",
+          "status": "pass",
+          "attempts": "5/5 tests pass",
+          "error": ""
+        },
+        {
+          "id": "import",
+          "status": "fail",
+          "attempts": "2/3 tests pass",
+          "error": "Error: expect(received).toBeTruthy() | Received: false"
+        },
+        {
+          "id": "rbac",
+          "status": "fail",
+          "attempts": "3/4 tests pass",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        }
+      ],
+      "regressions": [
+        {
+          "id": "REG-01",
+          "scenario": "Create item → record sale → item status becomes \"sold\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-02",
+          "scenario": "Record sale → process refund_with_return → item becomes \"returned\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-03",
+          "scenario": "Record sale → process refund_no_return → item stays \"sold\", refund recorded",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-04",
+          "scenario": "Delete sale → item status reverts to \"available\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-05",
+          "scenario": "Bulk update items to \"donated\" → removalDate set, no $0 sales created",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-06",
+          "scenario": "Password change invalidates existing JWT sessions",
+          "category": "Auth",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-07",
+          "scenario": "Origin header required on all POST/PUT/DELETE/PATCH requests",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-08",
+          "scenario": "Origin header mismatched returns 403 INVALID_ORIGIN",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-09",
+          "scenario": "Standard user cannot access another user's items",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-10",
+          "scenario": "canViewAll user can view all data but only edit own",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-11",
+          "scenario": "Admin can manage users and edit any data",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-12",
+          "scenario": "Invalid status transition rejected (e.g., sold → available)",
+          "category": "Validation",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-13",
+          "scenario": "Status transition to \"donated\" sets removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-14",
+          "scenario": "Status transition \"returned\" → \"available\" clears removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-15",
+          "scenario": "Backup restore with invalid data → no DB changes",
+          "category": "Backup",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-16",
+          "scenario": "Setup lock prevents second admin creation",
+          "category": "Auth",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-17",
+          "scenario": "Photo upload requires item ownership",
+          "category": "Security",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-18",
+          "scenario": "Profit calculation produces correct results for all null/zero combinations",
+          "category": "Financial",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        }
+      ],
+      "failures": [
+        {
+          "flowId": "auth",
+          "scenarioId": "REG-06",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions."
+        },
+        {
+          "flowId": "import",
+          "scenarioId": null,
+          "error": "Error: expect(received).toBeTruthy() | Received: false",
+          "effort": "S",
+          "prompt": "Fix per spec: fix the mileage import path in POST /api/import for type=mileage."
+        },
+        {
+          "flowId": "rbac",
+          "scenarioId": "REG-11",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete."
+        }
+      ],
+      "functionalScore": 88,
+      "summary": "23/26 pass. Only REG-06, mileage CSV import, and REG-11 fail. seed.ts is broken (missing dotenv); admin bootstrapped via /api/setup."
+    },
+    "build-pi-glm-5.1": {
+      "bootMode": "dev (drizzle-kit migrate required)",
+      "flows": [
+        {
+          "id": "auth",
+          "status": "fail",
+          "attempts": "7/8 tests pass",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "inventory",
+          "status": "fail",
+          "attempts": "3/6 tests pass",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: \"E2E Item\" | Received: undefined"
+        },
+        {
+          "id": "sales",
+          "status": "fail",
+          "attempts": "0/5 tests pass",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "import",
+          "status": "pass",
+          "attempts": "3/3 tests pass",
+          "error": ""
+        },
+        {
+          "id": "rbac",
+          "status": "fail",
+          "attempts": "3/4 tests pass",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        }
+      ],
+      "regressions": [
+        {
+          "id": "REG-01",
+          "scenario": "Create item → record sale → item status becomes \"sold\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        },
+        {
+          "id": "REG-02",
+          "scenario": "Record sale → process refund_with_return → item becomes \"returned\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-03",
+          "scenario": "Record sale → process refund_no_return → item stays \"sold\", refund recorded",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-04",
+          "scenario": "Delete sale → item status reverts to \"available\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-05",
+          "scenario": "Bulk update items to \"donated\" → removalDate set, no $0 sales created",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-06",
+          "scenario": "Password change invalidates existing JWT sessions",
+          "category": "Auth",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-07",
+          "scenario": "Origin header required on all POST/PUT/DELETE/PATCH requests",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-08",
+          "scenario": "Origin header mismatched returns 403 INVALID_ORIGIN",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-09",
+          "scenario": "Standard user cannot access another user's items",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-10",
+          "scenario": "canViewAll user can view all data but only edit own",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-11",
+          "scenario": "Admin can manage users and edit any data",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-12",
+          "scenario": "Invalid status transition rejected (e.g., sold → available)",
+          "category": "Validation",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-13",
+          "scenario": "Status transition to \"donated\" sets removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBeTruthy() | Received: undefined"
+        },
+        {
+          "id": "REG-14",
+          "scenario": "Status transition \"returned\" → \"available\" clears removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: \"sold\" | Received: undefined"
+        },
+        {
+          "id": "REG-15",
+          "scenario": "Backup restore with invalid data → no DB changes",
+          "category": "Backup",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-16",
+          "scenario": "Setup lock prevents second admin creation",
+          "category": "Auth",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-17",
+          "scenario": "Photo upload requires item ownership",
+          "category": "Security",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-18",
+          "scenario": "Profit calculation produces correct results for all null/zero combinations",
+          "category": "Financial",
+          "priority": "High",
+          "status": "fail",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500"
+        }
+      ],
+      "failures": [
+        {
+          "flowId": "auth",
+          "scenarioId": "REG-06",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": null,
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: \"E2E Item\" | Received: undefined",
+          "effort": "M",
+          "prompt": "Fix per spec: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-13",
+          "error": "Error: expect(received).toBeTruthy() | Received: undefined",
+          "effort": "S",
+          "prompt": "Fix per INV-02: set removalDate when status transitions to donated."
+        },
+        {
+          "flowId": "inventory",
+          "scenarioId": "REG-14",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: \"sold\" | Received: undefined",
+          "effort": "S",
+          "prompt": "Fix per INV-02: clear removalDate on returned→available and ensure refund_with_return sets returned."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-01",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per SALE-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-02",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-03: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-03",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-03: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-04",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per SALE-02: fix the failing behavior to match the spec."
+        },
+        {
+          "flowId": "sales",
+          "scenarioId": "REG-18",
+          "error": "Error: expect(received).toBe(expected) // Object.is equality | Expected: 201 | Received: 500",
+          "effort": "M",
+          "prompt": "Fix per SALE-04: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input."
+        },
+        {
+          "flowId": "rbac",
+          "scenarioId": "REG-11",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete."
+        }
+      ],
+      "functionalScore": 62,
+      "summary": "16/26 pass. Sale creation 500; inventory GET returns undefined fields; REG-06 and REG-11 fail. RBAC view and basic auth gating work."
+    },
+    "build-vscode-glm-5.2": {
+      "bootMode": "dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv)",
+      "flows": [
+        {
+          "id": "auth",
+          "status": "fail",
+          "attempts": "7/8 tests pass",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "inventory",
+          "status": "pass",
+          "attempts": "6/6 tests pass",
+          "error": ""
+        },
+        {
+          "id": "sales",
+          "status": "pass",
+          "attempts": "5/5 tests pass",
+          "error": ""
+        },
+        {
+          "id": "import",
+          "status": "pass",
+          "attempts": "3/3 tests pass",
+          "error": ""
+        },
+        {
+          "id": "rbac",
+          "status": "pass",
+          "attempts": "4/4 tests pass",
+          "error": ""
+        }
+      ],
+      "regressions": [
+        {
+          "id": "REG-01",
+          "scenario": "Create item → record sale → item status becomes \"sold\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-02",
+          "scenario": "Record sale → process refund_with_return → item becomes \"returned\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-03",
+          "scenario": "Record sale → process refund_no_return → item stays \"sold\", refund recorded",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-04",
+          "scenario": "Delete sale → item status reverts to \"available\"",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-05",
+          "scenario": "Bulk update items to \"donated\" → removalDate set, no $0 sales created",
+          "category": "Functional",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-06",
+          "scenario": "Password change invalidates existing JWT sessions",
+          "category": "Auth",
+          "priority": "Critical",
+          "status": "fail",
+          "error": "Error: expect(received).toContain(expected) // indexOf"
+        },
+        {
+          "id": "REG-07",
+          "scenario": "Origin header required on all POST/PUT/DELETE/PATCH requests",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-08",
+          "scenario": "Origin header mismatched returns 403 INVALID_ORIGIN",
+          "category": "Security",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-09",
+          "scenario": "Standard user cannot access another user's items",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-10",
+          "scenario": "canViewAll user can view all data but only edit own",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-11",
+          "scenario": "Admin can manage users and edit any data",
+          "category": "RBAC",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-12",
+          "scenario": "Invalid status transition rejected (e.g., sold → available)",
+          "category": "Validation",
+          "priority": "Critical",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-13",
+          "scenario": "Status transition to \"donated\" sets removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-14",
+          "scenario": "Status transition \"returned\" → \"available\" clears removalDate",
+          "category": "Business Logic",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-15",
+          "scenario": "Backup restore with invalid data → no DB changes",
+          "category": "Backup",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-16",
+          "scenario": "Setup lock prevents second admin creation",
+          "category": "Auth",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-17",
+          "scenario": "Photo upload requires item ownership",
+          "category": "Security",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        },
+        {
+          "id": "REG-18",
+          "scenario": "Profit calculation produces correct results for all null/zero combinations",
+          "category": "Financial",
+          "priority": "High",
+          "status": "pass",
+          "error": ""
+        }
+      ],
+      "failures": [
+        {
+          "flowId": "auth",
+          "scenarioId": "REG-06",
+          "error": "Error: expect(received).toContain(expected) // indexOf",
+          "effort": "M",
+          "prompt": "Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions."
+        }
+      ],
+      "functionalScore": 96,
+      "summary": "25/26 pass. Only REG-06 fails (no live JWT refresh). seed.ts is broken (missing dotenv); /api/setup bootstraps the admin cleanly."
+    }
+  },
+  "crossBranchMatrix": null,
+  "aggregateFindings": [
+    {
+      "sev": "High",
+      "branch": "build-claude-glm-5.1",
+      "finding": "POST /api/sales and /api/inventory return HTTP 500 (broken creation handler)",
+      "flowId": "sales/inventory",
+      "scenarioId": "REG-01/REG-05/REG-12/REG-17/REG-18"
+    },
+    {
+      "sev": "High",
+      "branch": "build-opencode-1.17.4-glm-5.1",
+      "finding": "POST /api/sales returns 500; sale workflow non-functional",
+      "flowId": "sales",
+      "scenarioId": "REG-01..REG-04/REG-18"
+    },
+    {
+      "sev": "High",
+      "branch": "build-pi-glm-5.1",
+      "finding": "POST /api/sales returns 500; inventory GET returns undefined fields",
+      "flowId": "sales/inventory",
+      "scenarioId": "REG-01..REG-04/REG-13/REG-14/REG-18"
+    },
+    {
+      "sev": "High",
+      "branch": "build-opencode-glm-5.2, build-vscode-glm-5.2",
+      "finding": "seed.ts crashes: Cannot find module 'dotenv/config' (broken boot script)",
+      "flowId": "boot",
+      "scenarioId": "—"
+    },
+    {
+      "sev": "Med",
+      "branch": "build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2",
+      "finding": "REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02)",
+      "flowId": "auth",
+      "scenarioId": "REG-06"
+    },
+    {
+      "sev": "Med",
+      "branch": "build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1",
+      "finding": "REG-11 fails: admin user-management endpoint returns wrong status/shape",
+      "flowId": "rbac",
+      "scenarioId": "REG-11"
+    },
+    {
+      "sev": "Med",
+      "branch": "build-opencode-1.17.4-glm-5.1",
+      "finding": "REG-14 fails: refund_with_return leaves item in 'sold' state instead of 'returned'",
+      "flowId": "inventory",
+      "scenarioId": "REG-14"
+    },
+    {
+      "sev": "Med",
+      "branch": "build-opencode-glm-5.2",
+      "finding": "Mileage CSV import (type=mileage) fails; inventory/sales imports work",
+      "flowId": "import",
+      "scenarioId": "—"
+    },
+    {
+      "sev": "Low",
+      "branch": "build-claude-glm-5.2",
+      "finding": "/api/setup POST throws 500 when drizzle-kit has run (tag column mismatch in custom migrator)",
+      "flowId": "boot",
+      "scenarioId": "—"
+    },
+    {
+      "sev": "Low",
+      "branch": "build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2",
+      "finding": "App does not auto-migrate on dev boot; requires manual `npx drizzle-kit migrate` (OPERATIONS.md §1.3)",
+      "flowId": "boot",
+      "scenarioId": "—"
+    },
+    {
+      "sev": "Info",
+      "branch": "all branches except build-claude-glm-5.2",
+      "finding": "Session invalidation (REG-06) is the single most-shared functional gap — only claude-5.2 implements live JWT refresh",
+      "flowId": "auth",
+      "scenarioId": "REG-06"
+    }
+  ],
+  "effortSummary": [
+    {
+      "branch": "build-claude-glm-5.2",
+      "total": 0,
+      "S": 0,
+      "M": 0,
+      "L": 0,
+      "XL": 0,
+      "estimatedHours": 0.0
+    },
+    {
+      "branch": "build-claude-glm-5.1",
+      "total": 17,
+      "S": 1,
+      "M": 16,
+      "L": 0,
+      "XL": 0,
+      "estimatedHours": 16.2
+    },
+    {
+      "branch": "build-opencode-1.17.4-glm-5.1",
+      "total": 8,
+      "S": 1,
+      "M": 7,
+      "L": 0,
+      "XL": 0,
+      "estimatedHours": 7.2
+    },
+    {
+      "branch": "build-opencode-glm-5.2",
+      "total": 3,
+      "S": 1,
+      "M": 2,
+      "L": 0,
+      "XL": 0,
+      "estimatedHours": 2.2
+    },
+    {
+      "branch": "build-pi-glm-5.1",
+      "total": 10,
+      "S": 2,
+      "M": 8,
+      "L": 0,
+      "XL": 0,
+      "estimatedHours": 8.5
+    },
+    {
+      "branch": "build-vscode-glm-5.2",
+      "total": 1,
+      "S": 0,
+      "M": 1,
+      "L": 0,
+      "XL": 0,
+      "estimatedHours": 1.0
+    }
+  ],
+  "functionalWinner": "build-claude-glm-5.2",
+  "recommendation": "build-claude-glm-5.2 is the only build that passes the full functional E2E suite (26/26, 100/100) — the only build with working session invalidation (REG-06), non-500 sale creation, and working admin user management. Corroborates the static-analysis #1 ranking. Runner-up build-vscode-glm-5.2 (96/100) fails only REG-06. Adopt claude-5.2 as the production baseline.",
+  "appendix": "Raw reports: /tmp/opencode/eval-func/<branch>/results-run-{1,2,3}/. Per-run logs: /tmp/opencode/eval-func/<branch>-run-{1,2,3}.log. Dev logs: /tmp/opencode/eval-func/<branch>-dev.log."
+}
 };
