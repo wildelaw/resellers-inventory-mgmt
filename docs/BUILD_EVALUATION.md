@@ -1,18 +1,20 @@
 # Build Evaluation Report — Resell Inventory Manager v2
 
 > **Date:** 2026-06-30 (updated)
-> **Scope:** Evaluation of five AI-generated builds of the Resell Inventory Manager v2 application against the specification in `docs/`, and against each other for maintainability, vulnerabilities, complexity, and variances.
+> **Scope:** Evaluation of six AI-generated builds of the Resell Inventory Manager v2 application against the specification in `docs/`, and against each other for maintainability, vulnerabilities, complexity, and variances.
 > **Method:** Static source review + real `npm ci` / lint / `tsc --noEmit` / `vitest run` per branch (see Appendix A for methodology and raw logs).
 
-> **Note on `build-ibm-bob`:** A sixth branch, `build-ibm-bob`, was attempted but **did not complete** — the agent ran out of usage quota (lowest Pro plan) mid-build before finishing the implementation. Because a partial build cannot be fairly compared against completed builds, it is **excluded from the evaluation below**. The branch exists in the repository for reference but is not scored or ranked.
+> **Note on `build-ibm-bob`:** A seventh branch, `build-ibm-bob`, was attempted but **did not complete** — the agent ran out of usage quota (lowest Pro plan) mid-build before finishing the implementation. Because a partial build cannot be fairly compared against completed builds, it is **excluded from the evaluation below**. The branch exists in the repository for reference but is not scored or ranked.
 
 ---
 
 ## 1. Executive Summary
 
-Five branches were generated from a single one-shot prompt (`read and execute docs/BUILD_PROMPT.md to build this application`) using three coding agents and two models. All five compile (`tsc --noEmit` clean) and pass their own test suites, and all honor the headline v2 simplifications (no CSRF token, no session revocation table, `canViewAll` toggle, `app_config` single-row, single-source `calculateProfit`, no phantom $0 sales).
+Six branches were generated from a single one-shot prompt (`read and execute docs/BUILD_PROMPT.md to build this application`) using four coding agents and two models. All six compile (`tsc --noEmit` clean) and pass their own test suites, and all honor the headline v2 simplifications (no CSRF token, no session revocation table, `canViewAll` toggle, `app_config` single-row, single-source `calculateProfit`, no phantom $0 sales).
 
-`build-claude-glm-5.2` is the clear leader: it is the only branch that ships the 9 required integration tests, the only branch whose lint pipeline passes cleanly (zero errors, zero warnings), the only branch with a live-JWT-refresh callback that makes role/canViewAll/isActive changes take effect on existing sessions, and it combines the strengths of the prior leaders (claude-5.1's spec fidelity and type discipline + opencode-5.2's explicit SameSite=Strict cookie).
+`build-claude-glm-5.2` remains the clear leader: it is the only branch that ships the 9 required integration tests, the only branch whose lint pipeline passes cleanly (zero errors, zero warnings), the only branch with a live-JWT-refresh callback that makes role/canViewAll/isActive changes take effect on existing sessions, and it combines the strengths of the prior leaders (claude-5.1's spec fidelity and type discipline + opencode-5.2's explicit SameSite=Strict cookie).
+
+The newly added `build-vscode-glm-5.2` is a compact, type-safe build with the second-fewest `as any` occurrences in the cohort (1, in `db.ts` Proxy). It ships all 24 spec endpoints, correct `src/proxy.ts` naming, and full ops artifacts. However, it has the thinnest test suite of the completed builds (9 files / 100 tests, no integration tests, only 1 e2e spec), a broken lint script (`next lint` removed in Next 16), a `calculateSalesTaxFromPrice` formula that deviates from the spec (computes tax to add rather than extracting from a tax-inclusive price), and no explicit SameSite cookie config.
 
 ### Rankings
 
@@ -21,14 +23,15 @@ Five branches were generated from a single one-shot prompt (`read and execute do
 | **1** | `build-claude-glm-5.2` | ★★★★★ | ★★★★★ | ★★★★★ | ★★★★☆ | **23 files / 186 tests / lint exit 0** |
 | **2** | `build-claude-glm-5.1` | ★★★★★ | ★★★★★ | ★★★★☆ | ★★★★☆ | 14 files / 121 tests / lint exit 1 (11 err) |
 | **3** | `build-opencode-glm-5.2` | ★★★★☆ | ★★★★☆ | ★★★★★ | ★★★☆☆ | 12 files / 134 tests / lint script broken |
-| **4** | `build-opencode-1.17.4-glm-5.1` | ★★★★☆ | ★★★☆☆ | ★★★★☆ | ★★★★☆ | 14 files / 115 tests / lint exit 1 (119 err) |
-| **5** | `build-pi-glm-5.1` | ★★★☆☆ | ★★★☆☆ | ★★☆☆☆ | ★★★★☆ | 9 files / 95 tests / lint script broken |
+| **4** | `build-vscode-glm-5.2` | ★★★★☆ | ★★★★☆ | ★★★★☆ | ★★★★☆ | 9 files / 100 tests / lint script broken |
+| **5** | `build-opencode-1.17.4-glm-5.1` | ★★★★☆ | ★★★☆☆ | ★★★★☆ | ★★★★☆ | 14 files / 115 tests / lint exit 1 (119 err) |
+| **6** | `build-pi-glm-5.1` | ★★★☆☆ | ★★★☆☆ | ★★☆☆☆ | ★★★★☆ | 9 files / 95 tests / lint script broken |
 
 ### Per-dimension winners
 - **Spec conformance:** `build-claude-glm-5.2` — canonical `withAuth` wrapper, `src/proxy.ts` naming, exact 24-endpoint surface, full e2e suite, **and the only branch with all 9 required integration tests**. *Co-winner:* `build-claude-glm-5.1` (same pattern, same endpoints, but no integration tests and missing `drizzle/meta/`).
 - **Maintainability:** `build-claude-glm-5.2` — zero `as any` / `: any` / `@ts-ignore` in `src/`, proper NextAuth module augmentation, **lint passes with zero errors and zero warnings** (only branch to do so), centralized bcrypt cost in `config.ts`.
 - **Vulnerabilities:** `build-claude-glm-5.2` — explicit `sameSite: 'strict'` cookie (SEC-01), live JWT refresh of `passwordChangedAt`/`role`/`canViewAll`/`isActive` on every request (stronger than AUTH-02 minimum), `withAuth` also rejects deactivated accounts, `validateOriginOrReferer` exempts both `/api/auth/*` and `/api/setup` and rejects when no host can be established. *Co-winner:* `build-opencode-glm-5.2` (also has explicit SameSite, clean typing, but lacks the live-refresh and the extra `isActive` gate).
-- **Complexity:** `build-opencode-1.17.4-glm-5.1` (smallest ts/tsx footprint, 241 KB) *co-winner* `build-pi-glm-5.1` (fewest files, 80). `build-claude-glm-5.2` is mid-pack on raw size (357 KB) but its extra modules (`api-client.ts`, `inventory-logic.ts`, `app-shell.tsx`, `client-shell.tsx`) are well-scoped architectural improvements rather than incidental surface area.
+- **Complexity:** `build-opencode-1.17.4-glm-5.1` (smallest ts/tsx footprint, 241 KB) *co-winner* `build-pi-glm-5.1` (fewest files, 80). `build-vscode-glm-5.2` is notable for being the second-smallest by file count (85 files, 268 KB) while maintaining full type safety. `build-claude-glm-5.2` is mid-pack on raw size (357 KB) but its extra modules (`api-client.ts`, `inventory-logic.ts`, `app-shell.tsx`, `client-shell.tsx`) are well-scoped architectural improvements rather than incidental surface area.
 - **Test signal:** `build-claude-glm-5.2` — only branch with the complete 4-tier suite (7 unit + 7 functional + 9 integration + 5 e2e) and the only branch whose lint passes clean.
 
 ### Overall recommendation
@@ -38,41 +41,43 @@ Five branches were generated from a single one-shot prompt (`read and execute do
 
 ## 2. Branch Profiles
 
-| | `build-claude-glm-5.2` | `build-claude-glm-5.1` | `build-opencode-1.17.4-glm-5.1` | `build-opencode-glm-5.2` | `build-pi-glm-5.1` |
-|---|---|---|---|---|---|
-| Agent | Claude Code | Claude Code | opencode 1.17.4 | opencode (current) | "pi" agent |
-| Model | GLM 5.2 | GLM 5.1 | GLM 5.1 | GLM 5.2 | GLM 5.1 |
-| Commit | `d951f31` | `4ce31a9` | `a54e68b` | `f4869dc` | `0e8f3b2` |
-| ts/tsx files | 111 | 96 | 95 | 97 | 80 |
-| ts/tsx bytes | 356,980 | 354,587 | 241,817 | 327,706 | 251,928 |
-| API routes | 24 | 24 | 24 | 25 (+`/sales/export`) | 22 (−`/mileage/export`, −`/mileage/reports`) |
-| Pages | 18 | 18 | 18 | 18 | 18 |
-| Unit tests | 7 | 7 | 7 | 7 | 6 |
-| Functional tests | 7 | 7 | 7 | 5 | 3 |
-| Integration tests | **9** | 0 | 0 | 0 | 0 |
-| E2E specs | **5** | **5** | 0 | 0 | 0 |
-| `as any` in `src/` | **0** | **0** | 60 | 9 | 26 |
-| `: any` in `src/` | **0** | **0** | 36 | 0 | 37 |
-| `@ts-ignore` | 0 | 0 | 0 | 0 | 2 |
-| Middleware file | `src/proxy.ts` ✓ | `src/proxy.ts` ✓ | `src/middleware.ts` ✗ | `src/proxy.ts` ✓ | `src/middleware.ts` ✗ |
-| `lint` script | `eslint .` (works) | `eslint` (works) | `eslint .` (works) | `next lint` (broken) | `next lint` (broken) |
-| `eslint.config.mjs` | ✓ | ✓ | ✓ | ✗ | ✗ |
-| `npm ci` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `tsc --noEmit` | ✓ clean | ✓ clean | ✓ clean | ✓ clean | ✓ clean |
-| `vitest run` | ✓ **186 pass** | ✓ 121 pass | ✓ 115 pass | ✓ 134 pass | ✓ 95 pass |
-| `npm run lint` | ✓ **exit 0 (0 err / 0 warn)** | exit 1 — 11 err / 81 warn | exit 1 — 119 err / 72 warn | exit 1 — `next lint` removed | exit 1 — `next lint` removed |
-| Extra deps | — | — | `uuid@^14` + `@types/uuid` | — | — |
-| `next-auth` | `5.0.0-beta.30` | `5.0.0-beta.30` | `5.0.0-beta.31` | `5.0.0-beta.30` | `5.0.0-beta.30` |
-| `zod` | `^4.3.6` | `^4.3.6` | `^3.25.0` | `^4.3.6` | `^4.3.6` |
-| bcrypt cost (app) | 10 (centralized in `config.ts`) | **12** (inconsistent w/ seed) | 10 | 10 | 10 |
-| SameSite cookie | **explicit `strict`** | default | default | **explicit `strict`** | default |
+| | `build-claude-glm-5.2` | `build-claude-glm-5.1` | `build-opencode-1.17.4-glm-5.1` | `build-opencode-glm-5.2` | `build-pi-glm-5.1` | `build-vscode-glm-5.2` |
+|---|---|---|---|---|---|---|
+| Agent | Claude Code | Claude Code | opencode 1.17.4 | opencode (current) | "pi" agent | VS Code (GitHub Copilot) |
+| Model | GLM 5.2 | GLM 5.1 | GLM 5.1 | GLM 5.2 | GLM 5.1 | GLM 5.2 |
+| Commit | `d951f31` | `4ce31a9` | `a54e68b` | `f4869dc` | `0e8f3b2` | `9e70fb6` |
+| ts/tsx files | 111 | 96 | 95 | 97 | 80 | 85 |
+| ts/tsx bytes | 356,980 | 354,587 | 241,817 | 327,706 | 251,928 | 267,796 |
+| API routes | 24 | 24 | 24 | 25 (+`/sales/export`) | 22 (−`/mileage/export`, −`/mileage/reports`) | 24 |
+| Pages | 18 | 18 | 18 | 18 | 18 | 18 |
+| Unit tests | 7 | 7 | 7 | 7 | 6 | 7 |
+| Functional tests | 7 | 7 | 7 | 5 | 3 | 2 |
+| Integration tests | **9** | 0 | 0 | 0 | 0 | 0 |
+| E2E specs | **5** | **5** | 0 | 0 | 0 | 1 |
+| `as any` in `src/` | **0** | **0** | 60 | 9 | 26 | **1** |
+| `: any` in `src/` | **0** | **0** | 36 | 0 | 37 | **0** |
+| `@ts-ignore` | 0 | 0 | 0 | 0 | 2 | 0 |
+| Middleware file | `src/proxy.ts` ✓ | `src/proxy.ts` ✓ | `src/middleware.ts` ✗ | `src/proxy.ts` ✓ | `src/middleware.ts` ✗ | `src/proxy.ts` ✓ |
+| `lint` script | `eslint .` (works) | `eslint` (works) | `eslint .` (works) | `next lint` (broken) | `next lint` (broken) | `next lint` (broken) |
+| `eslint.config.mjs` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| `npm ci` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `tsc --noEmit` | ✓ clean | ✓ clean | ✓ clean | ✓ clean | ✓ clean | ✓ clean |
+| `vitest run` | ✓ **186 pass** | ✓ 121 pass | ✓ 115 pass | ✓ 134 pass | ✓ 95 pass | ✓ 100 pass |
+| `npm run lint` | ✓ **exit 0 (0 err / 0 warn)** | exit 1 — 11 err / 81 warn | exit 1 — 119 err / 72 warn | exit 1 — `next lint` removed | exit 1 — `next lint` removed | exit 1 — `next lint` removed |
+| Extra deps | — | — | `uuid@^14` + `@types/uuid` | — | — | — |
+| `next-auth` | `5.0.0-beta.30` | `5.0.0-beta.30` | `5.0.0-beta.31` | `5.0.0-beta.30` | `5.0.0-beta.30` | `5.0.0-beta.30` |
+| `zod` | `^4.3.6` | `^4.3.6` | `^3.25.0` | `^4.3.6` | `^4.3.6` | `^4.3.6` |
+| bcrypt cost (app) | 10 (centralized in `config.ts`) | **12** (inconsistent w/ seed) | 10 | 10 | 10 | 10 |
+| SameSite cookie | **explicit `strict`** | default | default | **explicit `strict`** | default | default |
 
 Notes:
-- All five target Next.js 16.2.x and React 19.2.4. `node_modules` installed cleanly under Node 24.15 / npm 11.12 with no peer-dep conflicts.
-- **Only `build-claude-glm-5.2` ships the 9 required integration tests.** The other four have zero. This was the single biggest shared gap in the prior cohort; claude-5.2 closes it.
-- **Only `build-claude-glm-5.2` passes `npm run lint` with exit 0.** claude-5.1 and opencode-1.17.4 have working ESLint but emit errors; opencode-5.2 and pi use the removed `next lint` command.
-- `build-opencode-1.17.4-glm-5.1` pins **zod v3** while the others pin v4 — a meaningful variance since v4 changed several APIs (`safeParse` issue shape, error customization). It still typechecks and passes tests, but mixing v3 into a v4-oriented spec is a future-compatibility risk.
-- `build-opencode-glm-5.2` and `build-pi-glm-5.1` both define `"lint": "next lint"`, which is **removed in Next.js 16**. Running `npm run lint` fails immediately with `Invalid project directory provided, no such directory: …/lint`. Neither branch ships `eslint.config.mjs`. Their lint pipeline is non-functional.
+- All six target Next.js 16.2.x and React 19.2.4. `node_modules` installed cleanly under Node 24.15 / npm 11.12 with no peer-dep conflicts.
+- **Only `build-claude-glm-5.2` ships the 9 required integration tests.** All others have zero.
+- **Only `build-claude-glm-5.2` passes `npm run lint` with exit 0.** claude-5.1 and opencode-1.17.4 have working ESLint but emit errors; opencode-5.2, pi, and vscode-glm-5.2 use the removed `next lint` command.
+- `build-vscode-glm-5.2` is the second-most type-safe build (1 `as any` in `db.ts` Proxy, 0 `: any`, 0 `@ts-ignore`) and the second-smallest by file count (85). However, it has the thinnest test suite of the completed builds (9 files / 100 tests, only 2 functional tests and 1 e2e spec, no integration tests).
+- `build-vscode-glm-5.2` has a **`calculateSalesTaxFromPrice` formula deviation**: it computes `price * rate` (tax to add to a tax-exclusive price) rather than the spec's `price - price/(1+rate)` (extract tax from a tax-inclusive price). Its own test passes because it tests the implementation, not the spec.
+- `build-opencode-1.17.4-glm-5.1` pins **zod v3** while the others pin v4 — a future-compatibility risk.
+- `build-opencode-glm-5.2`, `build-pi-glm-5.1`, and `build-vscode-glm-5.2` all define `"lint": "next lint"`, which is **removed in Next.js 16**. Running `npm run lint` fails immediately. None of the three ships `eslint.config.mjs`. Their lint pipelines are non-functional.
 
 ---
 
@@ -82,58 +87,59 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 
 ### 3.1 Architecture & simplifications (BUILD_PROMPT §"KEY SIMPLIFICATIONS")
 
-| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | Evidence |
-|---|---|---|---|---|---|---|
-| 2 roles + `canViewAll` (no `power_user`) | ✓ | ✓ | ✓ | ✓ | ✓ | all `schema.ts`: `role` enum `['admin','user']` + `canViewAll` |
-| No CSRF token system | ✓ | ✓ | ✓ | ✓ | ✓ | no `csrf.ts` / `csrf-provider.tsx` / `useCsrfToken.ts` in any branch |
-| No `revoked_tokens` table | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas: 6 tables only |
-| No account lockout columns | ✓ | ✓ | ✓ | ✓ | ✓ | no `failed_login_attempts`/`locked_until` |
-| No in-app rate limiter | ✓ | ✓ | ✓ | ✓ | ✓ | no `rate-limit.ts` |
-| Single-source profit (TS only) | ✓ | ✓ | ✓ | ✓ | ✓ | all `reports/route.ts` use `calculateProfit`; 0 SQL profit expressions |
-| No auto $0 sales on donate/discard | ✓ | ✓ | ✓ | ✓ | ✓ | all set only `removalDate`; no `sales` insert on transition |
-| `app_config` single-row table | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas: `appConfig` with `id default(1)` |
-| Removed tables absent (`sessions`/`accounts`/`verification_tokens`) | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas |
-| `withAuth` wrapper pattern | ✓ | ✓ | ✓ | ◐ | ◐ | claude-5.2 & claude-5.1 & opencode-1.17.4 use `export const POST = withAuth(...)`; glm-5.2 & pi use `export async function POST(req){ return withAuth(...) }` (functionally equivalent, deviates from spec's canonical form) |
-| Server Components for data pages | ✓ | ✓ | ✓ | ✓ | ✓ | `inventory/page.tsx`, `sales/page.tsx`, `reports/page.tsx`, `app/page.tsx` |
+| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 | Evidence |
+|---|---|---|---|---|---|---|---|
+| 2 roles + `canViewAll` (no `power_user`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all `schema.ts`: `role` enum `['admin','user']` + `canViewAll` |
+| No CSRF token system | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | no `csrf.ts` / `csrf-provider.tsx` / `useCsrfToken.ts` in any branch |
+| No `revoked_tokens` table | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas: 6 tables only |
+| No account lockout columns | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | no `failed_login_attempts`/`locked_until` |
+| No in-app rate limiter | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | no `rate-limit.ts` |
+| Single-source profit (TS only) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all `reports/route.ts` use `calculateProfit`; 0 SQL profit expressions |
+| No auto $0 sales on donate/discard | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all set only `removalDate`; no `sales` insert on transition |
+| `app_config` single-row table | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas: `appConfig` with `id default(1)` |
+| Removed tables absent (`sessions`/`accounts`/`verification_tokens`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas |
+| `withAuth` wrapper pattern | ✓ | ✓ | ✓ | ◐ | ◐ | ✓ | claude-5.2 & claude-5.1 & opencode-1.17.4 & vscode-5.2 use `export const POST = withAuth(...)`; glm-5.2 & pi use `export async function POST(req){ return withAuth(...) }` (functionally equivalent, deviates from canonical form) |
+| Server Components for data pages | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `inventory/page.tsx`, `sales/page.tsx`, `reports/page.tsx`, `app/page.tsx` |
+| `calculateSalesTaxFromPrice` formula matches spec | ✓ | ✓ | ✓ | ✓ | ✓ | **✗** | vscode-5.2 uses `price * rate` (add tax) instead of `price - price/(1+rate)` (extract from tax-inclusive) |
 
 ### 3.2 API surface (BUILD_PROMPT STEP 5 — 43 endpoints)
 
-| Endpoint group | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
-|---|---|---|---|---|---|
-| All 43 spec endpoints present | ✓ | ✓ | ✓ | ✓ (+1 extra `/sales/export`) | ✗ missing `/mileage/export` & `/mileage/reports` |
-| Removed endpoints absent | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `/api/auth/*` exempt from Origin check | ✓ (also `/api/setup`) | ✓ | ✗ | ◐ (in `http-utils.ts`, no explicit auth exemption — relies on routes not calling it) | ✓ (also exempts `/api/setup` POST, which is correct) |
+| Endpoint group | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|
+| All 43 spec endpoints present | ✓ | ✓ | ✓ | ✓ (+1 extra `/sales/export`) | ✗ missing `/mileage/export` & `/mileage/reports` | ✓ |
+| Removed endpoints absent | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `/api/auth/*` exempt from Origin check | ✓ (also `/api/setup`) | ✓ | ✗ | ◐ (no explicit exemption) | ✓ (also `/api/setup` POST) | ✗ no exemption |
 
 ### 3.3 Config & ops (BUILD_PROMPT STEPS 2, 6, 12)
 
-| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
-|---|---|---|---|---|---|
-| `src/proxy.ts` middleware (named per spec) | ✓ | ✓ | ✗ named `src/middleware.ts` | ✓ | ✗ named `src/middleware.ts` |
-| `next.config.ts` security headers + CSP | ✓ (+`serverExternalPackages`) | ✓ | ✓ (+`serverExternalPackages`) | ✓ | ✓ |
-| `Caddyfile` rate limit 5/15min auth + 100/15min api | ✓ (scoped via `handle`) | ✓ | ✓ (scoped via `handle_path`) | ✓ | ✓ |
-| `Dockerfile` multi-stage + `/data` + non-root user | ✓ | ✓ | ✓ | ✓ | ✓ |
-| bcrypt cost factor 10 (SEC-02) | ✓ (centralized) | ◐ uses **12** in app code, 10 in seed | ✓ | ✓ | ✓ |
-| `drizzle.config.ts` → `./src/lib/schema.ts` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Migration `.sql` + `meta/` journal | ✓ | ◐ missing `meta/` | ✓ | ✓ | ✓ |
+| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|
+| `src/proxy.ts` middleware (named per spec) | ✓ | ✓ | ✗ named `src/middleware.ts` | ✓ | ✗ named `src/middleware.ts` | ✓ |
+| `next.config.ts` security headers + CSP | ✓ (+`serverExternalPackages`) | ✓ | ✓ (+`serverExternalPackages`) | ✓ | ✓ | ✓ |
+| `Caddyfile` rate limit 5/15min auth + 100/15min api | ✓ (scoped via `handle`) | ✓ | ✓ (scoped via `handle_path`) | ✓ | ✓ | ✓ |
+| `Dockerfile` multi-stage + `/data` + non-root user | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| bcrypt cost factor 10 (SEC-02) | ✓ (centralized) | ◐ uses **12** in app code, 10 in seed | ✓ | ✓ | ✓ | ✓ |
+| `drizzle.config.ts` → `./src/lib/schema.ts` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Migration `.sql` + `meta/` journal | ✓ | ◐ missing `meta/` | ✓ | ✓ | ✓ | ✓ |
 
 ### 3.4 RBAC & auth (REQUIREMENTS §3.1, §3.7)
 
-| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
-|---|---|---|---|---|---|
-| `passwordChangedAt` session invalidation (AUTH-02) | **✓+** live-refresh on every request | ✓ | ✓ | ✓ | **✗ broken** — `passwordChangedAt` never written to JWT in `jwt` callback; session always sees 0 |
-| `withAuth` also rejects deactivated accounts | ✓ | ✗ | ✗ | ✗ | ✗ |
-| SEC-11 admin cannot deactivate/role-change own account | ✓ | ✓ | ✓ | ✓ | ✓ |
-| USR-02 password policy (8–128 + 4 char classes) | ✓ | ✓ | ✓ | ✓ | ✓ |
-| SameSite=Strict cookie (SEC-01) | **✓ explicit** | ◐ relies on default | ◐ relies on default | **✓ explicit** | ◐ relies on default |
+| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|
+| `passwordChangedAt` session invalidation (AUTH-02) | **✓+** live-refresh on every request | ✓ | ✓ | ✓ | **✗ broken** — never written to JWT | ✓ |
+| `withAuth` also rejects deactivated accounts | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ |
+| SEC-11 admin cannot deactivate/role-change own account | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| USR-02 password policy (8–128 + 4 char classes) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| SameSite=Strict cookie (SEC-01) | **✓ explicit** | ◐ relies on default | ◐ relies on default | **✓ explicit** | ◐ relies on default | ◐ relies on default |
 
 ### 3.5 Test conformance (BUILD_PROMPT STEP 10)
 
-| Required suite | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
-|---|---|---|---|---|---|
-| 7 unit tests | ✓ 7 | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 6 (missing one) |
-| 7 functional tests | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 5 (missing `inventory-removal-date`) | ◐ 3 (missing 4: `password-invalidation`, `setup-lock`, `sale-refund-flow`, `inventory-removal-date`) |
-| 9 integration tests | **✓ 9** | ✗ 0 | ✗ 0 | ✗ 0 | ✗ 0 |
-| 5 e2e specs | **✓ 5** | **✓ 5** | ✗ 0 | ✗ 0 | ✗ 0 |
+| Required suite | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|
+| 7 unit tests | ✓ 7 | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 6 | ✓ 7 |
+| 7 functional tests | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 5 | ◐ 3 | ◐ 2 (missing 5: `password-invalidation`, `setup-lock`, `sale-refund-flow`, `inventory-removal-date`, `refund-impact`) |
+| 9 integration tests | **✓ 9** | ✗ 0 | ✗ 0 | ✗ 0 | ✗ 0 | ✗ 0 |
+| 5 e2e specs | **✓ 5** | **✓ 5** | ✗ 0 | ✗ 0 | ✗ 0 | ◐ 1 (auth only) |
 
 ---
 
@@ -145,11 +151,12 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 |---|---|---|---|---|---|
 | `build-claude-glm-5.2` | **0** | **0** | 0 | 0 | **0** |
 | `build-claude-glm-5.1` | **0** | **0** | 0 | 0 | **0** |
+| `build-vscode-glm-5.2` | **1** | **0** | 0 | 0 | **1** |
 | `build-opencode-glm-5.2` | 9 | 0 | 0 | 0 | 9 |
 | `build-pi-glm-5.1` | 26 | 37 | 10 | 2 | 75 |
 | `build-opencode-1.17.4-glm-5.1` | 60 | 36 | 1 | 0 | 97 |
 
-Both Claude branches are fully type-safe in `src/`. opencode-1.17.4 has 97 type-escape occurrences concentrated in `auth.ts` session callbacks and route handlers (e.g., `(session.user as any).id`), which is why it still typechecks — the escapes silence the type checker rather than fix the missing NextAuth module augmentation. Claude and opencode-5.2 both ship proper `declare module 'next-auth'` augmentation; opencode-5.2 still has 9 `as any` casts in non-auth code.
+Both Claude branches are fully type-safe in `src/`. `build-vscode-glm-5.2` is very close — its single `as any` is in `db.ts` line 43 (`(actualDb as any)[prop]`) inside the lazy Proxy pattern, a pragmatic escape for dynamic property forwarding. opencode-1.17.4 has 97 type-escape occurrences concentrated in `auth.ts` session callbacks (e.g., `(session.user as any).id`), which silence the type checker rather than fix the missing NextAuth module augmentation. Claude, opencode-5.2, and vscode-5.2 all ship proper `declare module 'next-auth'` augmentation; vscode-5.2 also augments `@auth/core/jwt` (like claude-5.2).
 
 ### 4.2 Lint outcomes
 
@@ -160,17 +167,19 @@ Both Claude branches are fully type-safe in `src/`. opencode-1.17.4 has 97 type-
 | `build-opencode-1.17.4-glm-5.1` | `eslint .` | exit 1 — 119 errors, 72 warnings (errors spread across `src/` and tests) |
 | `build-opencode-glm-5.2` | `next lint` | exit 1 — command removed in Next 16; no `eslint.config.mjs`; lint pipeline non-functional |
 | `build-pi-glm-5.1` | `next lint` | exit 1 — command removed in Next 16; no `eslint.config.mjs`; lint pipeline non-functional |
+| `build-vscode-glm-5.2` | `next lint` | exit 1 — command removed in Next 16; no `eslint.config.mjs`; lint pipeline non-functional |
 
-**Winner:** `build-claude-glm-5.2` — only branch with a fully clean lint pass. claude-5.1 is the only other branch with a working lint script, but still emits 11 errors.
+**Winner:** `build-claude-glm-5.2` — only branch with a fully clean lint pass.
 
 ### 4.3 Module structure
 
-- `build-claude-glm-5.1`, `build-opencode-1.17.4-glm-5.1`, `build-pi-glm-5.1`: 16-module `src/lib/` matching the spec list exactly.
-- `build-claude-glm-5.2`: 19 modules — adds `api-client.ts` (typed client-side fetch helpers documenting the no-CSRF-token design), `inventory-logic.ts` (centralized status-transition + removalDate logic — cleaner than the inline `if/else` chains in other branches), plus `app-shell.tsx` (Server Component shell for authenticated pages) and `client-shell.tsx` (client shell for interactive pages) in `src/components/`. These are well-scoped architectural refinements, not incidental surface area, and each carries a header comment explaining its purpose.
+- `build-claude-glm-5.1`, `build-opencode-1.17.4-glm-5.1`, `build-pi-glm-5.1`, `build-vscode-glm-5.2`: 16-module `src/lib/` matching the spec list exactly.
+- `build-claude-glm-5.2`: 19 modules — adds `api-client.ts` (typed client-side fetch helpers documenting the no-CSRF-token design), `inventory-logic.ts` (centralized status-transition + removalDate logic), plus `app-shell.tsx` (Server Component shell) and `client-shell.tsx` (client shell) in `src/components/`. Well-scoped architectural refinements.
 - `build-opencode-glm-5.2`: 21 modules — adds `http-utils.ts`, `inventory-queries.ts`, `sales-queries.ts`, `rbac.ts`. Cleaner separation of concerns but deviates further from the spec's literal module list.
+- `build-vscode-glm-5.2`: 16 modules matching the spec list exactly, with raw integer timestamps/booleans (like claude-5.2, no conversion needed). Schema uses `check` import from drizzle-orm (unused) — a minor leftover.
 
 ### 4.4 Documentation/comments
-All five branches include JSDoc on `calculateProfit` and `withAuth`. `build-claude-glm-5.2` has the most thorough header comments — e.g. `auth.ts` opens with a multi-line block explaining the JWT refresh strategy and why it's necessary for AUTH-02, and `inventory-logic.ts` documents the removalDate side-effect rules per status transition. Both Claude branches include section-banner comments in `schema.ts`.
+All six branches include JSDoc on `calculateProfit` and `withAuth`. `build-claude-glm-5.2` has the most thorough header comments — e.g. `auth.ts` opens with a multi-line block explaining the JWT refresh strategy and why it's necessary for AUTH-02. `build-vscode-glm-5.2` includes concise JSDoc on all financial functions and the `withAuth` wrapper, but lacks the longer architectural rationale comments of claude-5.2.
 
 **Maintainability winner:** `build-claude-glm-5.2`.
 
@@ -180,13 +189,12 @@ All five branches include JSDoc on `calculateProfit` and `withAuth`. `build-clau
 
 ### 5.1 CSRF / Origin-Referer validation (SEC-01, AUTH-04)
 
-All five implement `validateOriginOrReferer` checking `Origin` then `Referer` against `AUTH_URL` (falling back to `https://${host}`) for POST/PUT/DELETE/PATCH, returning 403 on missing/mismatched. No raw SQL, no `eval`, no `dangerouslySetInnerHTML` anywhere. Differences:
+All six implement `validateOriginOrReferer` checking `Origin` then `Referer` against `AUTH_URL` (falling back to `https://${host}`) for POST/PUT/DELETE/PATCH, returning 403 on missing/mismatched. No raw SQL, no `eval`, no `dangerouslySetInnerHTML` anywhere. Differences:
 
-- **`build-claude-glm-5.2`**: most robust — uses a configurable `ORIGIN_EXEMPT_PREFIXES = ['/api/auth/', '/api/setup']` list (correctly exempting both pre-auth paths), and additionally rejects with 403 when neither `AUTH_URL` nor `Host` can be established (defensive — others fall back to an empty string and may let mismatches through).
+- **`build-claude-glm-5.2`**: most robust — configurable `ORIGIN_EXEMPT_PREFIXES = ['/api/auth/', '/api/setup']` list, rejects with 403 when neither `AUTH_URL` nor `Host` can be established (defensive).
 - **`build-pi-glm-5.1`**: also exempts both `/api/auth/*` and `/api/setup` POST (correct).
 - **`build-claude-glm-5.1`**: exempts `/api/auth/*` only (matches spec minimum).
-- **`build-opencode-1.17.4-glm-5.1`**: does **not** exempt `/api/auth/*`. Spec violation (AUTH-04) — in practice the NextAuth credential callback route doesn't call `validateOriginOrReferer` so login still works, but the helper is non-compliant.
-- **`build-opencode-glm-5.2`**: implementation in `http-utils.ts` also lacks an explicit `/api/auth/*` exemption.
+- **`build-opencode-1.17.4-glm-5.1`**, **`build-opencode-glm-5.2`**, **`build-vscode-glm-5.2`**: do **not** exempt `/api/auth/*`. Spec violation (AUTH-04) — in practice the NextAuth credential callback route doesn't call `validateOriginOrReferer` so login still works, but the helpers are non-compliant.
 
 ### 5.2 Session invalidation (AUTH-02, SEC-03) — CRITICAL FINDING + NEW HARDENING
 
@@ -203,42 +211,13 @@ jwt: ({ token, user }) => {
   }
   return token;
 },
-session: ({ session, token }) => {
-  // ...
-  (session.user as any).passwordChangedAt = (token.passwordChangedAt as number) ?? 0;
-}
 ```
 
-Because `token.passwordChangedAt` is never written, `session.user.passwordChangedAt` is always `0`. The `withAuth` check `if (pca > 0 && iat < pca)` is therefore always false → **changing a user's password (or admin resetting it) does NOT invalidate existing JWTs.** This directly violates AUTH-02/SEC-03. The functional test `password-invalidation.test.ts` passes only because it mocks the session object directly rather than exercising the real JWT callback chain. **Severity: High.**
+Because `token.passwordChangedAt` is never written, `session.user.passwordChangedAt` is always `0`. The `withAuth` check `if (pca > 0 && iat < pca)` is therefore always false → **changing a user's password (or admin resetting it) does NOT invalidate existing JWTs.** This directly violates AUTH-02/SEC-03. **Severity: High.**
 
-The other four branches correctly propagate `passwordChangedAt` through the `jwt` callback.
+**`build-claude-glm-5.2` goes further than the spec requires** — its `jwt` callback refreshes `passwordChangedAt`, `role`, `canViewAll`, and `isActive` from the database on every request (not just at login), so role changes, `canViewAll` toggles, and deactivations take effect on existing JWTs. It also handles deleted users by forcing `passwordChangedAt = MAX_SAFE_INTEGER`. Additionally, `withAuth` checks `isActive === false` and rejects deactivated accounts immediately, which no other branch does.
 
-**`build-claude-glm-5.2` goes further than the spec requires** — its `jwt` callback refreshes `passwordChangedAt`, `role`, `canViewAll`, and `isActive` from the database on every request (not just at login):
-
-```ts
-// build-claude-glm-5.2/src/lib/auth.ts — jwt callback
-jwt: ({ token, user }) => {
-  if (user) { /* initial login: copy from user */ }
-  // Subsequent request: refresh live fields from the DB.
-  const id = token.id ?? token.sub;
-  if (id) {
-    const row = db.query.users.findFirst({ where: eq(users.id, parseInt(id, 10)) }).sync();
-    if (row) {
-      token.role = row.role as UserRole;
-      token.canViewAll = toBool(row.canViewAll);
-      token.passwordChangedAt = row.passwordChangedAt;
-      token.isActive = toBool(row.isActive);
-    } else {
-      // User deleted: force invalidation (iat < far-future).
-      token.passwordChangedAt = Number.MAX_SAFE_INTEGER;
-      token.isActive = false;
-    }
-  }
-  return token;
-},
-```
-
-This means role changes, `canViewAll` toggles, and deactivations take effect on existing JWTs without waiting for `passwordChangedAt` to be bumped — a meaningful operational improvement. It also handles deleted users by forcing `passwordChangedAt = MAX_SAFE_INTEGER`. Additionally, `withAuth` checks `isActive === false` and rejects deactivated accounts immediately, which no other branch does.
+The other four branches (claude-5.1, opencode-1.17.4, opencode-5.2, vscode-5.2) correctly propagate `passwordChangedAt` through the `jwt` callback at login time. `build-vscode-glm-5.2` uses proper `declare module '@auth/core/jwt'` augmentation (like claude-5.2) so the token fields are typed without `as any`.
 
 ### 5.3 Cookie hardening (SEC-01)
 
@@ -254,24 +233,24 @@ cookies: {
 },
 ```
 
-The other three rely on NextAuth defaults, which set `sameSite=lax` (not `strict`) for the session token in production. The spec (AUTH-04) states "Session cookies are set with `SameSite=Strict`". **Only claude-5.2 and opencode-5.2 satisfy this literally.** Severity: Medium (defense-in-depth gap; the Origin/Referer check is the primary CSRF defense and works regardless).
+The other four (claude-5.1, opencode-1.17.4, pi, vscode-5.2) rely on NextAuth defaults, which set `sameSite=lax` (not `strict`). The spec (AUTH-04) states "Session cookies are set with `SameSite=Strict`". **Only claude-5.2 and opencode-5.2 satisfy this literally.** Severity: Medium.
 
 ### 5.4 Input validation, secrets, info leakage
 
-| Check | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
-|---|---|---|---|---|---|
-| `eval(` / `dangerouslySetInnerHTML` | none | none | none | none | none |
-| Raw SQL template literals (`db.run(\`...\`)`) | none | none | none | none | none |
-| `sql.raw` usage | none | none | none | none | none |
-| Hardcoded `AUTH_URL`/`NEXTAUTH_SECRET` | none | none | none | none | none |
-| `console.log` (potential info leak) | 4 | 9 | 6 | 3 | **13** |
-| Photo upload type+size validation (INV-05, SEC-07) | ✓ | ✓ | ✓ | ✓ | ✓ (+extension check) |
-| SEC-11 admin self-protection | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Password policy (USR-02) | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Check | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|
+| `eval(` / `dangerouslySetInnerHTML` | none | none | none | none | none | none |
+| Raw SQL template literals | none | none | none | none | none | none |
+| `sql.raw` usage | none | none | none | none | none | none |
+| Hardcoded `AUTH_URL`/`NEXTAUTH_SECRET` | none | none | none | none | none | none |
+| `console.log` (potential info leak) | 4 | 9 | 6 | 3 | **13** | 7 |
+| Photo upload type+size validation (INV-05, SEC-07) | ✓ | ✓ | ✓ | ✓ | ✓ (+ext) | ✓ (+extension check) |
+| SEC-11 admin self-protection | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Password policy (USR-02) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
-`console.log` density is highest in pi (13). claude-5.2 is clean (4). None appear to log secrets in the sampled routes.
+`console.log` density is highest in pi (13). claude-5.2 is cleanest (4), followed by vscode-5.2 (7). None appear to log secrets in the sampled routes.
 
-**Security winner:** `build-claude-glm-5.2` — explicit `sameSite: 'strict'`, live JWT refresh (stronger than AUTH-02 minimum), `isActive` enforcement in `withAuth`, defensive `validateOriginOrReferer`, fully type-safe, cleanest `console.log` profile. *Co-winner:* `build-opencode-glm-5.2` (also has explicit SameSite and clean typing, but lacks the live-refresh and `isActive` gate). Pi is last due to the critical session-invalidation bug.
+**Security winner:** `build-claude-glm-5.2` — explicit `sameSite: 'strict'`, live JWT refresh, `isActive` enforcement, defensive `validateOriginOrReferer`, fully type-safe, clean `console.log` profile. *Co-winner:* `build-opencode-glm-5.2` (also has explicit SameSite and clean typing, but lacks the live-refresh and `isActive` gate). Pi is last due to the critical session-invalidation bug.
 
 ---
 
@@ -281,12 +260,14 @@ The other three rely on NextAuth defaults, which set `sameSite=lax` (not `strict
 |---|---|---|---|---|
 | `build-opencode-1.17.4-glm-5.1` | **241,817** | 95 | `schema.ts` ~5 KB | 0 (tightest) |
 | `build-pi-glm-5.1` | 251,928 | **80** | `auth.ts` ~4 KB | 0 |
+| `build-vscode-glm-5.2` | 267,796 | 85 | `reports/route.ts` 104 lines | 0 |
 | `build-opencode-glm-5.2` | 327,706 | 97 | `inventory-queries.ts` 3.8 KB + `sales-queries.ts` | +4 (`http-utils`, `inventory-queries`, `sales-queries`, `rbac`) |
 | `build-claude-glm-5.1` | 354,587 | 96 | `reports/route.ts` 99 lines | 0 |
 | `build-claude-glm-5.2` | 356,980 | 111 | `reports/route.ts` 112 lines | +4 (`api-client`, `inventory-logic`, `app-shell`, `client-shell`) |
 
 - **Lowest absolute complexity:** `build-opencode-1.17.4-glm-5.1` (smallest byte total) and `build-pi-glm-5.1` (fewest files). Co-winners on raw footprint.
-- **Highest complexity:** `build-claude-glm-5.2` (largest byte total and file count, driven by the 9 integration tests + 4 extra well-scoped modules) and `build-opencode-glm-5.2` (most lib modules). Claude-5.2's extra size is largely explained by its complete test suite (which the spec requires) and architectural refinements rather than incidental verbosity.
+- **`build-vscode-glm-5.2`** is the second-smallest by file count (85) and third-smallest by bytes (268 KB), while maintaining full type safety (1 `as any`). A strong complexity-to-quality ratio.
+- **Highest complexity:** `build-claude-glm-5.2` (largest byte total and file count, driven by the 9 integration tests + 4 extra well-scoped modules) and `build-opencode-glm-5.2` (most lib modules). Claude-5.2's extra size is largely explained by its complete test suite (which the spec requires) and architectural refinements.
 - No branch shows pathological cyclomatic complexity in sampled routes; the longest single route handler observed was under 130 lines.
 
 **Complexity winner:** `build-opencode-1.17.4-glm-5.1` (co-winner with `build-pi-glm-5.1`) on raw footprint. Note: `build-claude-glm-5.2` is the largest but its complexity is justified by test coverage and module decomposition that improves maintainability.
@@ -295,32 +276,35 @@ The other three rely on NextAuth defaults, which set `sameSite=lax` (not `strict
 
 ## 7. Variances Between Branches
 
-| Dimension | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 |
-|---|---|---|---|---|---|
-| `withAuth` signature | `export const POST = withAuth(...)` — matches spec | same as claude-5.2 | same as claude-5.2 | `export async function POST(req){ return withAuth(...) }` — wraps inside | `withAuth(req, async (session) => …)` — completely different signature, takes `req` as first arg |
-| Middleware filename | `src/proxy.ts` (spec) | `src/proxy.ts` (spec) | `src/middleware.ts` (Next.js convention) | `src/proxy.ts` (spec) | `src/middleware.ts` (Next.js convention) |
-| `lint` script | `eslint .` (works, clean) | `eslint` (works) | `eslint .` (works) | `next lint` (broken in Next 16) | `next lint` (broken in Next 16) |
-| `eslint.config.mjs` | ✓ | ✓ | ✓ | ✗ | ✗ |
-| Schema timestamp mode | raw integer (unix s) | raw integer (unix s) | `{ mode: 'timestamp' }` (Date objects) | raw integer (unix s) | raw integer (unix s) |
-| Schema boolean mode | raw 0/1 integer + `toBool`/`fromBool` helpers | raw 0/1 integer | `{ mode: 'boolean' }` | `{ mode: 'boolean' }` | raw 0/1 integer |
-| JWT callback refreshes live fields from DB | **✓** every request | ✗ login-only | ✗ login-only | ✗ login-only | ✗ login-only (and broken) |
-| `withAuth` rejects deactivated accounts | **✓** | ✗ | ✗ | ✗ | ✗ |
-| Extra dependency | — | — | `uuid@^14` + `@types/uuid` | — | — |
-| zod version | v4 | v4 | **v3** | v4 | v4 |
-| Extra API endpoint | — | — | — | `+ /api/sales/export` | — |
-| Missing API endpoints | — | — | — | — | `− /api/mileage/export`, `− /api/mileage/reports` |
-| Migration `meta/` journal | ✓ | ✗ missing | ✓ | ✓ | ✓ |
-| bcrypt cost (app code) | 10 (centralized in `config.ts`) | **12** (inconsistent w/ seed) | 10 | 10 | 10 |
-| SameSite cookie config | **explicit `strict`** | default | default | **explicit `strict`** | default |
-| `serverExternalPackages` in next.config | yes (`better-sqlite3`, `bcrypt`) | no | yes | no | no |
-| Caddyfile rate-limit scoping | scoped via `handle /api/auth/*` | global zones | scoped via `handle_path /api/auth/*` | global zones | global zones |
-| Extra modules (beyond spec list) | `api-client`, `inventory-logic`, `app-shell`, `client-shell` | 0 | 0 | `http-utils`, `inventory-queries`, `sales-queries`, `rbac` | 0 |
+| Dimension | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|
+| `withAuth` signature | `export const POST = withAuth(...)` — matches spec | same as claude-5.2 | same as claude-5.2 | wraps inside `async function POST` | `withAuth(req, handler)` — different signature | `export const POST = withAuth(...)` — matches spec |
+| Middleware filename | `src/proxy.ts` (spec) | `src/proxy.ts` (spec) | `src/middleware.ts` (Next.js) | `src/proxy.ts` (spec) | `src/middleware.ts` (Next.js) | `src/proxy.ts` (spec) |
+| `lint` script | `eslint .` (works, clean) | `eslint` (works) | `eslint .` (works) | `next lint` (broken) | `next lint` (broken) | `next lint` (broken) |
+| `eslint.config.mjs` | ✓ | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Schema timestamp mode | raw integer (unix s) | raw integer (unix s) | `{ mode: 'timestamp' }` (Date) | raw integer (unix s) | raw integer (unix s) | raw integer (unix s) |
+| Schema boolean mode | raw 0/1 + `toBool`/`fromBool` helpers | raw 0/1 integer | `{ mode: 'boolean' }` | `{ mode: 'boolean' }` | raw 0/1 integer | raw 0/1 integer |
+| JWT callback refreshes live fields from DB | **✓** every request | ✗ login-only | ✗ login-only | ✗ login-only | ✗ login-only (broken) | ✗ login-only |
+| `withAuth` rejects deactivated accounts | **✓** | ✗ | ✗ | ✗ | ✗ | ✗ |
+| `calculateSalesTaxFromPrice` formula | spec: `price - price/(1+rate)` | same | same | same | same | **differs: `price * rate`** (adds tax, not extracts) |
+| NextAuth module augmentation | `next-auth` + `@auth/core/jwt` | `next-auth` + `@auth/core/jwt` | `next-auth` only | `next-auth` only | none (uses `as any`) | `next-auth` + `@auth/core/jwt` |
+| Extra dependency | — | — | `uuid@^14` + `@types/uuid` | — | — | — |
+| zod version | v4 | v4 | **v3** | v4 | v4 | v4 |
+| Extra API endpoint | — | — | — | `+ /api/sales/export` | — | — |
+| Missing API endpoints | — | — | — | — | `− /mileage/export`, `− /mileage/reports` | — |
+| Migration `meta/` journal | ✓ | ✗ missing | ✓ | ✓ | ✓ | ✓ |
+| bcrypt cost (app code) | 10 (centralized in `config.ts`) | **12** (inconsistent w/ seed) | 10 | 10 | 10 | 10 |
+| SameSite cookie config | **explicit `strict`** | default | default | **explicit `strict`** | default | default |
+| `serverExternalPackages` in next.config | yes | no | yes | no | no | no |
+| Caddyfile rate-limit scoping | scoped via `handle /api/auth/*` | global zones | scoped via `handle_path /api/auth/*` | global zones | global zones | global zones |
+| Extra modules (beyond spec list) | `api-client`, `inventory-logic`, `app-shell`, `client-shell` | 0 | 0 | `http-utils`, `inventory-queries`, `sales-queries`, `rbac` | 0 | 0 |
 
 Notable interpretation differences:
-- **JWT refresh strategy:** claude-5.2 is the only branch that refreshes `passwordChangedAt`/`role`/`canViewAll`/`isActive` from the DB on every request inside the `jwt` callback. The other four copy these fields only at login, meaning role/canViewAll changes don't propagate to existing JWTs until the token expires or the password is reset. claude-5.2's approach is stronger than AUTH-02 requires and also handles deleted users.
-- **Timestamp/boolean schema modes:** opencode-1.17.4 and glm-5.2 use Drizzle's `{ mode: 'timestamp' }`/`{ mode: 'boolean' }`, which makes the inferred TS types `Date`/`boolean` instead of `number`. This is more ergonomic but forces explicit conversion at the DB boundary (opencode-1.17.4 has the fragile `typeof user.passwordChangedAt === 'object' ? getTime()/1000 : …` ternary in `auth.ts`). Both Claude branches and pi store raw unix integers and avoid the conversion; claude-5.2 additionally ships `toBool`/`fromBool` helpers in `schema.ts` to centralize the 0/1↔boolean coercion.
-- **`withAuth` signature:** pi's signature (`withAuth(req, handler)`) is the largest API-shape deviation. It works but means pi's route files look unlike the spec's example and unlike the other four branches.
-- **bcrypt cost:** claude-5.2 centralizes cost 10 in `config.ts` via a `hashPassword()` helper and reuses it everywhere — the cleanest approach. claude-5.1 uses cost 12 in app code but 10 in seed (inconsistent). The others hardcode 10 at each call site.
+- **JWT refresh strategy:** claude-5.2 is the only branch that refreshes `passwordChangedAt`/`role`/`canViewAll`/`isActive` from the DB on every request inside the `jwt` callback. The other five copy these fields only at login, meaning role/canViewAll changes don't propagate to existing JWTs until the token expires or the password is reset.
+- **`calculateSalesTaxFromPrice` formula:** vscode-5.2 is the only branch that deviates from the spec formula. The spec requires `taxAmount = price - (price / (1 + rate))` (extract tax from a tax-inclusive price), but vscode-5.2 implements `price * rate` (compute tax to add to a tax-exclusive price). These produce different results: for price=100 and rate=0.0825, the spec formula yields 7.62, while vscode-5.2 yields 8.25. Its test passes because it asserts the implementation's output, not the spec's expected value.
+- **Timestamp/boolean schema modes:** opencode-1.17.4 and glm-5.2 use Drizzle's `{ mode: 'timestamp' }`/`{ mode: 'boolean' }`, which makes the inferred TS types `Date`/`boolean` instead of `number`. This is more ergonomic but forces explicit conversion at the DB boundary. Claude-5.2, claude-5.1, pi, and vscode-5.2 store raw unix integers and avoid the conversion; claude-5.2 additionally ships `toBool`/`fromBool` helpers.
+- **`withAuth` signature:** pi's signature (`withAuth(req, handler)`) is the largest API-shape deviation. vscode-5.2 uses the canonical `export const POST = withAuth(...)` form (matching the spec and both Claude branches).
+- **bcrypt cost:** claude-5.2 centralizes cost 10 in `config.ts` via a `hashPassword()` helper — the cleanest approach. claude-5.1 uses cost 12 in app code but 10 in seed (inconsistent). The others (including vscode-5.2) hardcode 10 at each call site.
 
 ---
 
@@ -329,19 +313,24 @@ Notable interpretation differences:
 | Sev | Branch | Finding | Location |
 |---|---|---|---|
 | **High** | `build-pi-glm-5.1` | `passwordChangedAt` never written to JWT → session invalidation always no-ops (AUTH-02/SEC-03 broken) | `src/lib/auth.ts:90-97` |
-| **High** | `build-opencode-glm-5.2`, `build-pi-glm-5.1` | `lint` script uses removed `next lint`; no `eslint.config.mjs`; lint pipeline non-functional | `package.json` scripts |
-| **Med** | `build-opencode-1.17.4-glm-5.1`, `build-opencode-glm-5.2` | `validateOriginOrReferer` does not exempt `/api/auth/*` (AUTH-04 deviation) | `src/lib/api-utils.ts` / `http-utils.ts` |
-| **Med** | `build-claude-glm-5.1`, `build-opencode-1.17.4-glm-5.1`, `build-pi-glm-5.1` | No explicit `SameSite=Strict` on session cookie (relies on NextAuth default `lax`) | `src/lib/auth.ts` |
+| **High** | `build-opencode-glm-5.2`, `build-pi-glm-5.1`, `build-vscode-glm-5.2` | `lint` script uses removed `next lint`; no `eslint.config.mjs`; lint pipeline non-functional | `package.json` scripts |
+| **Med** | `build-vscode-glm-5.2` | `calculateSalesTaxFromPrice` uses `price * rate` instead of spec's `price - price/(1+rate)` (SALE-04 deviation) | `src/lib/financial.ts:48` |
+| **Med** | `build-opencode-1.17.4-glm-5.1`, `build-opencode-glm-5.2`, `build-vscode-glm-5.2` | `validateOriginOrReferer` does not exempt `/api/auth/*` (AUTH-04 deviation) | `src/lib/api-utils.ts` / `http-utils.ts` |
+| **Med** | `build-claude-glm-5.1`, `build-opencode-1.17.4-glm-5.1`, `build-pi-glm-5.1`, `build-vscode-glm-5.2` | No explicit `SameSite=Strict` on session cookie (relies on NextAuth default `lax`) | `src/lib/auth.ts` |
 | **Med** | `build-pi-glm-5.1` | Missing `/api/mileage/export` and `/api/mileage/reports` endpoints (MILE-02, MILE-03) | `src/app/api/mileage/` |
-| **Med** | claude-5.1, opencode-1.17.4-5.1, opencode-5.2, pi-5.1 | No integration tests produced (spec requires 9 under `tests/integration/api/`) | `tests/integration/` absent |
+| **Med** | claude-5.1, opencode-1.17.4-5.1, opencode-5.2, pi-5.1, vscode-5.2 | No integration tests produced (spec requires 9 under `tests/integration/api/`) | `tests/integration/` absent |
+| **Med** | `build-vscode-glm-5.2` | Only 2 of 7 required functional tests (missing `password-invalidation`, `setup-lock`, `sale-refund-flow`, `inventory-removal-date`, `refund-impact`) | `tests/functional/` |
 | **Low** | `build-opencode-1.17.4-glm-5.1`, `build-pi-glm-5.1` | Middleware named `src/middleware.ts` not `src/proxy.ts` (BUILD_PROMPT STEP 6) | `src/` |
 | **Low** | `build-claude-glm-5.1` | Migration directory lacks `meta/_journal.json` (only `.sql`); may break `drizzle-kit migrate` | `drizzle/` |
 | **Low** | `build-claude-glm-5.1` | bcrypt cost 12 in app code, 10 in seed (inconsistent; both ≥ spec) | `src/app/api/*/route.ts`, `src/scripts/seed.ts` |
 | **Low** | `build-opencode-1.17.4-glm-5.1` | zod v3 pinned while spec ecosystem is v4; 97 type-escape occurrences in `src/` | `package.json`, `src/lib/auth.ts` |
 | **Low** | `build-opencode-1.17.4-glm-5.1` | Adds `uuid@^14` dependency not used by core id flow | `package.json` |
+| **Low** | `build-vscode-glm-5.2` | Only 1 of 5 required e2e specs (auth only; missing inventory, sales, rbac, import) | `tests/e2e/` |
+| **Low** | `build-vscode-glm-5.2` | Schema imports `check` from drizzle-orm but never uses it (dead import) | `src/lib/schema.ts:1` |
 | **Info** | `build-claude-glm-5.2` | Extra modules `api-client`, `inventory-logic`, `app-shell`, `client-shell` (well-scoped refinements, spec-list deviation) | `src/lib/`, `src/components/` |
 | **Info** | `build-opencode-glm-5.2` | Extra modules `http-utils`, `inventory-queries`, `sales-queries`, `rbac` (cleaner separation, spec-list deviation) | `src/lib/` |
 | **Info** | `build-pi-glm-5.1` | 13 `console.log` in `src/` (highest density) | various |
+| **Info** | `build-vscode-glm-5.2` | 1 `as any` in `db.ts` Proxy pattern (pragmatic escape for dynamic property forwarding) | `src/lib/db.ts:43` |
 
 ---
 
@@ -349,10 +338,10 @@ Notable interpretation differences:
 
 1. **Worktrees.** Each branch was checked out into an isolated git worktree under `/tmp/opencode/eval/<branch>` so all could be inspected and built without checkout churn. The `main` branch remained checked out in the primary workspace for writing this report.
 2. **Static analysis.** File censuses used `find` + `wc`. Type-escape and dangerous-pattern counts used `grep -rn` over `src/` (tests excluded unless noted). Module/endpoint presence used `find` and `git ls-tree`. Critical modules (`schema.ts`, `financial.ts`, `api-utils.ts`, `auth.ts`, `validations.ts`, `reports/route.ts`, `inventory/[id]/route.ts`, `inventory/bulk/route.ts`, `sales/route.ts`, `admin/users/[id]/route.ts`, `next.config.ts`, `Caddyfile`, `Dockerfile`, `proxy.ts`/`middleware.ts`) were read in full.
-3. **Dynamic verification.** Per worktree: `npm ci --no-audit --no-fund`, then `npm run lint` (or `next lint` where scripted), then `npx tsc --noEmit`, then `npm test` (`vitest run`). All five installed cleanly under Node 24.15 / npm 11.12. E2E (`playwright test`) was not run: only the two Claude branches ship e2e specs, and running Playwright was deemed informational per the approved plan; unit/functional/integration results are weighted instead.
+3. **Dynamic verification.** Per worktree: `npm ci --no-audit --no-fund`, then `npm run lint` (or `next lint` where scripted), then `npx tsc --noEmit`, then `npm test` (`vitest run`). All six installed cleanly under Node 24.15 / npm 11.12. E2E (`playwright test`) was not run: only the two Claude branches and vscode-5.2 ship e2e specs, and running Playwright was deemed informational per the approved plan; unit/functional/integration results are weighted instead.
 4. **No patching.** Per the approved plan, branches were not modified to repair failures — a broken lint script or missing endpoint was recorded as-is to preserve "single one-shot prompt" fidelity.
 5. **No commits.** This report is the only file written to the repo; nothing was committed. Worktrees and logs under `/tmp/opencode/eval/` are throwaway.
-6. **`build-ibm-bob` excluded.** A sixth branch (`build-ibm-bob`) was attempted but did not complete — the agent exhausted its usage quota on the lowest Pro plan mid-build. Since a partial build cannot be fairly compared against completed builds, it is excluded from all evaluation sections. The branch remains in the repository for reference.
+6. **`build-ibm-bob` excluded.** A seventh branch (`build-ibm-bob`) was attempted but did not complete — the agent exhausted its usage quota on the lowest Pro plan mid-build. Since a partial build cannot be fairly compared against completed builds, it is excluded from all evaluation sections. The branch remains in the repository for reference.
 
 ### Raw verification results
 
@@ -363,13 +352,14 @@ Notable interpretation differences:
 | `build-opencode-1.17.4-glm-5.1` | exit 0 | exit 1 — 119 err / 72 warn | exit 0 (clean) | exit 0 — 14 files, 115 tests |
 | `build-opencode-glm-5.2` | exit 0 | exit 1 — `next lint` removed in Next 16 | exit 0 (clean) | exit 0 — 12 files, 134 tests |
 | `build-pi-glm-5.1` | exit 0 | exit 1 — `next lint` removed in Next 16 | exit 0 (clean) | exit 0 — 9 files, 95 tests |
+| `build-vscode-glm-5.2` | exit 0 | exit 1 — `next lint` removed in Next 16 | exit 0 (clean) | exit 0 — 9 files, 100 tests |
 
 ### Endpoint inventory (per branch)
 
-All five expose the core 22 endpoints (`/api/health`, `/api/auth/[...nextauth]`, `/api/setup`, `/api/inventory*`, `/api/sales`, `/api/sales/[id]`, `/api/mileage`, `/api/mileage/[id]`, `/api/photos/[itemId]/[filename]`, `/api/profile`, `/api/reports`, `/api/import`, `/api/settings`, `/api/admin/{users,backup,setup-unlock}`). Variances:
+All six expose the core 22 endpoints (`/api/health`, `/api/auth/[...nextauth]`, `/api/setup`, `/api/inventory*`, `/api/sales`, `/api/sales/[id]`, `/api/mileage`, `/api/mileage/[id]`, `/api/photos/[itemId]/[filename]`, `/api/profile`, `/api/reports`, `/api/import`, `/api/settings`, `/api/admin/{users,backup,setup-unlock}`). Variances:
 - `build-opencode-glm-5.2` adds `/api/sales/export` (not required, harmless).
 - `build-pi-glm-5.1` omits `/api/mileage/export` and `/api/mileage/reports` (required by MILE-02/MILE-03).
-- `build-claude-glm-5.2`, `build-claude-glm-5.1`, and `build-opencode-1.17.4-glm-5.1` match the spec surface exactly.
+- `build-claude-glm-5.2`, `build-claude-glm-5.1`, `build-opencode-1.17.4-glm-5.1`, and `build-vscode-glm-5.2` match the spec surface exactly.
 
 ### Test files present (per branch)
 
@@ -379,6 +369,7 @@ build-claude-glm-5.1:        7 unit + 7 functional              + 5 e2e + 3 setu
 build-opencode-1.17.4-glm-5.1: 7 unit + 7 functional                    + 2 setup            (16 files)
 build-opencode-glm-5.2:      7 unit + 5 functional                    + 2 setup            (14 files)
 build-pi-glm-5.1:             6 unit + 3 functional                    + 2 setup            (11 files)
+build-vscode-glm-5.2:         7 unit + 2 functional              + 1 e2e + 3 setup            (13 files)
 ```
 Integration tests (`tests/integration/`): **9 files in `build-claude-glm-5.2` only; 0 in all other branches.**
 
@@ -389,8 +380,9 @@ Integration tests (`tests/integration/`): **9 files in `build-claude-glm-5.2` on
 - **Best overall build:** **`build-claude-glm-5.2`**. It is the most spec-faithful, the most type-disciplined, the only branch with a complete 4-tier test suite (incl. the 9 required integration tests), the only branch whose lint passes with zero errors/warnings, and the most security-hardened (explicit SameSite=Strict + live JWT refresh + `isActive` enforcement). It has no high- or medium-severity findings. Adopt it as the production baseline.
 - **Runner-up:** `build-claude-glm-5.1` — same canonical patterns and type discipline, but no integration tests, missing `drizzle/meta/`, lint emits 11 errors, and no explicit SameSite cookie. Port the SameSite config and `drizzle/meta/` from claude-5.2 if you stay on 5.1.
 - **Most security-hardened alternative:** `build-opencode-glm-5.2` — also has explicit SameSite and clean typing, but its lint pipeline is broken (`next lint` removed in Next 16, no `eslint.config.mjs`), it lacks the live JWT refresh and `isActive` gate, and it deviates from the canonical `withAuth` signature.
+- **`build-vscode-glm-5.2`** is a compact, type-safe build (1 `as any`, 0 `: any`) with all 24 endpoints, correct `src/proxy.ts`, and full ops artifacts. It ranks 4th overall. Its main gaps are: thinnest test suite of completed builds (9 files / 100 tests, only 2 functional + 1 e2e, no integration), broken lint script (`next lint`), `calculateSalesTaxFromPrice` formula deviation from spec, and no explicit SameSite cookie. If adopted, fix the tax formula, add the missing functional/integration/e2e tests, and port SameSite config from claude-5.2.
 - **Avoid `build-pi-glm-5.1` as a production baseline:** its session-invalidation bug is silent and security-critical, and it is missing two required mileage endpoints.
 - **`build-opencode-1.17.4-glm-5.1`** is compact and works, but its 97 type escapes and zod v3 pin make it the worst-positioned for future maintenance despite the small footprint.
 - **`build-ibm-bob`** was not completed (agent ran out of quota on the lowest Pro plan) and is therefore excluded from the comparison. A fair evaluation would require re-running the build with sufficient quota.
 
-The prior cohort's single biggest shared gap — the **complete absence of integration tests** — is closed by `build-claude-glm-5.2` (9 integration test files, 60+ integration test cases, all passing). The other four branches still have zero integration tests.
+The prior cohort's single biggest shared gap — the **complete absence of integration tests** — is closed by `build-claude-glm-5.2` (9 integration test files, 60+ integration test cases, all passing). The other five branches still have zero integration tests.
