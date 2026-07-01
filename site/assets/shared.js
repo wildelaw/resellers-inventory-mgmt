@@ -84,26 +84,45 @@
     target.appendChild(wrap);
   }
 
-  // Branch name -> HTML href
+  // Branch name -> HTML href (prefix-aware so it works from any subfolder)
   function branchHref(branch) {
-    return 'branches/' + branch + '.html';
+    const p = sitePrefix();
+    return p + 'branches/' + branch + '.html';
+  }
+
+  // Compute path prefix from current location so links work from any subfolder
+  // (handles repo-root Pages URLs like /resellers-inventory-mgmt/ and subdirs).
+  function sitePrefix() {
+    // pathname examples:
+    //   /resellers-inventory-mgmt/index.html                       (root page)
+    //   /resellers-inventory-mgmt/branches/build-claude-glm-5.2.html (subfolder page)
+    //   /branches/build-pi-glm-5.1.html                             (local serving, subfolder)
+    // Split into segments, drop the filename, then look at the directory name.
+    const parts = window.location.pathname.replace(/\/+$/, '').split('/').filter(Boolean);
+    if (parts.length && parts[parts.length - 1].indexOf('.') >= 0) parts.pop();
+    // The site root is the directory containing index.html. Files in
+    // `branches/` or `specs/` are one level below root and need a `../` prefix.
+    const dir = parts[parts.length - 1] || '';
+    const inSubfolder = dir === 'branches' || dir === 'specs';
+    return inSubfolder ? '../' : '';
   }
 
   // Header injection
   function renderHeader(active) {
+    const p = sitePrefix();
     const links = [
-      { href: 'index.html', label: 'Overview' },
-      { href: 'static-eval.html', label: 'Static Eval' },
-      { href: 'functional-eval.html', label: 'Functional Eval' },
-      { href: 'prompt-functional-eval.html', label: 'Eval Prompt' },
-      { href: 'specs/overview.html', label: 'Specs' },
-      { href: 'about.html', label: 'About' }
+      { href: p + 'index.html', label: 'Overview' },
+      { href: p + 'static-eval.html', label: 'Static Eval' },
+      { href: p + 'functional-eval.html', label: 'Functional Eval' },
+      { href: p + 'prompt-functional-eval.html', label: 'Eval Prompt' },
+      { href: p + 'specs/overview.html', label: 'Specs' },
+      { href: p + 'about.html', label: 'About' }
     ];
     const header = document.querySelector('[data-site-header]');
     if (!header) return;
     clear(header);
     const container = el('div', { class: 'container' });
-    const brand = el('a', { class: 'brand', href: 'index.html' }, [
+    const brand = el('a', { class: 'brand', href: p + 'index.html' }, [
       'Resell Inventory Manager v2',
       el('span', { class: 'badge' }, 'Build Eval')
     ]);
