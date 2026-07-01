@@ -1,0 +1,9 @@
+{
+    "git.ignoreLimitWarning": true,
+    "chat.tools.terminal.autoApprove": {
+        "/^npx drizzle-kit generate 2>&1 \\| tail -30$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

@@ -1,1 +1,49 @@
 .DS_Store
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# database
+/sqlite.db
+/sqlite.db-journal
+/sqlite.db-wal
+/sqlite.db-shm
+/data/
+
+# uploads
+/uploads/
+
+# backups
+/backups/
+
+# certs
+/certs/
+
+# env
+.env
+.env.local
+.env*.local
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# testing
+/coverage
+
+# playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# misc
+*.pem
