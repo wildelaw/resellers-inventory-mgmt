@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Static Analysis · Resell Inventory Manager v2 Build Eval</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" data-site-header></header>
+
+  <main>
+    <div class="container">
+      <section>
+        <h1>Static Analysis Results</h1>
+        <p class="lead">Source: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/BUILD_EVALUATION.md" target="_blank" rel="noopener">docs/BUILD_EVALUATION.md</a>. Methodology: static source review + real <code>npm ci</code> / lint / <code>tsc --noEmit</code> / <code>vitest run</code> per branch in isolated git worktrees. Branches were not patched, preserving single one-shot-prompt fidelity.</p>
+
+        <div class="callout">
+          <p><strong>Executive summary.</strong> Six branches compile clean and pass their own suites. <span class="mono">build-claude-glm-5.2</span> leads: only branch shipping all 9 required integration tests, only branch with zero lint errors/warnings, only branch with live-JWT-refresh of role/canViewAll/isActive on existing sessions, and combines strengths of the prior leaders. <span class="mono">build-ibm-bob</span> was excluded — agent exhausted its usage quota mid-build.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>§1 Rankings</h2>
+        <div id="rankings"></div>
+      </section>
+
+      <section>
+        <h2>§2 Branch profiles</h2>
+        <p class="dim">Per-branch build profile across agent, model, file counts, test tiers, type discipline, lint outcomes, dependencies, and security config.</p>
+        <div id="profiles"></div>
+      </section>
+
+      <section>
+        <h2>§3 Spec conformance matrices</h2>
+        <p class="dim">Legend: <span class="chip chip-pass">pass</span> <span class="chip chip-partial">partial</span> <span class="chip chip-fail">fail</span> <span class="chip chip-na">—</span>. Evidence per row is in the rightmost column.</p>
+        <div id="conformance"></div>
+      </section>
+
+      <section>
+        <h2>§4 Maintainability</h2>
+        <h3>Type discipline (src/ only)</h3>
+        <div id="type-discipline"></div>
+        <h3>Lint outcomes</h3>
+        <div id="lint-outcomes"></div>
+      </section>
+
+      <section>
+        <h2>§5 Vulnerabilities</h2>
+        <p class="dim">All six implement <code>validateOriginOrReferer</code> for POST/PUT/DELETE/PATCH, returning 403 on missing/mismatched Origin/Referer. No raw SQL, no <code>eval</code>, no <code>dangerouslySetInnerHTML</code> anywhere. Key differences below.</p>
+        <ul>
+          <li><strong>build-claude-glm-5.2:</strong> most robust — configurable ORIGIN_EXEMPT_PREFIXES, rejects with 403 when no host established, explicit SameSite=strict, live JWT refresh of passwordChangedAt/role/canViewAll/isActive, withAuth also rejects deactivated accounts.</li>
+          <li><strong>build-pi-glm-5.1:</strong> <strong style="color:var(--red);">CRITICAL</strong> — <code>jwt</code> callback copies id/role/canViewAll but never copies <code>passwordChangedAt</code>. <code>token.passwordChangedAt</code> is always 0, so <code>withAuth</code>'s check is always false → password changes do <em>not</em> invalidate existing JWTs. Directly violates AUTH-02/SEC-03. Severity: High.</li>
+          <li><strong>SameSite cookie:</strong> only claude-5.2 and opencode-5.2 explicitly set <code>sameSite:'strict'</code> as the spec requires. The other four rely on NextAuth defaults (lax).</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>§6 Complexity</h2>
+        <div id="complexity"></div>
+      </section>
+
+      <section>
+        <h2>§7 Variances between branches</h2>
+        <p class="dim">Key interpretation differences across the six builds.</p>
+        <div id="variances"></div>
+      </section>
+
+      <section>
+        <h2>§8 Findings by severity</h2>
+        <p class="dim">All findings from the static review, sorted by severity. High-severity findings warrant immediate remediation.</p>
+        <div id="findings"></div>
+      </section>
+
+      <section>
+        <h2>Appendix A — Raw verification</h2>
+        <div id="raw-verification"></div>
+        <details>
+          <summary>Methodology</summary>
+          <div class="details-body">
+            <ol>
+              <li><strong>Worktrees.</strong> Each branch checked out into an isolated git worktree under <code>/tmp/opencode/eval/&lt;branch&gt;</code>.</li>
+              <li><strong>Static analysis.</strong> File censuses via <code>find</code> + <code>wc</code>. Type-escape and dangerous-pattern counts via <code>grep -rn</code> over <code>src/</code> (tests excluded unless noted).</li>
+              <li><strong>Dynamic verification.</strong> Per worktree: <code>npm ci --no-audit --no-fund</code>, then lint, then <code>npx tsc --noEmit</code>, then <code>npm test</code>. All six installed cleanly under Node 24.15 / npm 11.12.</li>
+              <li><strong>No patching.</strong> Branches were not modified — broken lint or missing endpoints recorded as-is.</li>
+              <li><strong>No commits.</strong> Only this report was written; nothing committed. Worktrees under <code>/tmp/opencode/eval/</code> are throwaway.</li>
+              <li><strong>build-ibm-bob excluded.</strong> Did not complete (agent exhausted Pro plan quota mid-build). Branch remains in repo for reference.</li>
+            </ol>
+          </div>
+        </details>
+      </section>
+    </div>
+  </main>
+
+  <footer data-site-footer></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/shared.js"></script>
+  <script src="assets/static-eval.js"></script>
+  <script>
+    EVAL.renderHeader('Static Eval');
+  </script>
+</body>
+</html>

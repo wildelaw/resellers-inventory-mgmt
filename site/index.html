@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resell Inventory Manager v2 — Build Evaluation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" data-site-header></header>
+
+  <main>
+    <div class="container">
+      <section class="hero">
+        <h1>One-Shot Prompt · Spec-Driven Build Evaluation</h1>
+        <p class="lead">Six AI coding agents received the same single one-shot prompt — <em>“read and execute docs/BUILD_PROMPT.md to build this application”</em> — and produced six independent builds of the Resell Inventory Manager v2. This site documents the static analysis and functional (Playwright E2E) results across all six builds.</p>
+        <div class="meta-row">
+          <span><strong>Repo:</strong> <a href="https://github.com/wildelaw/resellers-inventory-mgmt">wildelaw/resellers-inventory-mgmt</a></span>
+          <span><strong>Static eval:</strong> 2026-06-30</span>
+          <span><strong>Functional eval:</strong> <span data-functional-status>pending</span></span>
+          <span><strong>Branches:</strong> 7 attempted, 6 completed, 1 incomplete</span>
+        </div>
+        <div class="btn-row">
+          <a class="btn primary" href="static-eval.html">View Static Analysis →</a>
+          <a class="btn" href="functional-eval.html">View Functional Results</a>
+          <a class="btn" href="prompt-functional-eval.html">Functional Eval Prompt</a>
+          <a class="btn" href="specs/overview.html">Spec Documents</a>
+        </div>
+      </section>
+
+      <section>
+        <h2>Leaderboard</h2>
+        <p class="dim">Overall ranking across Spec conformance, Maintainability, Security, Complexity, and Test signal. Click a branch for full detail.</p>
+        <div id="leaderboard"></div>
+      </section>
+
+      <section>
+        <h2>Per-dimension winners</h2>
+        <div id="winners" class="card-grid"></div>
+      </section>
+
+      <section>
+        <h2>Recommendation</h2>
+        <div class="callout">
+          <h3 style="border:0; padding:0; margin-bottom:6px;">Recommended baseline: <span class="mono" data-rec-branch></span></h3>
+          <p class="dim" data-rec-summary></p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Test signal at a glance</h2>
+        <p class="dim">Vitest pass counts and lint outcomes per branch.</p>
+        <div id="test-chart" class="card"></div>
+      </section>
+
+      <section>
+        <h2>Branches evaluated</h2>
+        <div id="branches-list" class="card-grid"></div>
+      </section>
+
+      <section>
+        <h2>How this site works</h2>
+        <div class="card">
+          <p>This is a zero-build, framework-free static site. All evaluation data lives in <code>site/assets/data.js</code>, sourced from <code>docs/BUILD_EVALUATION.md</code> (static) and <code>docs/FUNCTIONAL_EVALUATION.md</code> (functional, when complete). Pages render via vanilla JavaScript — no Node, no Jekyll, no VitePress.</p>
+          <p>To run the functional evaluation and populate <code>docs/FUNCTIONAL_EVALUATION.md</code>, use the reusable prompt on the <a href="prompt-functional-eval.html">Eval Prompt</a> page. After committing the regenerated <code>FUNCTIONAL_EVALUATION.md</code> and updating <code>site/assets/data.js</code>, the site redeploys automatically via GitHub Actions.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer data-site-footer></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/shared.js"></script>
+  <script src="assets/leaderboard.js"></script>
+  <script>
+    EVAL.renderHeader('Overview');
+  </script>
+</body>
+</html>

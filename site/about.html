@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About · Resell Inventory Manager v2 Build Eval</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" data-site-header></header>
+
+  <main>
+    <div class="container">
+      <section>
+        <h1>About this evaluation</h1>
+        <p class="lead">A controlled experiment in spec-driven, one-shot-prompt software generation across six AI coding agents.</p>
+      </section>
+
+      <section>
+        <h2>The experiment</h2>
+        <div class="card">
+          <p>Seven AI coding agents were given the same single instruction — <em>“read and execute <code>docs/BUILD_PROMPT.md</code> to build this application”</em> — with no follow-up turns, no clarification, and no patching. Each agent was expected to read the complete specification in <code>docs/</code>, then generate the entire Resell Inventory Manager v2 application from scratch.</p>
+          <p>Six agents completed the build; one (<code>build-ibm-bob</code>) exhausted its usage quota mid-build and is excluded from scoring. The six completed builds are evaluated across two dimensions:</p>
+          <ol>
+            <li><strong>Static analysis</strong> — spec conformance, maintainability, vulnerabilities, complexity, and test signal. Source: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/BUILD_EVALUATION.md" target="_blank" rel="noopener">docs/BUILD_EVALUATION.md</a>.</li>
+            <li><strong>Functional (E2E) testing</strong> — Playwright end-to-end runs of the 5 spec flows and 18 regression scenarios against each running build, with per-failure effort estimates and remediation prompts. Source: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/FUNCTIONAL_EVALUATION.md" target="_blank" rel="noopener">docs/FUNCTIONAL_EVALUATION.md</a> (populated by the <a href="prompt-functional-eval.html">eval prompt</a>).</li>
+          </ol>
+        </div>
+      </section>
+
+      <section>
+        <h2>The agents</h2>
+        <div class="card">
+          <table>
+            <thead><tr><th>Branch</th><th>Agent</th><th>Model</th><th>Status</th></tr></thead>
+            <tbody id="agents-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>This site</h2>
+        <div class="card">
+          <p>A zero-build, framework-free static site. All evaluation data lives in <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/site/assets/data.js" target="_blank" rel="noopener"><code>site/assets/data.js</code></a>, rendered via vanilla JavaScript. No Node, no Jekyll, no VitePress, no npm install required to view it.</p>
+          <p>Deployment is automatic via GitHub Actions: any push to <code>main</code> that touches <code>site/**</code> or <code>docs/**</code> uploads <code>site/</code> as a Pages artifact. Enable <strong>Settings → Pages → Source = GitHub Actions</strong> once in the repo.</p>
+          <p>When the functional evaluation is run, the agent writes <code>docs/FUNCTIONAL_EVALUATION.md</code> and updates <code>site/assets/data.js</code>; the next push redeploys the site with the populated <a href="functional-eval.html">functional results page</a>.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Reproducing</h2>
+        <div class="card">
+          <h3>Reproducing the static analysis</h3>
+          <p>The methodology is documented in Appendix A of <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/BUILD_EVALUATION.md" target="_blank" rel="noopener">docs/BUILD_EVALUATION.md</a>: check out each branch into an isolated git worktree, run <code>npm ci</code> / lint / <code>tsc --noEmit</code> / <code>vitest run</code>, and inspect the source.</p>
+          <h3>Reproducing the functional evaluation</h3>
+          <p>Copy the <a href="prompt-functional-eval.html">eval prompt</a> into any coding agent with access to this repo. The prompt is resumable and self-contained.</p>
+          <h3>Reproducing a build</h3>
+          <p>Check out any <code>build-*</code> branch and run <code>npm ci &amp;&amp; npm run dev</code>, or <code>docker compose --profile https up -d</code> per <code>docs/OPERATIONS.md</code>.</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer data-site-footer></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/shared.js"></script>
+  <script src="assets/about.js"></script>
+  <script>
+    EVAL.renderHeader('About');
+  </script>
+</body>
+</html>

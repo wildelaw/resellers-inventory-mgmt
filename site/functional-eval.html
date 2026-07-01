@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Functional Evaluation · Resell Inventory Manager v2 Build Eval</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" data-site-header></header>
+
+  <main>
+    <div class="container">
+      <section>
+        <h1>Functional Evaluation Results (Playwright E2E)</h1>
+        <p class="lead">Full end-to-end testing of all six completed builds against the 5 spec E2E flows (<code>auth</code>, <code>inventory</code>, <code>sales</code>, <code>import</code>, <code>rbac</code>) and the 18 regression scenarios (REG-01..REG-18) defined in <code>docs/TEST_STRATEGY.md</code>. Each build is booted via Docker Compose (preferred) or <code>npm run dev</code>, seeded, then driven by Playwright.</p>
+        <div id="status-banner"></div>
+      </section>
+
+      <section id="methodology-section" hidden>
+        <h2>Methodology</h2>
+        <div id="methodology" class="card"></div>
+      </section>
+
+      <section id="cross-section" hidden>
+        <h2>Cross-branch matrix — E2E flows</h2>
+        <p class="dim">Pass / fail per flow per branch.</p>
+        <div id="cross-matrix"></div>
+      </section>
+
+      <section id="regression-section" hidden>
+        <h2>Cross-branch matrix — regression scenarios</h2>
+        <p class="dim">REG-01..REG-18 pass / fail per branch.</p>
+        <div id="regression-matrix"></div>
+      </section>
+
+      <section id="aggregate-section" hidden>
+        <h2>Aggregate findings & severity</h2>
+        <div id="aggregate-findings"></div>
+      </section>
+
+      <section id="effort-section" hidden>
+        <h2>Effort estimates summary</h2>
+        <p class="dim">Estimated effort to remediate each failing scenario, per branch.</p>
+        <div id="effort-summary"></div>
+      </section>
+
+      <section id="functional-winner-section" hidden>
+        <h2>Functional winner & recommendation</h2>
+        <div id="functional-winner" class="callout"></div>
+      </section>
+
+      <section id="per-branch-section" hidden>
+        <h2>Per-branch functional results</h2>
+        <div id="per-branch-links" class="card-grid"></div>
+      </section>
+
+      <section id="pending-section">
+        <h2>How to run the functional evaluation</h2>
+        <div class="callout">
+          <p>The functional evaluation has not been run yet. To populate <code>docs/FUNCTIONAL_EVALUATION.md</code> and this page, execute the reusable prompt:</p>
+          <div class="btn-row">
+            <a class="btn primary" href="prompt-functional-eval.html">View the Eval Prompt →</a>
+            <a class="btn" href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/FUNCTIONAL_EVAL_PROMPT.md" target="_blank" rel="noopener">docs/FUNCTIONAL_EVAL_PROMPT.md</a>
+          </div>
+        </div>
+
+        <h3>What the evaluation covers</h3>
+        <h4>5 Playwright E2E spec flows (from TEST_STRATEGY.md §2.4)</h4>
+        <div id="e2e-flows"></div>
+
+        <h4>18 regression scenarios (from TEST_STRATEGY.md §4.1)</h4>
+        <div id="regression-scenarios"></div>
+
+        <h3>Process</h3>
+        <div class="card">
+          <ol>
+            <li>For each of the 6 completed build branches, check out the branch into an isolated git worktree at <code>/tmp/opencode/eval-func/&lt;branch&gt;</code>.</li>
+            <li>Boot the app the way the spec requires: <code>docker compose --profile https up -d</code> (preferred for fidelity — real Caddy TLS + rate limiting + /data volume), falling back to <code>npm run dev</code> + <code>npx tsx src/scripts/seed.ts</code>. Verify <code>/api/health</code> returns 200.</li>
+            <li>If a branch is missing a Playwright spec file (common — only claude-5.2, claude-5.1, and vscode-5.2 ship any), write the canonical spec from <code>TEST_STRATEGY.md</code> into the worktree's <code>tests/e2e/</code>. This gives every build an equal functional test. Do not commit these specs.</li>
+            <li>Run all 5 spec flows with the 18 regression scenarios as in-flow assertions. Run each flow 3× to surface flakiness (rate-limit 429s under Caddy are recorded as info, not failure).</li>
+            <li>For each failing scenario, produce an effort estimate (S/M/L/XL: &lt;15 / &lt;60 / &lt;240 / &gt;240 min) and a targeted AI remediation prompt (≤300 chars) referencing the failing file/function and the spec section.</li>
+            <li>Write <code>docs/FUNCTIONAL_EVALUATION.md</code> with the exact section layout the site parses, update <code>site/assets/data.js</code> with the new functional results, and commit both on <code>main</code>. The site redeploys automatically.</li>
+            <li>Do not patch or commit changes to any build branch — preserve single one-shot-prompt fidelity.</li>
+          </ol>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer data-site-footer></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/shared.js"></script>
+  <script src="assets/functional-eval.js"></script>
+  <script>
+    EVAL.renderHeader('Functional Eval');
+  </script>
+</body>
+</html>

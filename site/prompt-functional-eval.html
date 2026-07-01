@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Functional Eval Prompt · Resell Inventory Manager v2 Build Eval</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" data-site-header></header>
+
+  <main>
+    <div class="container">
+      <section>
+        <h1>Functional Evaluation Prompt</h1>
+        <p class="lead">A reusable, self-contained prompt that drives a coding agent to run the full Playwright E2E evaluation across all six completed builds and write <code>docs/FUNCTIONAL_EVALUATION.md</code>. Source of truth: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/FUNCTIONAL_EVAL_PROMPT.md" target="_blank" rel="noopener">docs/FUNCTIONAL_EVAL_PROMPT.md</a>.</p>
+
+        <div class="callout">
+          <p><strong>How to use.</strong> Copy the prompt below and paste it into any coding agent (Claude Code, opencode, VS Code Copilot, etc.) with access to this repo. The agent will:</p>
+          <ol style="margin-bottom:0;">
+            <li>Check out each of the 6 completed build branches into isolated git worktrees.</li>
+            <li>Boot each build via Docker Compose (or <code>npm run dev</code> + seed as fallback).</li>
+            <li>Write the canonical 5 Playwright E2E spec files from <code>TEST_STRATEGY.md</code> into each worktree if missing.</li>
+            <li>Run all 5 flows with 18 regression assertions, 3 retries each.</li>
+            <li>Record per-flow pass/fail, effort estimates (S/M/L/XL), and per-failure remediation prompts.</li>
+            <li>Write <code>docs/FUNCTIONAL_EVALUATION.md</code> and update <code>site/assets/data.js</code>, then commit only those two files on <code>main</code>.</li>
+          </ol>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn primary" id="copy-btn">Copy prompt to clipboard</button>
+          <a class="btn" href="functional-eval.html">View Functional Results →</a>
+        </div>
+      </section>
+
+      <section>
+        <h2>The prompt</h2>
+        <div class="prompt-block">
+          <pre id="prompt-text"></pre>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer data-site-footer></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/shared.js"></script>
+  <script src="assets/functional-prompt.js"></script>
+  <script src="assets/prompt-functional-eval.js"></script>
+  <script>
+    EVAL.renderHeader('Eval Prompt');
+  </script>
+</body>
+</html>
