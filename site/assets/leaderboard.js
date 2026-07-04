@@ -25,6 +25,13 @@
     // ---- leaderboard ----
     const lb = document.getElementById('leaderboard');
     if (lb) {
+      // attach functional score from data.functional.branches to each ranking row
+      const rows = completed.map(function (r) {
+        const fb = data.functional && data.functional.branches && data.functional.branches[r.branch];
+        return Object.assign({}, r, {
+          functionalScore: fb ? fb.functionalScore : null
+        });
+      });
       dataTable(lb, [
         { key: 'rank', label: 'Rank', numeric: true },
         {
@@ -37,8 +44,16 @@
         { key: 'maintain', label: 'Maintain', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
         { key: 'security', label: 'Security', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
         { key: 'complexity', label: 'Complexity', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
+        {
+          key: 'functionalScore', label: 'Functional', numeric: true,
+          render: function (v) {
+            if (v == null) return el('span', { class: 'chip chip-na' }, '—');
+            const cls = v >= 90 ? 'chip chip-pass' : v >= 60 ? 'chip chip-partial' : 'chip chip-fail';
+            return el('span', { class: cls, title: v + '/100 E2E' }, v + '/100');
+          }
+        },
         { key: 'testSignal', label: 'Test signal', wrap: true }
-      ], completed);
+      ], rows);
     }
 
     // ---- dimension winners ----
@@ -100,10 +115,13 @@
           card.appendChild(el('p', { class: 'dim', style: 'font-size:13px;' }, p.note));
         } else {
           const stats = el('div', { class: 'kv-list' });
+          const fb = data.functional && data.functional.branches && data.functional.branches[p.branch];
+          const fScore = fb ? fb.functionalScore : null;
           [
             ['API routes', p.apiRoutes], ['Pages', p.pages],
             ['Unit tests', p.unit], ['Functional tests', p.functional],
             ['Integration tests', p.integration], ['E2E specs', p.e2e],
+            ['Functional score', fScore != null ? fScore + '/100' : '—'],
             ['ts/tsx files', p.tsFiles], ['ts/tsx bytes', p.tsBytes ? p.tsBytes.toLocaleString() : '—']
           ].forEach(function (kv) {
             stats.appendChild(el('div', { class: 'kv' }, [
