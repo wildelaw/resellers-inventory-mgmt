@@ -44,6 +44,7 @@ The newly added `build-vscode-glm-5.2` is a compact, type-safe build with the se
 | | `build-claude-glm-5.2` | `build-claude-glm-5.1` | `build-opencode-1.17.4-glm-5.1` | `build-opencode-glm-5.2` | `build-pi-glm-5.1` | `build-vscode-glm-5.2` |
 |---|---|---|---|---|---|---|
 | Agent | Claude Code | Claude Code | opencode 1.17.4 | opencode (current) | "pi" agent | VS Code (GitHub Copilot) |
+| Agent version | Claude Code 2.1.196 | Claude Code 2.1.196 | opencode 1.17.4 | opencode 1.17.4 | pi 0.79.2 | VS Code 1.126.0 (GitHub Copilot) |
 | Model | GLM 5.2 | GLM 5.1 | GLM 5.1 | GLM 5.2 | GLM 5.1 | GLM 5.2 |
 | Commit | `d951f31` | `4ce31a9` | `a54e68b` | `f4869dc` | `0e8f3b2` | `9e70fb6` |
 | ts/tsx files | 111 | 96 | 95 | 97 | 80 | 85 |

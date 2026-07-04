@@ -21,14 +21,14 @@ Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm
 - Boot mode: `next dev` (Docker Compose skipped — no production TLS certificates available in the eval environment; the dev fallback is documented in FUNCTIONAL_EVAL_PROMPT.md STEP 2). All builds target Next.js 16.2.x with Turbopack.
 - Admin bootstrapping: each branch's native `seed.ts` was attempted first; where the seed script crashed (opencode-5.2, vscode-5.2 — missing `dotenv/config`) or the app did not auto-migrate (opencode-1.17.4, opencode-5.2, pi-5.1, vscode-5.2), the documented fallbacks were used: `npx drizzle-kit migrate` (OPERATIONS.md §1.3) and/or `POST /api/setup` (SETUP-01). No build branches were patched.
 - Boot modes per branch:
-  | Branch | Boot mode | Admin created via | Notes |
-  |---|---|---|---|
-  | build-claude-glm-5.2 | dev (auto-migrate via lazy proxy) | native seed (admin@example.com) | app auto-migrates via lazy DB proxy; `/api/setup` POST is broken (500), so native seed is required |
-  | build-claude-glm-5.1 | dev (auto-migrate via app + drizzle-kit) | native seed (admin@resalemanager.com) | app auto-migrates; native seed uses admin@resalemanager.com |
-  | build-opencode-1.17.4-glm-5.1 | dev (drizzle-kit migrate required) | native seed (security@lawsonsoft.com) | app does not auto-migrate; `drizzle-kit migrate` required; native seed uses security@lawsonsoft.com |
-  | build-opencode-glm-5.2 | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
-  | build-pi-glm-5.1 | dev (drizzle-kit migrate required) | native seed (admin@example.com) | app does not auto-migrate; `drizzle-kit migrate` + ADMIN_EMAIL env required |
-  | build-vscode-glm-5.2 | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
+  | Branch | Agent version | Boot mode | Admin created via | Notes |
+  |---|---|---|---|---|
+  | build-claude-glm-5.2 | Claude Code 2.1.196 | dev (auto-migrate via lazy proxy) | native seed (admin@example.com) | app auto-migrates via lazy DB proxy; `/api/setup` POST is broken (500), so native seed is required |
+  | build-claude-glm-5.1 | Claude Code 2.1.196 | dev (auto-migrate via app + drizzle-kit) | native seed (admin@resalemanager.com) | app auto-migrates; native seed uses admin@resalemanager.com |
+  | build-opencode-1.17.4-glm-5.1 | opencode 1.17.4 | dev (drizzle-kit migrate required) | native seed (security@lawsonsoft.com) | app does not auto-migrate; `drizzle-kit migrate` required; native seed uses security@lawsonsoft.com |
+  | build-opencode-glm-5.2 | opencode 1.17.4 | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
+  | build-pi-glm-5.1 | pi 0.79.2 | dev (drizzle-kit migrate required) | native seed (admin@example.com) | app does not auto-migrate; `drizzle-kit migrate` + ADMIN_EMAIL env required |
+  | build-vscode-glm-5.2 | VS Code 1.126.0 (GitHub Copilot) | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
 - Retry count: 3 full runs of the 26-test suite per branch (78 test executions per branch).
 - Caddy 429 handling: N/A — Caddy was not in the dev boot path; no rate-limit 429s were observed.
 - Canonical E2E specs: 5 spec files (`auth.spec.ts`, `inventory.spec.ts`, `sales.spec.ts`, `import.spec.ts`, `rbac.spec.ts`) written from `docs/TEST_STRATEGY.md §2.4` and `§4.1`. The specs are API-contract-focused (the API surface is fixed by the spec; UI selectors vary between builds), with one browser-driven logout test. Specs were written into each worktree as throwaway files (not committed).
@@ -37,7 +37,7 @@ Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm
 
 ### 3.1 build-claude-glm-5.2
 
-**Boot:** dev (auto-migrate via lazy proxy) · **Admin:** admin@example.com (via /api/setup fallback) · **Functional score:** 100/100 (26/26 tests pass)
+**Agent:** Claude Code 2.1.196 · **Boot:** dev (auto-migrate via lazy proxy) · **Admin:** admin@example.com (via /api/setup fallback) · **Functional score:** 100/100 (26/26 tests pass)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |
@@ -77,7 +77,7 @@ _(no failures)_
 
 ### 3.2 build-claude-glm-5.1
 
-**Boot:** dev (auto-migrate via app + drizzle-kit) · **Admin:** admin@resalemanager.com (native seed) · **Functional score:** 35/100 (9/26 tests pass)
+**Agent:** Claude Code 2.1.196 · **Boot:** dev (auto-migrate via app + drizzle-kit) · **Admin:** admin@resalemanager.com (native seed) · **Functional score:** 35/100 (9/26 tests pass)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |
@@ -135,7 +135,7 @@ _(no failures)_
 
 ### 3.3 build-opencode-1.17.4-glm-5.1
 
-**Boot:** dev (drizzle-kit migrate required) · **Admin:** security@lawsonsoft.com (native seed) · **Functional score:** 69/100 (18/26 tests pass)
+**Agent:** opencode 1.17.4 · **Boot:** dev (drizzle-kit migrate required) · **Admin:** security@lawsonsoft.com (native seed) · **Functional score:** 69/100 (18/26 tests pass)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |
@@ -184,7 +184,7 @@ _(no failures)_
 
 ### 3.4 build-opencode-glm-5.2
 
-**Boot:** dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) · **Admin:** admin@example.com (via /api/setup fallback; seed broken) · **Functional score:** 88/100 (23/26 tests pass)
+**Agent:** opencode 1.17.4 · **Boot:** dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) · **Admin:** admin@example.com (via /api/setup fallback; seed broken) · **Functional score:** 88/100 (23/26 tests pass)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |
@@ -228,7 +228,7 @@ _(no failures)_
 
 ### 3.5 build-pi-glm-5.1
 
-**Boot:** dev (drizzle-kit migrate required) · **Admin:** admin@example.com (native seed with ADMIN_EMAIL env) · **Functional score:** 62/100 (16/26 tests pass)
+**Agent:** pi 0.79.2 · **Boot:** dev (drizzle-kit migrate required) · **Admin:** admin@example.com (native seed with ADMIN_EMAIL env) · **Functional score:** 62/100 (16/26 tests pass)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |
@@ -279,7 +279,7 @@ _(no failures)_
 
 ### 3.6 build-vscode-glm-5.2
 
-**Boot:** dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) · **Admin:** admin@example.com (via /api/setup fallback; seed broken) · **Functional score:** 96/100 (25/26 tests pass)
+**Agent:** VS Code 1.126.0 (GitHub Copilot) · **Boot:** dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) · **Admin:** admin@example.com (via /api/setup fallback; seed broken) · **Functional score:** 96/100 (25/26 tests pass)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |

@@ -95,7 +95,7 @@
           title.appendChild(el('span', { class: 'chip chip-na', style: 'margin-left:8px;' }, 'incomplete'));
         }
         card.appendChild(title);
-        card.appendChild(el('p', { class: 'dim', style: 'font-size:13px; margin-bottom:12px;' }, p.agent + ' · ' + p.model + (p.commit !== '—' ? ' · ' + p.commit : '')));
+        card.appendChild(el('p', { class: 'dim', style: 'font-size:13px; margin-bottom:12px;' }, p.agent + (p.agentVersion && p.agentVersion !== '—' ? ' ' + p.agentVersion : '') + ' · ' + p.model + (p.commit !== '—' ? ' · ' + p.commit : '')));
         if (p.note) {
           card.appendChild(el('p', { class: 'dim', style: 'font-size:13px;' }, p.note));
         } else {

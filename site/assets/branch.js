@@ -27,7 +27,7 @@
     document.getElementById('branch-title').textContent = branch;
     const subtitle = document.getElementById('branch-subtitle');
     if (profile) {
-      subtitle.textContent = profile.agent + ' · ' + profile.model + (profile.commit && profile.commit !== '—' ? ' · commit ' + profile.commit : '');
+      subtitle.textContent = profile.agent + (profile.agentVersion && profile.agentVersion !== '—' ? ' ' + profile.agentVersion : '') + ' · ' + profile.model + (profile.commit && profile.commit !== '—' ? ' · commit ' + profile.commit : '');
     }
 
     // stats
@@ -59,7 +59,7 @@
         ]));
       } else {
         const rows = [
-          ['Agent', profile.agent], ['Model', profile.model], ['Commit', profile.commit],
+          ['Agent', profile.agent], ['Agent version', profile.agentVersion || '—'], ['Model', profile.model], ['Commit', profile.commit],
           ['ts/tsx files', profile.tsFiles], ['ts/tsx bytes', profile.tsBytes ? profile.tsBytes.toLocaleString() : '—'],
           ['API routes', profile.apiRoutes], ['Pages', profile.pages],
           ['Unit tests', profile.unit], ['Functional tests', profile.functional],

@@ -35,6 +35,7 @@
       dataTable(pr, [
         { key: 'branch', label: 'Branch', sticky: true, render: function (v) { return el('a', { class: 'mono', href: branchHref(v), style: 'font-size:12px;' }, SHORT[v] || v); }, title: 'full name in branch page' },
         { key: 'agent', label: 'Agent', wrap: true },
+        { key: 'agentVersion', label: 'Agent version', wrap: true, render: function (v) { return el('code', null, v == null ? '—' : v); } },
         { key: 'model', label: 'Model' },
         { key: 'commit', label: 'Commit', render: function (v) { return el('code', null, v); } },
         { key: 'tsFiles', label: 'ts files', numeric: true },

@@ -44,7 +44,7 @@ window.EVAL_DATA = {
   // ---------- Branch profiles (§2) ----------
   profiles: [
     {
-      branch: 'build-claude-glm-5.2', agent: 'Claude Code', model: 'GLM 5.2', commit: 'd951f31',
+      branch: 'build-claude-glm-5.2', agent: 'Claude Code', agentVersion: '2.1.196', model: 'GLM 5.2', commit: 'd951f31',
       tsFiles: 111, tsBytes: 356980, apiRoutes: 24, pages: 18,
       unit: 7, functional: 7, integration: 9, e2e: 5,
       asAny: 0, colonAny: 0, tsIgnore: 0, middleware: 'src/proxy.ts', lintScript: 'eslint . (works)',
@@ -52,7 +52,7 @@ window.EVAL_DATA = {
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '10 (centralized in config.ts)', sameSite: "explicit 'strict'"
     },
     {
-      branch: 'build-claude-glm-5.1', agent: 'Claude Code', model: 'GLM 5.1', commit: '4ce31a9',
+      branch: 'build-claude-glm-5.1', agent: 'Claude Code', agentVersion: '2.1.196', model: 'GLM 5.1', commit: '4ce31a9',
       tsFiles: 96, tsBytes: 354587, apiRoutes: 24, pages: 18,
       unit: 7, functional: 7, integration: 0, e2e: 5,
       asAny: 0, colonAny: 0, tsIgnore: 0, middleware: 'src/proxy.ts', lintScript: 'eslint (works)',
@@ -60,7 +60,7 @@ window.EVAL_DATA = {
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '12 (inconsistent w/ seed)', sameSite: 'default'
     },
     {
-      branch: 'build-opencode-1.17.4-glm-5.1', agent: 'opencode 1.17.4', model: 'GLM 5.1', commit: 'a54e68b',
+      branch: 'build-opencode-1.17.4-glm-5.1', agent: 'opencode', agentVersion: '1.17.4', model: 'GLM 5.1', commit: 'a54e68b',
       tsFiles: 95, tsBytes: 241817, apiRoutes: 24, pages: 18,
       unit: 7, functional: 7, integration: 0, e2e: 0,
       asAny: 60, colonAny: 36, tsIgnore: 0, middleware: 'src/middleware.ts (spec violation)', lintScript: 'eslint . (works)',
@@ -68,7 +68,7 @@ window.EVAL_DATA = {
       extraDeps: 'uuid@^14 + @types/uuid', nextAuth: '5.0.0-beta.31', zod: '^3.25.0 (v3)', bcryptApp: '10', sameSite: 'default'
     },
     {
-      branch: 'build-opencode-glm-5.2', agent: 'opencode (current)', model: 'GLM 5.2', commit: 'f4869dc',
+      branch: 'build-opencode-glm-5.2', agent: 'opencode', agentVersion: '1.17.4', model: 'GLM 5.2', commit: 'f4869dc',
       tsFiles: 97, tsBytes: 327706, apiRoutes: '25 (+/sales/export)', pages: 18,
       unit: 7, functional: 5, integration: 0, e2e: 0,
       asAny: 9, colonAny: 0, tsIgnore: 0, middleware: 'src/proxy.ts', lintScript: 'next lint (broken in Next 16)',
@@ -76,7 +76,7 @@ window.EVAL_DATA = {
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '10', sameSite: "explicit 'strict'"
     },
     {
-      branch: 'build-pi-glm-5.1', agent: '"pi" agent', model: 'GLM 5.1', commit: '0e8f3b2',
+      branch: 'build-pi-glm-5.1', agent: 'pi', agentVersion: '0.79.2', model: 'GLM 5.1', commit: '0e8f3b2',
       tsFiles: 80, tsBytes: 251928, apiRoutes: '22 (−/mileage/export, −/mileage/reports)', pages: 18,
       unit: 6, functional: 3, integration: 0, e2e: 0,
       asAny: 26, colonAny: 37, tsIgnore: 2, middleware: 'src/middleware.ts (spec violation)', lintScript: 'next lint (broken in Next 16)',
@@ -84,7 +84,7 @@ window.EVAL_DATA = {
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '10', sameSite: 'default'
     },
     {
-      branch: 'build-vscode-glm-5.2', agent: 'VS Code (GitHub Copilot)', model: 'GLM 5.2', commit: '9e70fb6',
+      branch: 'build-vscode-glm-5.2', agent: 'VS Code (GitHub Copilot)', agentVersion: '1.126.0', model: 'GLM 5.2', commit: '9e70fb6',
       tsFiles: 85, tsBytes: 267796, apiRoutes: 24, pages: 18,
       unit: 7, functional: 2, integration: 0, e2e: 1,
       asAny: 1, colonAny: 0, tsIgnore: 0, middleware: 'src/proxy.ts', lintScript: 'next lint (broken in Next 16)',
@@ -92,7 +92,7 @@ window.EVAL_DATA = {
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '10', sameSite: 'default'
     },
     {
-      branch: 'build-ibm-bob', agent: 'IBM build (excluded)', model: '—', commit: '—',
+      branch: 'build-ibm-bob', agent: 'IBM build (excluded)', agentVersion: '2.0', model: '—', commit: '—',
       tsFiles: null, tsBytes: null, apiRoutes: null, pages: null,
       unit: null, functional: null, integration: null, e2e: null,
       asAny: null, colonAny: null, tsIgnore: null, middleware: 'n/a', lintScript: 'n/a',
