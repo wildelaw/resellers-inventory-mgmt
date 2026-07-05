@@ -24,7 +24,7 @@ Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm
   | Branch | Agent version | Boot mode | Admin created via | Notes |
   |---|---|---|---|---|
   | build-claude-glm-5.2 | Claude Code 2.1.196 | dev (auto-migrate via lazy proxy) | native seed (admin@example.com) | app auto-migrates via lazy DB proxy; `/api/setup` POST is broken (500), so native seed is required |
-  | build-claude-glm-5.1 | Claude Code 2.1.196 | dev (auto-migrate via app + drizzle-kit) | native seed (admin@resalemanager.com) | app auto-migrates; native seed uses admin@resalemanager.com |
+  | build-claude-glm-5.1 | Claude Code 2.1.176 | dev (auto-migrate via app + drizzle-kit) | native seed (admin@resalemanager.com) | app auto-migrates; native seed uses admin@resalemanager.com |
   | build-opencode-1.17.4-glm-5.1 | opencode 1.17.4 | dev (drizzle-kit migrate required) | native seed (security@lawsonsoft.com) | app does not auto-migrate; `drizzle-kit migrate` required; native seed uses security@lawsonsoft.com |
   | build-opencode-glm-5.2 | opencode 1.17.4 | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
   | build-pi-glm-5.1 | pi 0.79.2 | dev (drizzle-kit migrate required) | native seed (admin@example.com) | app does not auto-migrate; `drizzle-kit migrate` + ADMIN_EMAIL env required |
@@ -77,7 +77,7 @@ _(no failures)_
 
 ### 3.2 build-claude-glm-5.1
 
-**Agent:** Claude Code 2.1.196 · **Boot:** dev (auto-migrate via app + drizzle-kit) · **Admin:** admin@resalemanager.com (native seed) · **Functional score:** 35/100 (9/26 tests pass)
+**Agent:** Claude Code 2.1.176 · **Boot:** dev (auto-migrate via app + drizzle-kit) · **Admin:** admin@resalemanager.com (native seed) · **Functional score:** 35/100 (9/26 tests pass)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |

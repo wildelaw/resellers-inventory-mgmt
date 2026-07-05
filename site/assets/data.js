@@ -52,7 +52,7 @@ window.EVAL_DATA = {
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '10 (centralized in config.ts)', sameSite: "explicit 'strict'"
     },
     {
-      branch: 'build-claude-glm-5.1', agent: 'Claude Code', agentVersion: '2.1.196', model: 'GLM 5.1', commit: '4ce31a9',
+      branch: 'build-claude-glm-5.1', agent: 'Claude Code', agentVersion: '2.1.176', model: 'GLM 5.1', commit: '4ce31a9',
       tsFiles: 96, tsBytes: 354587, apiRoutes: 24, pages: 18,
       unit: 7, functional: 7, integration: 0, e2e: 5,
       asAny: 0, colonAny: 0, tsIgnore: 0, middleware: 'src/proxy.ts', lintScript: 'eslint (works)',
