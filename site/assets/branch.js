@@ -8,7 +8,7 @@
     return {
       'build-claude-glm-5.2': 'claude52',
       'build-claude-glm-5.1': 'claude51',
-      'build-opencode-1.17.4-glm-5.1': 'opencode17174',
+      'build-opencode-glm-5.1': 'opencode17174',
       'build-opencode-glm-5.2': 'opencode52',
       'build-pi-glm-5.1': 'pi51',
       'build-vscode-glm-5.2': 'vscode52'

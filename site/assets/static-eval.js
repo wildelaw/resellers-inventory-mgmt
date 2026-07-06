@@ -6,7 +6,7 @@
   const SHORT = {
     'build-claude-glm-5.2': 'claude-5.2',
     'build-claude-glm-5.1': 'claude-5.1',
-    'build-opencode-1.17.4-glm-5.1': 'opencode-1.17.4',
+    'build-opencode-glm-5.1': 'opencode-1.17.4',
     'build-opencode-glm-5.2': 'opencode-5.2',
     'build-pi-glm-5.1': 'pi-5.1',
     'build-vscode-glm-5.2': 'vscode-5.2'

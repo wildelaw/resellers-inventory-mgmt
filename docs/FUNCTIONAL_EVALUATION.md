@@ -8,11 +8,11 @@
 
 `build-claude-glm-5.2` is the clear functional winner: it is the only build that passes all 26 E2E checks across the 5 canonical flows (auth, inventory, sales, import, rbac), achieving a functional score of 100/100. It is also the only build whose session-invalidation flow (REG-06) works end-to-end — consistent with the static-analysis finding that claude-5.2 is the sole branch with a live JWT refresh of `passwordChangedAt` on every request.
 
-`build-vscode-glm-5.2` is a close runner-up (96/100, 25/26 pass), failing only REG-06 — the same session-invalidation gap noted in BUILD_EVALUATION.md. `build-opencode-glm-5.2` (88/100) and `build-opencode-1.17.4-glm-5.1` (69/100) follow, with the opencode-5.2 build notably recovering once migrations were applied via `drizzle-kit` (its own `seed.ts` is broken — it `require`s `dotenv/config`, which is not installed). `build-pi-glm-5.1` (62/100) and `build-claude-glm-5.1` (35/100) round out the cohort.
+`build-vscode-glm-5.2` is a close runner-up (96/100, 25/26 pass), failing only REG-06 — the same session-invalidation gap noted in BUILD_EVALUATION.md. `build-opencode-glm-5.2` (88/100) and `build-opencode-glm-5.1` (69/100) follow, with the opencode-5.2 build notably recovering once migrations were applied via `drizzle-kit` (its own `seed.ts` is broken — it `require`s `dotenv/config`, which is not installed). `build-pi-glm-5.1` (62/100) and `build-claude-glm-5.1` (35/100) round out the cohort.
 
 The biggest shared functional gap is **sale creation** (`POST /api/sales` returning HTTP 500), which breaks REG-01..REG-04 and REG-18 on four of six builds (claude-5.1, opencode-1.17.4, pi-5.1, and partially others). The second shared gap is **session invalidation** (REG-06), which only claude-5.2 implements correctly — every other build copies `passwordChangedAt` into the JWT only at login, so admin password resets do not invalidate existing sessions. A third shared gap is **admin user management** (REG-11), which fails on five of six builds (all except claude-5.2).
 
-Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm-5.2` both ship a `seed.ts` that crashes on `Cannot find module 'dotenv/config'` — a real boot defect that forces falling back to the `/api/setup` first-run endpoint to create the admin; (2) `build-claude-glm-5.2`'s `/api/setup` POST route throws a 500 (a `tag` column mismatch in its custom migrator when `drizzle-kit migrate` has run), so it must rely on its native seed script; (3) `build-opencode-1.17.4-glm-5.1` is the most improved by the documented `drizzle-kit migrate` step — going from 0/26 to 18/26 once migrations are applied; (4) `build-pi-glm-5.1`'s inventory GET returns items with `undefined` fields, indicating a serialization shape mismatch.
+Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm-5.2` both ship a `seed.ts` that crashes on `Cannot find module 'dotenv/config'` — a real boot defect that forces falling back to the `/api/setup` first-run endpoint to create the admin; (2) `build-claude-glm-5.2`'s `/api/setup` POST route throws a 500 (a `tag` column mismatch in its custom migrator when `drizzle-kit migrate` has run), so it must rely on its native seed script; (3) `build-opencode-glm-5.1` is the most improved by the documented `drizzle-kit migrate` step — going from 0/26 to 18/26 once migrations are applied; (4) `build-pi-glm-5.1`'s inventory GET returns items with `undefined` fields, indicating a serialization shape mismatch.
 
 ## 2. Methodology
 
@@ -25,7 +25,7 @@ Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm
   |---|---|---|---|---|
   | build-claude-glm-5.2 | Claude Code 2.1.196 | dev (auto-migrate via lazy proxy) | native seed (admin@example.com) | app auto-migrates via lazy DB proxy; `/api/setup` POST is broken (500), so native seed is required |
   | build-claude-glm-5.1 | Claude Code 2.1.176 | dev (auto-migrate via app + drizzle-kit) | native seed (admin@resalemanager.com) | app auto-migrates; native seed uses admin@resalemanager.com |
-  | build-opencode-1.17.4-glm-5.1 | opencode 1.17.4 | dev (drizzle-kit migrate required) | native seed (security@lawsonsoft.com) | app does not auto-migrate; `drizzle-kit migrate` required; native seed uses security@lawsonsoft.com |
+  | build-opencode-glm-5.1 | opencode 1.17.4 | dev (drizzle-kit migrate required) | native seed (security@lawsonsoft.com) | app does not auto-migrate; `drizzle-kit migrate` required; native seed uses security@lawsonsoft.com |
   | build-opencode-glm-5.2 | opencode 1.17.4 | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
   | build-pi-glm-5.1 | pi 0.79.2 | dev (drizzle-kit migrate required) | native seed (admin@example.com) | app does not auto-migrate; `drizzle-kit migrate` + ADMIN_EMAIL env required |
   | build-vscode-glm-5.2 | VS Code 1.126.0 (GitHub Copilot) | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
@@ -133,7 +133,7 @@ _(no failures)_
 
 **Summary:** Auth gating and CSV import work (9/26 pass), but sale and inventory creation return HTTP 500, which cascades to fail REG-01..REG-05, REG-12..REG-14, REG-17, and REG-18. REG-06 fails because the jwt callback copies passwordChangedAt only at login (no live refresh). REG-10/REG-11 (RBAC user management) fail. The 500s suggest a single broken handler or validation path in the POST routes; fixing it would likely unlock many downstream scenarios.
 
-### 3.3 build-opencode-1.17.4-glm-5.1
+### 3.3 build-opencode-glm-5.1
 
 **Agent:** opencode 1.17.4 · **Boot:** dev (drizzle-kit migrate required) · **Admin:** security@lawsonsoft.com (native seed) · **Functional score:** 69/100 (18/26 tests pass)
 
@@ -357,15 +357,15 @@ _(no failures)_
 | Sev | Branch | Finding | Flow | Scenario |
 |---|---|---|---|---|
 | High | build-claude-glm-5.1 | POST /api/sales and /api/inventory return HTTP 500 (broken creation handler) | sales/inventory | REG-01/REG-05/REG-12/REG-17/REG-18 |
-| High | build-opencode-1.17.4-glm-5.1 | POST /api/sales returns 500; sale workflow non-functional | sales | REG-01..REG-04/REG-18 |
+| High | build-opencode-glm-5.1 | POST /api/sales returns 500; sale workflow non-functional | sales | REG-01..REG-04/REG-18 |
 | High | build-pi-glm-5.1 | POST /api/sales returns 500; inventory GET returns undefined fields | sales/inventory | REG-01..REG-04/REG-13/REG-14/REG-18 |
 | High | build-opencode-glm-5.2, build-vscode-glm-5.2 | seed.ts crashes: Cannot find module 'dotenv/config' (broken boot script) | boot | — |
-| Med | build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02) | auth | REG-06 |
-| Med | build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1 | REG-11 fails: admin user-management endpoint returns wrong status/shape | rbac | REG-11 |
-| Med | build-opencode-1.17.4-glm-5.1 | REG-14 fails: refund_with_return leaves item in 'sold' state instead of 'returned' | inventory | REG-14 |
+| Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02) | auth | REG-06 |
+| Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1 | REG-11 fails: admin user-management endpoint returns wrong status/shape | rbac | REG-11 |
+| Med | build-opencode-glm-5.1 | REG-14 fails: refund_with_return leaves item in 'sold' state instead of 'returned' | inventory | REG-14 |
 | Med | build-opencode-glm-5.2 | Mileage CSV import (type=mileage) fails; inventory/sales imports work | import | — |
 | Low | build-claude-glm-5.2 | /api/setup POST throws 500 when drizzle-kit has run (tag column mismatch in custom migrator) | boot | — |
-| Low | build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | App does not auto-migrate on dev boot; requires manual `npx drizzle-kit migrate` (OPERATIONS.md §1.3) | boot | — |
+| Low | build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | App does not auto-migrate on dev boot; requires manual `npx drizzle-kit migrate` (OPERATIONS.md §1.3) | boot | — |
 | Info | all branches except build-claude-glm-5.2 | Session invalidation (REG-06) is the single most-shared functional gap — only claude-5.2 implements live JWT refresh | auth | REG-06 |
 
 ## 6. Effort Estimates Summary
@@ -374,7 +374,7 @@ _(no failures)_
 |---|---|---|---|---|---|---|
 | build-claude-glm-5.2 | 0 | 0 | 0 | 0 | 0 | 0.0 |
 | build-claude-glm-5.1 | 17 | 1 | 16 | 0 | 0 | 16.2 |
-| build-opencode-1.17.4-glm-5.1 | 8 | 1 | 7 | 0 | 0 | 7.2 |
+| build-opencode-glm-5.1 | 8 | 1 | 7 | 0 | 0 | 7.2 |
 | build-opencode-glm-5.2 | 3 | 1 | 2 | 0 | 0 | 2.2 |
 | build-pi-glm-5.1 | 10 | 2 | 8 | 0 | 0 | 8.5 |
 | build-vscode-glm-5.2 | 1 | 0 | 1 | 0 | 0 | 1.0 |
@@ -400,14 +400,14 @@ _(no failures)_
 15. `Fix per INV-03: fix the failing behavior to match the spec.` — build-claude-glm-5.1 (rbac / REG-10)
 16. `Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete.` — build-claude-glm-5.1 (rbac / REG-11)
 17. `Fix per BAK-02: fix the failing behavior to match the spec.` — build-claude-glm-5.1 (rbac / REG-15)
-18. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-opencode-1.17.4-glm-5.1 (auth / REG-06)
-19. `Fix per INV-02: clear removalDate on returned→available and ensure refund_with_return sets returned.` — build-opencode-1.17.4-glm-5.1 (inventory / REG-14)
-20. `Fix per SALE-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input.` — build-opencode-1.17.4-glm-5.1 (sales / REG-01)
-21. `Fix per SALE-03: fix the failing behavior to match the spec.` — build-opencode-1.17.4-glm-5.1 (sales / REG-02)
-22. `Fix per SALE-03: fix the failing behavior to match the spec.` — build-opencode-1.17.4-glm-5.1 (sales / REG-03)
-23. `Fix per SALE-02: fix the failing behavior to match the spec.` — build-opencode-1.17.4-glm-5.1 (sales / REG-04)
-24. `Fix per SALE-04: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input.` — build-opencode-1.17.4-glm-5.1 (sales / REG-18)
-25. `Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete.` — build-opencode-1.17.4-glm-5.1 (rbac / REG-11)
+18. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-opencode-glm-5.1 (auth / REG-06)
+19. `Fix per INV-02: clear removalDate on returned→available and ensure refund_with_return sets returned.` — build-opencode-glm-5.1 (inventory / REG-14)
+20. `Fix per SALE-02: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input.` — build-opencode-glm-5.1 (sales / REG-01)
+21. `Fix per SALE-03: fix the failing behavior to match the spec.` — build-opencode-glm-5.1 (sales / REG-02)
+22. `Fix per SALE-03: fix the failing behavior to match the spec.` — build-opencode-glm-5.1 (sales / REG-03)
+23. `Fix per SALE-02: fix the failing behavior to match the spec.` — build-opencode-glm-5.1 (sales / REG-04)
+24. `Fix per SALE-04: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input.` — build-opencode-glm-5.1 (sales / REG-18)
+25. `Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete.` — build-opencode-glm-5.1 (rbac / REG-11)
 26. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-opencode-glm-5.2 (auth / REG-06)
 27. `Fix per spec: fix the mileage import path in POST /api/import for type=mileage.` — build-opencode-glm-5.2 (import / import mileage CSV)
 28. `Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete.` — build-opencode-glm-5.2 (rbac / REG-11)

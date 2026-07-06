@@ -24,7 +24,7 @@ window.EVAL_DATA = {
     { rank: 2, branch: 'build-claude-glm-5.1',         spec: 5, maintain: 5, security: 4, complexity: 4, testSignal: '14 files / 121 tests / lint exit 1 (11 err)' },
     { rank: 3, branch: 'build-opencode-glm-5.2',       spec: 4, maintain: 4, security: 5, complexity: 3, testSignal: '12 files / 134 tests / lint script broken' },
     { rank: 4, branch: 'build-vscode-glm-5.2',         spec: 4, maintain: 4, security: 4, complexity: 4, testSignal: '9 files / 100 tests / lint script broken' },
-    { rank: 5, branch: 'build-opencode-1.17.4-glm-5.1', spec: 4, maintain: 3, security: 4, complexity: 4, testSignal: '14 files / 115 tests / lint exit 1 (119 err)' },
+    { rank: 5, branch: 'build-opencode-glm-5.1', spec: 4, maintain: 3, security: 4, complexity: 4, testSignal: '14 files / 115 tests / lint exit 1 (119 err)' },
     { rank: 6, branch: 'build-pi-glm-5.1',             spec: 3, maintain: 3, security: 2, complexity: 4, testSignal: '9 files / 95 tests / lint script broken' }
   ],
 
@@ -32,7 +32,7 @@ window.EVAL_DATA = {
     { dimension: 'Spec conformance', winner: 'build-claude-glm-5.2', note: "Canonical withAuth wrapper, src/proxy.ts naming, exact 24-endpoint surface, full e2e suite, and the only branch with all 9 required integration tests. Co-winner: build-claude-glm-5.1." },
     { dimension: 'Maintainability',  winner: 'build-claude-glm-5.2', note: 'Zero as-any / :any / @ts-ignore in src/, proper NextAuth module augmentation, lint passes with zero errors and zero warnings, centralized bcrypt cost in config.ts.' },
     { dimension: 'Vulnerabilities',  winner: 'build-claude-glm-5.2', note: "Explicit sameSite:'strict', live JWT refresh of passwordChangedAt/role/canViewAll/isActive on every request, withAuth rejects deactivated accounts, defensive validateOriginOrReferer. Co-winner: build-opencode-glm-5.2." },
-    { dimension: 'Complexity',       winner: 'build-opencode-1.17.4-glm-5.1', note: 'Smallest ts/tsx footprint (241 KB). Co-winner: build-pi-glm-5.1 (fewest files, 80). vscode-5.2 notable: 85 files / 268 KB with full type safety.' },
+    { dimension: 'Complexity',       winner: 'build-opencode-glm-5.1', note: 'Smallest ts/tsx footprint (241 KB). Co-winner: build-pi-glm-5.1 (fewest files, 80). vscode-5.2 notable: 85 files / 268 KB with full type safety.' },
     { dimension: 'Test signal',       winner: 'build-claude-glm-5.2', note: 'Only branch with the complete 4-tier suite (7 unit + 7 functional + 9 integration + 5 e2e) and the only branch whose lint passes clean.' }
   ],
 
@@ -60,7 +60,7 @@ window.EVAL_DATA = {
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '12 (inconsistent w/ seed)', sameSite: 'default'
     },
     {
-      branch: 'build-opencode-1.17.4-glm-5.1', agent: 'opencode', agentVersion: '1.17.4', model: 'GLM 5.1', commit: 'a54e68b',
+      branch: 'build-opencode-glm-5.1', agent: 'opencode', agentVersion: '1.17.4', model: 'GLM 5.1', commit: 'a54e68b',
       tsFiles: 95, tsBytes: 241817, apiRoutes: 24, pages: 18,
       unit: 7, functional: 7, integration: 0, e2e: 0,
       asAny: 60, colonAny: 36, tsIgnore: 0, middleware: 'src/middleware.ts (spec violation)', lintScript: 'eslint . (works)',
@@ -154,14 +154,14 @@ window.EVAL_DATA = {
     { branch: 'build-vscode-glm-5.2',          asAny: 1,  colonAny: 0,  anyGeneric: 0, tsIgnore: 0, total: 1 },
     { branch: 'build-opencode-glm-5.2',        asAny: 9,  colonAny: 0,  anyGeneric: 0, tsIgnore: 0, total: 9 },
     { branch: 'build-pi-glm-5.1',              asAny: 26, colonAny: 37, anyGeneric: 10, tsIgnore: 2, total: 75 },
-    { branch: 'build-opencode-1.17.4-glm-5.1', asAny: 60, colonAny: 36, anyGeneric: 1, tsIgnore: 0, total: 97 }
+    { branch: 'build-opencode-glm-5.1', asAny: 60, colonAny: 36, anyGeneric: 1, tsIgnore: 0, total: 97 }
   ],
 
   // ---------- Lint outcomes (§4.2) ----------
   lintOutcomes: [
     { branch: 'build-claude-glm-5.2',          command: 'eslint .',  result: 'exit 0 — 0 errors, 0 warnings' },
     { branch: 'build-claude-glm-5.1',          command: 'eslint',    result: 'exit 1 — 11 errors, 81 warnings (all errors are no-explicit-any in test files)' },
-    { branch: 'build-opencode-1.17.4-glm-5.1', command: 'eslint .',  result: 'exit 1 — 119 errors, 72 warnings (errors spread across src/ and tests)' },
+    { branch: 'build-opencode-glm-5.1', command: 'eslint .',  result: 'exit 1 — 119 errors, 72 warnings (errors spread across src/ and tests)' },
     { branch: 'build-opencode-glm-5.2',        command: 'next lint', result: 'exit 1 — command removed in Next 16; no eslint.config.mjs; lint pipeline non-functional' },
     { branch: 'build-pi-glm-5.1',               command: 'next lint', result: 'exit 1 — command removed in Next 16; no eslint.config.mjs; lint pipeline non-functional' },
     { branch: 'build-vscode-glm-5.2',           command: 'next lint', result: 'exit 1 — command removed in Next 16; no eslint.config.mjs; lint pipeline non-functional' }
@@ -169,7 +169,7 @@ window.EVAL_DATA = {
 
   // ---------- Complexity (§6) ----------
   complexity: [
-    { branch: 'build-opencode-1.17.4-glm-5.1', tsBytes: 241817, files: 95,  largestModule: 'schema.ts ~5 KB',         extraModules: '0 (tightest)' },
+    { branch: 'build-opencode-glm-5.1', tsBytes: 241817, files: 95,  largestModule: 'schema.ts ~5 KB',         extraModules: '0 (tightest)' },
     { branch: 'build-pi-glm-5.1',              tsBytes: 251928, files: 80,  largestModule: 'auth.ts ~4 KB',          extraModules: '0' },
     { branch: 'build-vscode-glm-5.2',           tsBytes: 267796, files: 85,  largestModule: 'reports/route.ts 104 lines', extraModules: '0' },
     { branch: 'build-opencode-glm-5.2',        tsBytes: 327706, files: 97,  largestModule: 'inventory-queries.ts 3.8 KB + sales-queries.ts', extraModules: '+4 (http-utils, inventory-queries, sales-queries, rbac)' },
@@ -182,16 +182,16 @@ window.EVAL_DATA = {
     { sev: 'High',   branch: 'build-pi-glm-5.1',                           finding: 'passwordChangedAt never written to JWT → session invalidation always no-ops (AUTH-02/SEC-03 broken)', location: 'src/lib/auth.ts:90-97' },
     { sev: 'High',   branch: 'build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2', finding: "lint script uses removed next lint; no eslint.config.mjs; lint pipeline non-functional", location: 'package.json scripts' },
     { sev: 'Med',    branch: 'build-vscode-glm-5.2',                       finding: "calculateSalesTaxFromPrice uses price * rate instead of spec's price - price/(1+rate) (SALE-04 deviation)", location: 'src/lib/financial.ts:48' },
-    { sev: 'Med',    branch: 'build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-vscode-glm-5.2', finding: 'validateOriginOrReferer does not exempt /api/auth/* (AUTH-04 deviation)', location: 'src/lib/api-utils.ts / http-utils.ts' },
-    { sev: 'Med',    branch: 'build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-pi-glm-5.1, build-vscode-glm-5.2', finding: 'No explicit SameSite=Strict on session cookie (relies on NextAuth default lax)', location: 'src/lib/auth.ts' },
+    { sev: 'Med',    branch: 'build-opencode-glm-5.1, build-opencode-glm-5.2, build-vscode-glm-5.2', finding: 'validateOriginOrReferer does not exempt /api/auth/* (AUTH-04 deviation)', location: 'src/lib/api-utils.ts / http-utils.ts' },
+    { sev: 'Med',    branch: 'build-claude-glm-5.1, build-opencode-glm-5.1, build-pi-glm-5.1, build-vscode-glm-5.2', finding: 'No explicit SameSite=Strict on session cookie (relies on NextAuth default lax)', location: 'src/lib/auth.ts' },
     { sev: 'Med',    branch: 'build-pi-glm-5.1',                           finding: 'Missing /api/mileage/export and /api/mileage/reports endpoints (MILE-02, MILE-03)', location: 'src/app/api/mileage/' },
     { sev: 'Med',    branch: 'claude-5.1, opencode-1.17.4-5.1, opencode-5.2, pi-5.1, vscode-5.2', finding: 'No integration tests produced (spec requires 9 under tests/integration/api/)', location: 'tests/integration/ absent' },
     { sev: 'Med',    branch: 'build-vscode-glm-5.2',                       finding: 'Only 2 of 7 required functional tests (missing password-invalidation, setup-lock, sale-refund-flow, inventory-removal-date, refund-impact)', location: 'tests/functional/' },
-    { sev: 'Low',    branch: 'build-opencode-1.17.4-glm-5.1, build-pi-glm-5.1', finding: 'Middleware named src/middleware.ts not src/proxy.ts (BUILD_PROMPT STEP 6)', location: 'src/' },
+    { sev: 'Low',    branch: 'build-opencode-glm-5.1, build-pi-glm-5.1', finding: 'Middleware named src/middleware.ts not src/proxy.ts (BUILD_PROMPT STEP 6)', location: 'src/' },
     { sev: 'Low',    branch: 'build-claude-glm-5.1',                       finding: 'Migration directory lacks meta/_journal.json (only .sql); may break drizzle-kit migrate', location: 'drizzle/' },
     { sev: 'Low',    branch: 'build-claude-glm-5.1',                       finding: 'bcrypt cost 12 in app code, 10 in seed (inconsistent; both ≥ spec)', location: 'src/app/api/*/route.ts, src/scripts/seed.ts' },
-    { sev: 'Low',    branch: 'build-opencode-1.17.4-glm-5.1',              finding: 'zod v3 pinned while spec ecosystem is v4; 97 type-escape occurrences in src/', location: 'package.json, src/lib/auth.ts' },
-    { sev: 'Low',    branch: 'build-opencode-1.17.4-glm-5.1',              finding: 'Adds uuid@^14 dependency not used by core id flow', location: 'package.json' },
+    { sev: 'Low',    branch: 'build-opencode-glm-5.1',              finding: 'zod v3 pinned while spec ecosystem is v4; 97 type-escape occurrences in src/', location: 'package.json, src/lib/auth.ts' },
+    { sev: 'Low',    branch: 'build-opencode-glm-5.1',              finding: 'Adds uuid@^14 dependency not used by core id flow', location: 'package.json' },
     { sev: 'Low',    branch: 'build-vscode-glm-5.2',                       finding: 'Only 1 of 5 required e2e specs (auth only; missing inventory, sales, rbac, import)', location: 'tests/e2e/' },
     { sev: 'Low',    branch: 'build-vscode-glm-5.2',                       finding: 'Schema imports check from drizzle-orm but never uses it (dead import)', location: 'src/lib/schema.ts:1' },
     { sev: 'Info',   branch: 'build-claude-glm-5.2',                       finding: 'Extra modules api-client, inventory-logic, app-shell, client-shell (well-scoped refinements, spec-list deviation)', location: 'src/lib/, src/components/' },
@@ -204,7 +204,7 @@ window.EVAL_DATA = {
   rawVerification: [
     { branch: 'build-claude-glm-5.2',          npmCi: 'exit 0', lint: 'exit 0 — 0 err / 0 warn',       tsc: 'exit 0 (clean)', vitest: 'exit 0 — 23 files, 186 tests' },
     { branch: 'build-claude-glm-5.1',          npmCi: 'exit 0', lint: 'exit 1 — 11 err / 81 warn',     tsc: 'exit 0 (clean)', vitest: 'exit 0 — 14 files, 121 tests' },
-    { branch: 'build-opencode-1.17.4-glm-5.1', npmCi: 'exit 0', lint: 'exit 1 — 119 err / 72 warn',   tsc: 'exit 0 (clean)', vitest: 'exit 0 — 14 files, 115 tests' },
+    { branch: 'build-opencode-glm-5.1', npmCi: 'exit 0', lint: 'exit 1 — 119 err / 72 warn',   tsc: 'exit 0 (clean)', vitest: 'exit 0 — 14 files, 115 tests' },
     { branch: 'build-opencode-glm-5.2',        npmCi: 'exit 0', lint: 'exit 1 — next lint removed',    tsc: 'exit 0 (clean)', vitest: 'exit 0 — 12 files, 134 tests' },
     { branch: 'build-pi-glm-5.1',              npmCi: 'exit 0', lint: 'exit 1 — next lint removed',    tsc: 'exit 0 (clean)', vitest: 'exit 0 — 9 files, 95 tests' },
     { branch: 'build-vscode-glm-5.2',          npmCi: 'exit 0', lint: 'exit 1 — next lint removed',    tsc: 'exit 0 (clean)', vitest: 'exit 0 — 9 files, 100 tests' }
@@ -780,7 +780,7 @@ window.EVAL_DATA = {
       "functionalScore": 35,
       "summary": "Auth gating and CSV import work (9/26 pass), but sale and inventory creation return HTTP 500, cascading to fail REG-01..REG-05, REG-12..REG-14, REG-17, REG-18. REG-06 fails (no live JWT refresh). REG-10/REG-11 fail."
     },
-    "build-opencode-1.17.4-glm-5.1": {
+    "build-opencode-glm-5.1": {
       "bootMode": "dev (drizzle-kit migrate required)",
       "flows": [
         {
@@ -1686,7 +1686,7 @@ window.EVAL_DATA = {
     },
     {
       "sev": "High",
-      "branch": "build-opencode-1.17.4-glm-5.1",
+      "branch": "build-opencode-glm-5.1",
       "finding": "POST /api/sales returns 500; sale workflow non-functional",
       "flowId": "sales",
       "scenarioId": "REG-01..REG-04/REG-18"
@@ -1707,21 +1707,21 @@ window.EVAL_DATA = {
     },
     {
       "sev": "Med",
-      "branch": "build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2",
+      "branch": "build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2",
       "finding": "REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02)",
       "flowId": "auth",
       "scenarioId": "REG-06"
     },
     {
       "sev": "Med",
-      "branch": "build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1",
+      "branch": "build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1",
       "finding": "REG-11 fails: admin user-management endpoint returns wrong status/shape",
       "flowId": "rbac",
       "scenarioId": "REG-11"
     },
     {
       "sev": "Med",
-      "branch": "build-opencode-1.17.4-glm-5.1",
+      "branch": "build-opencode-glm-5.1",
       "finding": "REG-14 fails: refund_with_return leaves item in 'sold' state instead of 'returned'",
       "flowId": "inventory",
       "scenarioId": "REG-14"
@@ -1742,7 +1742,7 @@ window.EVAL_DATA = {
     },
     {
       "sev": "Low",
-      "branch": "build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2",
+      "branch": "build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2",
       "finding": "App does not auto-migrate on dev boot; requires manual `npx drizzle-kit migrate` (OPERATIONS.md §1.3)",
       "flowId": "boot",
       "scenarioId": "—"
@@ -1775,7 +1775,7 @@ window.EVAL_DATA = {
       "estimatedHours": 16.2
     },
     {
-      "branch": "build-opencode-1.17.4-glm-5.1",
+      "branch": "build-opencode-glm-5.1",
       "total": 8,
       "S": 1,
       "M": 7,

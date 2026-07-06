@@ -17,7 +17,7 @@ Evaluate the six completed build branches:
 
 - build-claude-glm-5.2
 - build-claude-glm-5.1
-- build-opencode-1.17.4-glm-5.1
+- build-opencode-glm-5.1
 - build-opencode-glm-5.2
 - build-pi-glm-5.1
 - build-vscode-glm-5.2
@@ -36,7 +36,7 @@ Exclude build-ibm-bob — it did not complete. Do not evaluate it.
 For each of the six branches, create an isolated git worktree:
 
     mkdir -p /tmp/opencode/eval-func
-    for b in build-claude-glm-5.2 build-claude-glm-5.1 build-opencode-1.17.4-glm-5.1 build-opencode-glm-5.2 build-pi-glm-5.1 build-vscode-glm-5.2; do
+    for b in build-claude-glm-5.2 build-claude-glm-5.1 build-opencode-glm-5.1 build-opencode-glm-5.2 build-pi-glm-5.1 build-vscode-glm-5.2; do
       git worktree add /tmp/opencode/eval-func/$b $b
     done
 
@@ -171,7 +171,7 @@ Write the report with exactly this structure (the GitHub Pages site parses it):
 
     **Summary:** <one paragraph for this branch>
 
-    (repeat §3.2..3.6 for each remaining completed branch, in this order: build-claude-glm-5.1, build-opencode-1.17.4-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2)
+    (repeat §3.2..3.6 for each remaining completed branch, in this order: build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2)
 
     ## 4. Cross-Branch Comparison Matrix
 
