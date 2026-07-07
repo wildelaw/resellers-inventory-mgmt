@@ -13,14 +13,14 @@
     <div class="container">
       <section>
         <h1>About this evaluation</h1>
-        <p class="lead">A controlled experiment in spec-driven, one-shot-prompt software generation across six AI coding agents.</p>
+        <p class="lead">A controlled experiment in spec-driven, one-shot-prompt software generation across seven AI coding agents.</p>
       </section>
 
       <section>
         <h2>The experiment</h2>
         <div class="card">
           <p>Seven AI coding agents were given the same single instruction — <em>“read and execute <code>docs/BUILD_PROMPT.md</code> to build this application”</em> — with no follow-up turns, no clarification, and no patching. Each agent was expected to read the complete specification in <code>docs/</code>, then generate the entire Resell Inventory Manager v2 application from scratch.</p>
-          <p>Six agents completed the build; one (<code>build-ibm-bob</code>) exhausted its usage quota mid-build and is excluded from scoring. The six completed builds are evaluated across two dimensions:</p>
+          <p>Six agents completed the build; one (<code>build-ibm-bob</code>) exhausted its usage quota mid-build and is excluded from scoring. The seven completed builds are evaluated across two dimensions:</p>
           <ol>
             <li><strong>Static analysis</strong> — spec conformance, maintainability, vulnerabilities, complexity, and test signal. Source: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/BUILD_EVALUATION.md" target="_blank" rel="noopener">docs/BUILD_EVALUATION.md</a>.</li>
             <li><strong>Functional (E2E) testing</strong> — Playwright end-to-end runs of the 5 spec flows and 18 regression scenarios against each running build, with per-failure effort estimates and remediation prompts. Source: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/FUNCTIONAL_EVALUATION.md" target="_blank" rel="noopener">docs/FUNCTIONAL_EVALUATION.md</a> (populated by the <a href="prompt-functional-eval.html">eval prompt</a>).</li>

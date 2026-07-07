@@ -14,7 +14,7 @@
         el('div', { class: 'spinner' }),
         el('div', {}, [
           el('strong', {}, 'Functional evaluation pending.'),
-          el('p', { class: 'dim', style: 'margin:4px 0 0;' }, 'Run the prompt on the Eval Prompt page to populate Playwright E2E results across all six builds.')
+          el('p', { class: 'dim', style: 'margin:4px 0 0;' }, 'Run the prompt on the Eval Prompt page to populate Playwright E2E results across all builds.')
         ])
       ]));
       renderPending();

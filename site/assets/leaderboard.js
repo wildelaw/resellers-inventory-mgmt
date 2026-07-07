@@ -7,6 +7,33 @@
     const data = window.EVAL_DATA;
     const completed = data.rankings;
 
+    // ---- meta row: static eval date, functional status, branch counts ----
+    const sed = document.querySelector('[data-static-eval-date]');
+    if (sed) sed.textContent = data.meta.staticEvalDate || '—';
+
+    const bc = document.querySelector('[data-branch-counts]');
+    if (bc) {
+      const profiles = data.profiles || [];
+      const attempted = profiles.length;
+      const incomplete = profiles.filter(function (p) { return p.branch === 'build-ibm-bob' || (p.note && /incomplete|did not complete/i.test(p.note)); }).length;
+      const completedCount = attempted - incomplete;
+      bc.textContent = attempted + ' attempted, ' + completedCount + ' completed, ' + incomplete + ' incomplete';
+    }
+    const bcCap = document.querySelector('[data-branch-count-completed]');
+    if (bcCap) {
+      const profiles = data.profiles || [];
+      const incomplete = profiles.filter(function (p) { return p.branch === 'build-ibm-bob' || (p.note && /incomplete|did not complete/i.test(p.note)); }).length;
+      const completedCount = profiles.length - incomplete;
+      bcCap.textContent = completedCount === 1 ? 'One' : completedCount === 2 ? 'Two' : completedCount === 3 ? 'Three' : completedCount === 4 ? 'Four' : completedCount === 5 ? 'Five' : completedCount === 6 ? 'Six' : completedCount === 7 ? 'Seven' : completedCount === 8 ? 'Eight' : String(completedCount);
+    }
+    const bcLc = document.querySelector('[data-branch-count-completed-lc]');
+    if (bcLc) {
+      const profiles = data.profiles || [];
+      const incomplete = profiles.filter(function (p) { return p.branch === 'build-ibm-bob' || (p.note && /incomplete|did not complete/i.test(p.note)); }).length;
+      const completedCount = profiles.length - incomplete;
+      bcLc.textContent = completedCount === 1 ? 'one' : completedCount === 2 ? 'two' : completedCount === 3 ? 'three' : completedCount === 4 ? 'four' : completedCount === 5 ? 'five' : completedCount === 6 ? 'six' : completedCount === 7 ? 'seven' : completedCount === 8 ? 'eight' : String(completedCount);
+    }
+
     // ---- functional status badge ----
     const fs = document.querySelector('[data-functional-status]');
     if (fs) {

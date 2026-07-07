@@ -146,7 +146,7 @@
       el('div', { class: 'footer' }, [
         el('span', { text: 'Generated from ' }, null),
         el('a', { href: meta.repoUrl }, 'wildelaw/resellers-inventory-mgmt'),
-        el('span', { text: ' \u00B7 Static eval: ' + meta.staticEvalDate + (meta.functionalEvalDate ? ' \u00B7 Functional eval: ' + meta.functionalEvalDate : '') })
+        el('span', { text: ' \u00B7 Latest static eval: ' + (meta.staticEvalDate || '—') + (meta.functionalEvalDate ? ' \u00B7 Functional eval: ' + meta.functionalEvalDate : '') })
       ])
     ]));
   }

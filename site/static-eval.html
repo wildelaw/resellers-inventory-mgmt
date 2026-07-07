@@ -16,7 +16,7 @@
         <p class="lead">Source: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/BUILD_EVALUATION.md" target="_blank" rel="noopener">docs/BUILD_EVALUATION.md</a>. Methodology: static source review + real <code>npm ci</code> / lint / <code>tsc --noEmit</code> / <code>vitest run</code> per branch in isolated git worktrees. Branches were not patched, preserving single one-shot-prompt fidelity.</p>
 
         <div class="callout">
-          <p><strong>Executive summary.</strong> Six branches compile clean and pass their own suites. <span class="mono">build-claude-glm-5.2</span> leads: only branch shipping all 9 required integration tests, only branch with zero lint errors/warnings, only branch with live-JWT-refresh of role/canViewAll/isActive on existing sessions, and combines strengths of the prior leaders. <span class="mono">build-ibm-bob</span> was excluded — agent exhausted its usage quota mid-build.</p>
+          <p><strong>Executive summary.</strong> Seven branches compile clean and pass their own suites. <span class="mono">build-claude-glm-5.2</span> leads: only branch shipping all 9 required integration tests, only branch with zero lint errors/warnings, only branch with live-JWT-refresh of role/canViewAll/isActive on existing sessions, and combines strengths of the prior leaders. <span class="mono">build-ibm-bob</span> was excluded — agent exhausted its usage quota mid-build.</p>
         </div>
       </section>
 
@@ -47,7 +47,7 @@
 
       <section>
         <h2>§5 Vulnerabilities</h2>
-        <p class="dim">All six implement <code>validateOriginOrReferer</code> for POST/PUT/DELETE/PATCH, returning 403 on missing/mismatched Origin/Referer. No raw SQL, no <code>eval</code>, no <code>dangerouslySetInnerHTML</code> anywhere. Key differences below.</p>
+        <p class="dim">All seven implement <code>validateOriginOrReferer</code> for POST/PUT/DELETE/PATCH, returning 403 on missing/mismatched Origin/Referer. No raw SQL, no <code>eval</code>, no <code>dangerouslySetInnerHTML</code> anywhere. Key differences below.</p>
         <ul>
           <li><strong>build-claude-glm-5.2:</strong> most robust — configurable ORIGIN_EXEMPT_PREFIXES, rejects with 403 when no host established, explicit SameSite=strict, live JWT refresh of passwordChangedAt/role/canViewAll/isActive, withAuth also rejects deactivated accounts.</li>
           <li><strong>build-pi-glm-5.1:</strong> <strong style="color:var(--red);">CRITICAL</strong> — <code>jwt</code> callback copies id/role/canViewAll but never copies <code>passwordChangedAt</code>. <code>token.passwordChangedAt</code> is always 0, so <code>withAuth</code>'s check is always false → password changes do <em>not</em> invalidate existing JWTs. Directly violates AUTH-02/SEC-03. Severity: High.</li>
@@ -62,7 +62,7 @@
 
       <section>
         <h2>§7 Variances between branches</h2>
-        <p class="dim">Key interpretation differences across the six builds.</p>
+        <p class="dim">Key interpretation differences across the seven builds.</p>
         <div id="variances"></div>
       </section>
 
@@ -81,7 +81,7 @@
             <ol>
               <li><strong>Worktrees.</strong> Each branch checked out into an isolated git worktree under <code>/tmp/opencode/eval/&lt;branch&gt;</code>.</li>
               <li><strong>Static analysis.</strong> File censuses via <code>find</code> + <code>wc</code>. Type-escape and dangerous-pattern counts via <code>grep -rn</code> over <code>src/</code> (tests excluded unless noted).</li>
-              <li><strong>Dynamic verification.</strong> Per worktree: <code>npm ci --no-audit --no-fund</code>, then lint, then <code>npx tsc --noEmit</code>, then <code>npm test</code>. All six installed cleanly under Node 24.15 / npm 11.12.</li>
+              <li><strong>Dynamic verification.</strong> Per worktree: <code>npm ci --no-audit --no-fund</code>, then lint, then <code>npx tsc --noEmit</code>, then <code>npm test</code>. All seven installed cleanly under Node 24.15 / npm 11.12.</li>
               <li><strong>No patching.</strong> Branches were not modified — broken lint or missing endpoints recorded as-is.</li>
               <li><strong>No commits.</strong> Only this report was written; nothing committed. Worktrees under <code>/tmp/opencode/eval/</code> are throwaway.</li>
               <li><strong>build-ibm-bob excluded.</strong> Did not complete (agent exhausted Pro plan quota mid-build). Branch remains in repo for reference.</li>
