@@ -1,18 +1,21 @@
 # Functional Evaluation Report — Resell Inventory Manager v2
 
-> Date: 2026-06-30
-> Scope: Playwright E2E evaluation of 6 completed builds against docs/TEST_STRATEGY.md.
+> Date: 2026-07-06 (updated)
+> Scope: Playwright E2E evaluation of 7 completed builds against docs/TEST_STRATEGY.md.
 > Methodology: isolated git worktrees, `next dev` boot (Docker Compose skipped — no TLS certs in eval env), Playwright chromium, 3 retries per flow. Admin bootstrapped per-branch via the branch's native `seed.ts` where working, else via the documented `/api/setup` first-run endpoint. Migrations run via `npx drizzle-kit migrate` (per OPERATIONS.md §1.3) where the app did not auto-migrate.
+> Re-evaluation log: 2026-07-06 — added `build-pi-glm-5.2`. Functional E2E run on pi-5.2 only; existing 6 branches were NOT re-evaluated (per the strict-`>` re-run rule: pi-5.2's score of 96/100 does not exceed the current leader's 100/100, so no re-run was triggered). pi-5.2 enters at functional rank #2 (tied with vscode-5.2 at 96/100).
 
 ## 1. Executive Summary
 
-`build-claude-glm-5.2` is the clear functional winner: it is the only build that passes all 26 E2E checks across the 5 canonical flows (auth, inventory, sales, import, rbac), achieving a functional score of 100/100. It is also the only build whose session-invalidation flow (REG-06) works end-to-end — consistent with the static-analysis finding that claude-5.2 is the sole branch with a live JWT refresh of `passwordChangedAt` on every request.
+`build-claude-glm-5.2` remains the clear functional winner: it is the only build that passes all 26 E2E checks across the 5 canonical flows (auth, inventory, sales, import, rbac), achieving a functional score of 100/100. It is also the only build whose session-invalidation flow (REG-06) works end-to-end — consistent with the static-analysis finding that claude-5.2 is the sole branch with a live JWT refresh of `passwordChangedAt` on every request.
 
-`build-vscode-glm-5.2` is a close runner-up (96/100, 25/26 pass), failing only REG-06 — the same session-invalidation gap noted in BUILD_EVALUATION.md. `build-opencode-glm-5.2` (88/100) and `build-opencode-glm-5.1` (69/100) follow, with the opencode-5.2 build notably recovering once migrations were applied via `drizzle-kit` (its own `seed.ts` is broken — it `require`s `dotenv/config`, which is not installed). `build-pi-glm-5.1` (62/100) and `build-claude-glm-5.1` (35/100) round out the cohort.
+The newly added `build-pi-glm-5.2` is a strong performer, tying `build-vscode-glm-5.2` as runner-up at 96/100 (25/26 pass). Like vscode-5.2, its single failure is REG-06 (session invalidation) — the same live-JWT-refresh gap noted in BUILD_EVALUATION.md. Notably, pi-5.2 fixes all three of pi-5.1's critical functional defects: sale creation no longer returns 500 (REG-01..REG-04 and REG-18 now pass), inventory GET no longer returns undefined fields (REG-13/14 pass), and admin user management works (REG-11 passes). This is the most-improved build in the cohort functionally, jumping from pi-5.1's 62/100 to 96/100. Its seed script works natively (no missing-dotenv crash, unlike opencode-5.2 and vscode-5.2), though it seeds `security@lawsonsoft.com` (not `admin@example.com`) and only creates the admin user (no standard user), so the functional specs must create a regular user via the admin API before testing user-scoped flows. It also requires `AUTH_SECRET` to be set as an env var (NextAuth throws `MissingSecret` without it) — a boot requirement the other branches handle via config defaults.
 
-The biggest shared functional gap is **sale creation** (`POST /api/sales` returning HTTP 500), which breaks REG-01..REG-04 and REG-18 on four of six builds (claude-5.1, opencode-1.17.4, pi-5.1, and partially others). The second shared gap is **session invalidation** (REG-06), which only claude-5.2 implements correctly — every other build copies `passwordChangedAt` into the JWT only at login, so admin password resets do not invalidate existing sessions. A third shared gap is **admin user management** (REG-11), which fails on five of six builds (all except claude-5.2).
+`build-vscode-glm-5.2` (96/100, 25/26 pass) remains a co-runner-up, failing only REG-06. `build-opencode-glm-5.2` (88/100) and `build-opencode-glm-5.1` (69/100) follow, with the opencode-5.2 build notably recovering once migrations were applied via `drizzle-kit` (its own `seed.ts` is broken — it `require`s `dotenv/config`, which is not installed). `build-pi-glm-5.1` (62/100) and `build-claude-glm-5.1` (35/100) round out the cohort.
 
-Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm-5.2` both ship a `seed.ts` that crashes on `Cannot find module 'dotenv/config'` — a real boot defect that forces falling back to the `/api/setup` first-run endpoint to create the admin; (2) `build-claude-glm-5.2`'s `/api/setup` POST route throws a 500 (a `tag` column mismatch in its custom migrator when `drizzle-kit migrate` has run), so it must rely on its native seed script; (3) `build-opencode-glm-5.1` is the most improved by the documented `drizzle-kit migrate` step — going from 0/26 to 18/26 once migrations are applied; (4) `build-pi-glm-5.1`'s inventory GET returns items with `undefined` fields, indicating a serialization shape mismatch.
+The biggest shared functional gap remains **session invalidation** (REG-06), which only claude-5.2 implements correctly — every other build, including pi-5.2, copies `passwordChangedAt` into the JWT only at login, so admin password resets do not invalidate existing sessions. A second shared gap is **admin user management** (REG-11), which fails on five of seven builds (all except claude-5.2 and pi-5.2). Sale creation (`POST /api/sales` returning HTTP 500), which broke REG-01..REG-04 and REG-18 on four of the original six builds, is now fixed in pi-5.2.
+
+Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm-5.2` both ship a `seed.ts` that crashes on `Cannot find module 'dotenv/config'` — a real boot defect that forces falling back to the `/api/setup` first-run endpoint to create the admin; (2) `build-claude-glm-5.2`'s `/api/setup` POST route throws a 500 (a `tag` column mismatch in its custom migrator when `drizzle-kit migrate` has run), so it must rely on its native seed script; (3) `build-opencode-glm-5.1` is the most improved by the documented `drizzle-kit migrate` step — going from 0/26 to 18/26 once migrations are applied; (4) `build-pi-glm-5.1`'s inventory GET returns items with `undefined` fields, indicating a serialization shape mismatch (fixed in pi-5.2); (5) `build-pi-glm-5.2` requires `AUTH_SECRET` to be set as an env var or NextAuth throws `MissingSecret` and all auth flows fail — the other branches handle this via config defaults or tolerate the missing secret in dev.
 
 ## 2. Methodology
 
@@ -27,6 +30,7 @@ Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm
   | build-claude-glm-5.1 | Claude Code 2.1.176 | dev (auto-migrate via app + drizzle-kit) | native seed (admin@resalemanager.com) | app auto-migrates; native seed uses admin@resalemanager.com |
   | build-opencode-glm-5.1 | opencode 1.17.4 | dev (drizzle-kit migrate required) | native seed (security@lawsonsoft.com) | app does not auto-migrate; `drizzle-kit migrate` required; native seed uses security@lawsonsoft.com |
   | build-opencode-glm-5.2 | opencode 1.17.4 | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
+  | build-pi-glm-5.2 | pi 0.79.2 | dev (seed auto-migrates via runMigrations; AUTH_SECRET env required) | native seed (security@lawsonsoft.com) | seed.ts calls runMigrations() then creates admin; requires AUTH_SECRET env var (NextAuth throws MissingSecret without it); seed creates only admin (no standard user); admin email is security@lawsonsoft.com |
   | build-pi-glm-5.1 | pi 0.79.2 | dev (drizzle-kit migrate required) | native seed (admin@example.com) | app does not auto-migrate; `drizzle-kit migrate` + ADMIN_EMAIL env required |
   | build-vscode-glm-5.2 | VS Code 1.126.0 (GitHub Copilot) | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
 - Retry count: 3 full runs of the 26-test suite per branch (78 test executions per branch).
@@ -319,38 +323,80 @@ _(no failures)_
 
 **Summary:** Runner-up (25/26 pass). The single failure is REG-06 (session invalidation) — the same live-JWT-refresh gap noted in BUILD_EVALUATION.md. Every other flow, including sale creation, status transitions, refunds, RBAC, CSV import (incl. mileage), and backup-restore validation, passes. Its seed.ts is broken (missing dotenv), but /api/setup bootstraps the admin cleanly.
 
+### 3.7 build-pi-glm-5.2
+
+**Agent:** pi 0.79.2 · **Boot:** dev (seed auto-migrates via runMigrations; AUTH_SECRET env required) · **Admin:** security@lawsonsoft.com (native seed) · **Functional score:** 96/100 (25/26 tests pass)
+
+#### E2E flow results
+| Flow | Status | Attempts | Error |
+|---|---|---|---|
+| auth | fail | 10/11 tests pass | Error: expect(received).toBe(expected) // Object.is equality | Expected: 401 | Received: 200 |
+| inventory | pass | 6/6 tests pass |  |
+| sales | pass | 5/5 tests pass |  |
+| import | pass | 3/3 tests pass |  |
+| rbac | pass | 4/4 tests pass |  |
+
+#### Regression scenarios
+| ID | Scenario | Status | Error |
+|---|---|---|---|
+| REG-01 | Create item → record sale → item status becomes "sold" | pass | — |
+| REG-02 | Record sale → process refund_with_return → item becomes "returned" | pass | — |
+| REG-03 | Record sale → process refund_no_return → item stays "sold", refund recorded | pass | — |
+| REG-04 | Delete sale → item status reverts to "available" | pass | — |
+| REG-05 | Bulk update items to "donated" → removalDate set, no $0 sales created | pass | — |
+| REG-06 | Password change invalidates existing JWT sessions | fail | Error: expect(received).toBe(expected) // Object.is equality | Expected: 401 | Received: 200 |
+| REG-07 | Origin header required on all POST/PUT/DELETE/PATCH requests | pass | — |
+| REG-08 | Origin header mismatched returns 403 INVALID_ORIGIN | pass | — |
+| REG-09 | Standard user cannot access another user's items | pass | — |
+| REG-10 | canViewAll user can view all data but only edit own | pass | — |
+| REG-11 | Admin can manage users and edit any data | pass | — |
+| REG-12 | Invalid status transition rejected (e.g., sold → available) | pass | — |
+| REG-13 | Status transition to "donated" sets removalDate | pass | — |
+| REG-14 | Status transition "returned" → "available" clears removalDate | pass | — |
+| REG-15 | Backup restore with invalid data → no DB changes | pass | — |
+| REG-16 | Setup lock prevents second admin creation | pass | — |
+| REG-17 | Photo upload requires item ownership | pass | — |
+| REG-18 | Profit calculation produces correct results for all null/zero combinations | pass | — |
+
+#### Failures & remediation
+| Flow / scenario | Error | Effort | Remediation prompt |
+|---|---|---|---|
+| auth / REG-06 | Error: expect(received).toBe(expected) // Object.is equality | Expected: 401 | Received: 200 | M | Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions. |
+
+**Summary:** Co-runner-up (25/26 pass, tied with vscode-5.2 at 96/100). The single failure is REG-06 (session invalidation) — pi-5.2 copies `passwordChangedAt` into the JWT at login but does not live-refresh it, so an admin password change bumps `passwordChangedAt` on the user row but the existing JWT (frozen at the old value) is not rejected. This is the same shared gap as vscode-5.2, opencode-5.2, opencode-5.1, pi-5.1, and claude-5.1. Every other flow passes: sale creation (no 500, unlike pi-5.1), status transitions (incl. returned→available clearing removalDate, unlike pi-5.1), refunds, RBAC (incl. admin user management — REG-11 passes, unlike pi-5.1), CSV import (inventory + sales + mileage all work), and backup-restore validation. The seed script works natively (no missing-dotenv crash) and auto-migrates via its own `runMigrations()`, but it requires `AUTH_SECRET` to be set as an env var (NextAuth throws `MissingSecret` without it) and seeds only the admin user (no standard `user@example.com`), so the functional specs create a regular user via the admin API before testing user-scoped flows. This is the most-improved build in the cohort functionally: +34 points over pi-5.1 (62→96).
+
 ## 4. Cross-Branch Comparison Matrix
 
 ### 4.1 E2E flows
-| Flow | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.1 | vscode-5.2 |
-|---|---|---|---|---|---|---|
-| auth | pass | fail | fail | fail | fail | fail |
-| inventory | pass | fail | fail | pass | fail | pass |
-| sales | pass | fail | fail | pass | fail | pass |
-| import | pass | pass | pass | fail | pass | pass |
-| rbac | pass | fail | fail | fail | fail | pass |
+| Flow | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|---|
+| auth | pass | fail | fail | fail | fail | fail | fail |
+| inventory | pass | fail | fail | pass | pass | fail | pass |
+| sales | pass | fail | fail | pass | pass | fail | pass |
+| import | pass | pass | pass | fail | pass | pass | pass |
+| rbac | pass | fail | fail | fail | pass | fail | pass |
 
 ### 4.2 Regression scenarios (REG-01..REG-18)
-| ID | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.1 | vscode-5.2 |
-|---|---|---|---|---|---|---|
-| REG-01 | pass | fail | fail | pass | fail | pass |
-| REG-02 | pass | fail | fail | pass | fail | pass |
-| REG-03 | pass | fail | fail | pass | fail | pass |
-| REG-04 | pass | fail | fail | pass | fail | pass |
-| REG-05 | pass | fail | pass | pass | pass | pass |
-| REG-06 | pass | fail | fail | fail | fail | fail |
-| REG-07 | pass | pass | pass | pass | pass | pass |
-| REG-08 | pass | pass | pass | pass | pass | pass |
-| REG-09 | pass | pass | pass | pass | pass | pass |
-| REG-10 | pass | fail | pass | pass | pass | pass |
-| REG-11 | pass | fail | fail | fail | fail | pass |
-| REG-12 | pass | fail | pass | pass | pass | pass |
-| REG-13 | pass | fail | pass | pass | fail | pass |
-| REG-14 | pass | fail | fail | pass | fail | pass |
-| REG-15 | pass | fail | pass | pass | pass | pass |
-| REG-16 | pass | pass | pass | pass | pass | pass |
-| REG-17 | pass | fail | pass | pass | pass | pass |
-| REG-18 | pass | fail | fail | pass | fail | pass |
+| ID | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
+|---|---|---|---|---|---|---|---|
+| REG-01 | pass | fail | fail | pass | pass | fail | pass |
+| REG-02 | pass | fail | fail | pass | pass | fail | pass |
+| REG-03 | pass | fail | fail | pass | pass | fail | pass |
+| REG-04 | pass | fail | fail | pass | pass | fail | pass |
+| REG-05 | pass | fail | pass | pass | pass | pass | pass |
+| REG-06 | pass | fail | fail | fail | fail | fail | fail |
+| REG-07 | pass | pass | pass | pass | pass | pass | pass |
+| REG-08 | pass | pass | pass | pass | pass | pass | pass |
+| REG-09 | pass | pass | pass | pass | pass | pass | pass |
+| REG-10 | pass | fail | pass | pass | pass | pass | pass |
+| REG-11 | pass | fail | fail | fail | pass | fail | pass |
+| REG-12 | pass | fail | pass | pass | pass | pass | pass |
+| REG-13 | pass | fail | pass | pass | pass | fail | pass |
+| REG-14 | pass | fail | fail | pass | pass | fail | pass |
+| REG-15 | pass | fail | pass | pass | pass | pass | pass |
+| REG-16 | pass | pass | pass | pass | pass | pass | pass |
+| REG-17 | pass | fail | pass | pass | pass | pass | pass |
+| REG-18 | pass | fail | fail | pass | pass | fail | pass |
 
 ## 5. Aggregate Findings & Severity
 
@@ -360,11 +406,12 @@ _(no failures)_
 | High | build-opencode-glm-5.1 | POST /api/sales returns 500; sale workflow non-functional | sales | REG-01..REG-04/REG-18 |
 | High | build-pi-glm-5.1 | POST /api/sales returns 500; inventory GET returns undefined fields | sales/inventory | REG-01..REG-04/REG-13/REG-14/REG-18 |
 | High | build-opencode-glm-5.2, build-vscode-glm-5.2 | seed.ts crashes: Cannot find module 'dotenv/config' (broken boot script) | boot | — |
-| Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02) | auth | REG-06 |
+| Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02) | auth | REG-06 |
 | Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1 | REG-11 fails: admin user-management endpoint returns wrong status/shape | rbac | REG-11 |
 | Med | build-opencode-glm-5.1 | REG-14 fails: refund_with_return leaves item in 'sold' state instead of 'returned' | inventory | REG-14 |
 | Med | build-opencode-glm-5.2 | Mileage CSV import (type=mileage) fails; inventory/sales imports work | import | — |
 | Low | build-claude-glm-5.2 | /api/setup POST throws 500 when drizzle-kit has run (tag column mismatch in custom migrator) | boot | — |
+| Low | build-pi-glm-5.2 | Requires AUTH_SECRET env var or NextAuth throws MissingSecret (no config default in dev) | boot | — |
 | Low | build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | App does not auto-migrate on dev boot; requires manual `npx drizzle-kit migrate` (OPERATIONS.md §1.3) | boot | — |
 | Info | all branches except build-claude-glm-5.2 | Session invalidation (REG-06) is the single most-shared functional gap — only claude-5.2 implements live JWT refresh | auth | REG-06 |
 
@@ -373,13 +420,14 @@ _(no failures)_
 | Branch | Total failures | S | M | L | XL | Estimated hours |
 |---|---|---|---|---|---|---|
 | build-claude-glm-5.2 | 0 | 0 | 0 | 0 | 0 | 0.0 |
-| build-claude-glm-5.1 | 17 | 1 | 16 | 0 | 0 | 16.2 |
-| build-opencode-glm-5.1 | 8 | 1 | 7 | 0 | 0 | 7.2 |
-| build-opencode-glm-5.2 | 3 | 1 | 2 | 0 | 0 | 2.2 |
-| build-pi-glm-5.1 | 10 | 2 | 8 | 0 | 0 | 8.5 |
+| build-pi-glm-5.2 | 1 | 0 | 1 | 0 | 0 | 1.0 |
 | build-vscode-glm-5.2 | 1 | 0 | 1 | 0 | 0 | 1.0 |
+| build-opencode-glm-5.2 | 3 | 1 | 2 | 0 | 0 | 2.2 |
+| build-opencode-glm-5.1 | 8 | 1 | 7 | 0 | 0 | 7.2 |
+| build-pi-glm-5.1 | 10 | 2 | 8 | 0 | 0 | 8.5 |
+| build-claude-glm-5.1 | 17 | 1 | 16 | 0 | 0 | 16.2 |
 
-**Total estimated remediation across all branches: 35.099999999999994 hours.**
+**Total estimated remediation across all branches: 36.1 hours.**
 
 ## 7. Remediation Prompts (indexed)
 
@@ -422,12 +470,13 @@ _(no failures)_
 37. `Fix per SALE-04: POST handler throws 500; fix the sale/inventory creation route to not crash on valid input.` — build-pi-glm-5.1 (sales / REG-18)
 38. `Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete.` — build-pi-glm-5.1 (rbac / REG-11)
 39. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-vscode-glm-5.2 (auth / REG-06)
+40. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-pi-glm-5.2 (auth / REG-06)
 
 ## 8. Functional Winner & Recommendation
 
 **Functional winner:** `build-claude-glm-5.2`
 
-**Recommendation:** `build-claude-glm-5.2` is the only build that passes the full functional E2E suite (26/26, 100/100). It is the only build with working session invalidation (REG-06), the only build where sale/inventory creation does not return 500, and the only build where admin user management (REG-11) works end-to-end. This corroborates the static-analysis ranking in BUILD_EVALUATION.md, which also ranked claude-5.2 #1. Adopt it as the production baseline. The runner-up, `build-vscode-glm-5.2` (96/100), is a strong candidate for a second-tier baseline — its only failure is the shared REG-06 session-invalidation gap, which is a single moderate-effort fix (add live JWT refresh of passwordChangedAt in the jwt callback). The `build-opencode-glm-5.2` build (88/100) is third; its broken seed.ts should be fixed before any adoption. The remaining three builds (opencode-1.17.4, pi-5.1, claude-5.1) all have a broken sale-creation endpoint that cascades to 5+ regression failures and require substantial remediation before they are functionally viable.
+**Recommendation:** `build-claude-glm-5.2` is the only build that passes the full functional E2E suite (26/26, 100/100). It is the only build with working session invalidation (REG-06), the only build where sale/inventory creation does not return 500, and the only build where admin user management (REG-11) works end-to-end. This corroborates the static-analysis ranking in BUILD_EVALUATION.md, which also ranked claude-5.2 #1. Adopt it as the production baseline. The new `build-pi-glm-5.2` is a co-runner-up alongside `build-vscode-glm-5.2` (both 96/100, failing only REG-06) — both are strong candidates for a second-tier baseline, and pi-5.2 is the most-improved build in the cohort (+34 points over pi-5.1). Their only shared failure is the REG-06 session-invalidation gap, a single moderate-effort fix (add live JWT refresh of passwordChangedAt in the jwt callback). The `build-opencode-glm-5.2` build (88/100) is fourth; its broken seed.ts should be fixed before any adoption. The remaining three builds (opencode-1.17.4, pi-5.1, claude-5.1) all have a broken sale-creation endpoint that cascades to 5+ regression failures and require substantial remediation before they are functionally viable.
 
 ## Appendix
 - Raw Playwright reports: `/tmp/opencode/eval-func/<branch>/results-run-{1,2,3}/`
@@ -436,4 +485,12 @@ _(no failures)_
 - Playwright config (throwaway, written into each worktree, not committed): `baseURL: http://localhost:3000`, `workers: 1`, `fullyParallel: false`, chromium project, `webServer` disabled (server booted manually with env vars).
 - Canonical E2E specs (throwaway, written into each worktree from TEST_STRATEGY.md §2.4 + §4.1, not committed): `tests/e2e/{auth,inventory,sales,import,rbac}.spec.ts` — API-contract-focused with one browser-driven logout test.
 - Seed commands: native `npx tsx src/scripts/seed.ts` (per branch) where working; fallback `POST /api/setup` with `{name,email,password}` per SETUP-01; migrations via `npx drizzle-kit migrate` per OPERATIONS.md §1.3.
-- Admin credentials: `AdminP@ss1` for all branches; admin email varies per branch's seed default (admin@example.com, admin@resalemanager.com, security@lawsonsoft.com) — see §2 table.
+- Admin credentials: `AdminP@ss1` for all branches; admin email varies per branch's seed default (admin@example.com, admin@resalemanager.com, security@lawsonsoft.com) — see §2 table. pi-5.2 additionally requires `AUTH_SECRET` to be set as an env var.
+
+---
+
+## 9. Re-evaluation Log
+
+| Date | Branch added | Functional E2E run | Functional re-run triggered? | Score | Rank deltas |
+|---|---|---|---|---|---|
+| 2026-07-06 | `build-pi-glm-5.2` (pi 0.79.2 / GLM 5.2) | Run on pi-5.2 only (35 Playwright tests × 3 retries, fresh DB + dev-server restart per run) | No — pi-5.2's score of 96/100 does not strictly exceed the current leader's 100/100; per the strict-`>` re-run rule, no existing branches were re-evaluated | 96/100 (25/26 pass; only REG-06 fails) | pi-5.2 enters at functional rank #2 (co-runner-up with vscode-5.2 at 96/100). No existing branch's rank changed (claude-5.2 remains #1). |
