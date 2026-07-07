@@ -228,18 +228,43 @@ Update the static-analysis block in `site/assets/data.js`:
 
 Also update the `functional` block if `docs/FUNCTIONAL_EVALUATION.md` was also updated (cross-reference).
 
+### STEP 8b — Update site JS renderers and branch detail pages
+
+`site/assets/data.js` is the single source of truth, but several JS renderers and HTML pages have **hard-coded branch-column maps** that must be extended when a new branch is added. Failing to update these causes the new branch to be missing from the static-eval tables, the branch detail page to render blank, and the index page to show stale counts/dates.
+
+**1. `site/assets/static-eval.js`** — add the new branch to:
+- The `SHORT` map at the top of the file (branch name → short label, e.g. `'build-pi-glm-5.2': 'pi-5.2'`)
+- The conformance table column list (add `{ key: '<colKey>', label: '<short>', chip: true, render: ... }` in the `§3 conformance` dataTable call, before the `evidence` column)
+- The variances table column list (add `{ key: '<colKey>', label: '<short>', wrap: true, render: ... }` in the `§7 variances` dataTable call)
+
+**2. `site/assets/branch.js`** — add the new branch to the `conformanceKey` map inside the `conformanceKey(branch)` function (branch name → column key, e.g. `'build-pi-glm-5.2': 'pi52'`). The column key must match the key used in `data.js` conformance/variance rows.
+
+**3. `site/branches/<new-branch>.html`** — create a new branch detail page by copying an existing one (e.g. `site/branches/build-pi-glm-5.1.html`) and changing the `<title>`, `<body data-branch="...">`, and `<h1 id="branch-title">` to the new branch name. This page loads `branch.js` which renders everything from `data.js`.
+
+**4. `site/index.html` and `site/assets/leaderboard.js`** — verify the index page's meta row (eval dates, branch counts) is populated dynamically from `data.js`. The `leaderboard.js` file has `data-static-eval-date`, `data-branch-counts`, `data-branch-count-completed`, and `data-functional-status` selectors that read from `data.js`. If the new branch is the first addition since the dynamic logic was added, confirm these selectors exist in `index.html` and the population logic exists in `leaderboard.js`. If any are missing or hard-coded, fix them to be dynamic.
+
+**5. `site/assets/shared.js`** — verify the footer uses `meta.staticEvalDate` dynamically (label should read "Latest static eval"). If hard-coded, fix it.
+
+**6. Stale prose** — grep all `site/*.html` and `site/assets/*.js` for the old branch count (e.g. "six builds", "Six AI", "six independent") and update to the new count (e.g. "seven"). These are descriptive paragraphs in `static-eval.html`, `functional-eval.html`, `about.html`, and inline JS strings. They are not auto-derived — update them manually.
+
+**Verification:** after all edits, run `node -c` on each modified JS file to confirm syntax, then open `site/index.html`, `site/static-eval.html`, and `site/branches/<new-branch>.html` in a browser (or grep the rendered DOM) to confirm the new branch appears in every table and the meta row shows the correct date + counts.
+
 ### STEP 9 — Commit and clean up
 
 ```bash
 git checkout main
-git add docs/BUILD_EVALUATION.md docs/BUILD_EVAL_PROMPT.md docs/FUNCTIONAL_EVAL_PROMPT.md site/assets/data.js
-git commit -m "Add <new-branch> to static eval; re-rank cohort"
+git add docs/BUILD_EVALUATION.md docs/BUILD_EVAL_PROMPT.md docs/FUNCTIONAL_EVAL_PROMPT.md \
+  site/assets/data.js site/assets/static-eval.js site/assets/branch.js site/assets/leaderboard.js \
+  site/assets/shared.js site/assets/functional-eval.js \
+  site/index.html site/static-eval.html site/functional-eval.html site/about.html \
+  site/branches/<new-branch>.html
+git commit -m "Add <new-branch> to static eval; re-rank cohort; update site renderers"
 # clean up worktrees (throwaway)
 git worktree remove --force /tmp/opencode/eval/<branch>
 # ... repeat for each branch
 ```
 
-Do not push unless explicitly instructed. The site will redeploy automatically via GitHub Actions when these files land on `main`.
+Stage only the files you actually modified — do not stage files that were not touched. Do not push unless explicitly instructed. The site will redeploy automatically via GitHub Actions when these files land on `main`.
 
 ### STEP 10 — Done
 
@@ -247,7 +272,8 @@ Report back:
 - The overall #1 build (baseline recommendation)
 - Per-dimension winners
 - Rank deltas from the re-ranking
-- Confirmation that `docs/BUILD_EVALUATION.md`, `docs/BUILD_EVAL_PROMPT.md`, and `site/assets/data.js` are committed on `main`
+- Confirmation that `docs/BUILD_EVALUATION.md`, `docs/BUILD_EVAL_PROMPT.md`, `site/assets/data.js`, the site JS renderers (`static-eval.js`, `branch.js`), and the new `site/branches/<new-branch>.html` page are committed on `main`
+- Confirmation that `node -c` passed on all modified JS files
 - Any branches that failed `npm ci` or `tsc --noEmit` (with the error)
 
 ---
@@ -263,11 +289,12 @@ Report back:
 - The prompt **auto-discovers** `build-*` branches via `git branch -r`, so new model/agent branches are picked up without editing this file. The only hard-coded exclusion is `build-ibm-bob` (incomplete).
 - **Relative star ratings:** 5★ = current cohort leader per dimension, not an absolute bar. Adding a stronger branch rescales everyone's stars; adding a weaker branch may push existing branches down a rank.
 - **No re-analysis of existing branches:** static properties (file counts, type escapes, lint results) do not change between evaluations, so only the new branch is analyzed. This differs from the functional prompt, which may re-run existing branches if the new branch raises the bar.
-- The GitHub Pages site's `site/build-eval.html` automatically renders the results once `site/assets/data.js` is updated. No site rebuild needed.
+- The GitHub Pages site's `site/build-eval.html` automatically renders the results once `site/assets/data.js` is updated, **but the JS renderers (`static-eval.js`, `branch.js`) have hard-coded branch-column maps that must be extended per new branch, and a new `site/branches/<branch>.html` detail page must be created.** See STEP 8b. No site rebuild needed beyond those edits.
 - The prompt forbids patching build branches so the single one-shot-prompt fidelity of the experiment is preserved.
 
 ---
 
 ## CHANGELOG
 
+- **2026-07-06 (rev 2):** Added STEP 8b — explicit instructions to update site JS renderers (`static-eval.js`, `branch.js`), create the `site/branches/<branch>.html` detail page, verify `index.html`/`leaderboard.js`/`shared.js` dynamic meta row, and fix stale prose counts. Updated commit list to include all touched site files. Added `node -c` syntax-check verification.
 - **2026-07-06:** Initial version. Branch-agnostic, auto-discovering, with relative star ratings and a re-evaluation log. Mirrors the structure of `docs/FUNCTIONAL_EVAL_PROMPT.md` (updated the same day).
