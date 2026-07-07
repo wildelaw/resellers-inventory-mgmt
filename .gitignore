@@ -1,1 +1,17 @@
+node_modules
+.next
+sqlite.db
+sqlite.db-journal
+sqlite.db-wal
+sqlite.db-shm
+data/
+uploads/
+backups/
+certs/
+.env.local
+.env*.local
+coverage/
+test-results/
+playwright-report/
 .DS_Store
+*.tsbuildinfo

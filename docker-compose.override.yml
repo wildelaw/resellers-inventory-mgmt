@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      target: builder
+    environment:
+      - NODE_ENV=development
+      - AUTH_SECRET=dev-secret-change-in-production
+      - AUTH_URL=http://localhost:3000
+      - DATABASE_PATH=sqlite.db
+      - UPLOADS_PATH=uploads
+      - BACKUPS_PATH=backups
+    ports:
+      - "3000:3000"
+    read_only: false
+    tmpfs: []
+    volumes:
+      - .:/app:rw
+      - /app/node_modules
+      - ./data:/data:rw,z
+    command: npm run dev
