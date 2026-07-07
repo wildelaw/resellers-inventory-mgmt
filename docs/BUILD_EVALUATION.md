@@ -104,13 +104,13 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 | No auto $0 sales on donate/discard | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all set only `removalDate`; no `sales` insert on transition |
 | `app_config` single-row table | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas: `appConfig` with `id default(1)` |
 | Removed tables absent (`sessions`/`accounts`/`verification_tokens`) | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | all schemas |
-| `withAuth` wrapper pattern | ✓ | ✓ | ✓ | ◐ | ◐ | ✓ | ◐ | claude-5.2 & claude-5.1 & opencode-1.17.4 & vscode-5.2 use `export const POST = withAuth(...)`; opencode-5.2 & pi-5.2 & pi-5.1 use `export async function POST(req){ return withAuth(...) }` (functionally equivalent, deviates from canonical form) |
+| `withAuth` wrapper pattern | ✓ | ✓ | ✓ | ◐ | ◐ | ✓ | ◐ | claude-5.2 & claude-5.1 & opencode-5.1 & vscode-5.2 use `export const POST = withAuth(...)`; opencode-5.2 & pi-5.2 & pi-5.1 use `export async function POST(req){ return withAuth(...) }` (functionally equivalent, deviates from canonical form) |
 | Server Components for data pages | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `inventory/page.tsx`, `sales/page.tsx`, `reports/page.tsx`, `app/page.tsx` |
 | `calculateSalesTaxFromPrice` formula matches spec | ✓ | ✓ | ✓ | ✓ | ✓ | **✗** | ✓ | vscode-5.2 uses `price * rate` (add tax) instead of `price - price/(1+rate)` (extract from tax-inclusive); pi-5.2 uses the spec formula correctly |
 
 ### 3.2 API surface (BUILD_PROMPT STEP 5 — 43 endpoints)
 
-| Endpoint group | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
+| Endpoint group | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|---|---|
 | All 43 spec endpoints present | ✓ | ✓ | ✓ | ✓ (+1 extra `/sales/export`) | ✓ | ✓ | ✗ missing `/mileage/export` & `/mileage/reports` |
 | Removed endpoints absent | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
@@ -118,7 +118,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 
 ### 3.3 Config & ops (BUILD_PROMPT STEPS 2, 6, 12)
 
-| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
+| Requirement | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|---|---|
 | `src/proxy.ts` middleware (named per spec) | ✓ | ✓ | ✗ named `src/middleware.ts` | ✓ | ✓ | ✓ | ✗ named `src/middleware.ts` |
 | `next.config.ts` security headers + CSP | ✓ (+`serverExternalPackages`) | ✓ | ✓ (+`serverExternalPackages`) | ✓ | ✓ | ✓ | ✓ |
@@ -130,7 +130,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 
 ### 3.4 RBAC & auth (REQUIREMENTS §3.1, §3.7)
 
-| Requirement | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
+| Requirement | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|---|---|
 | `passwordChangedAt` session invalidation (AUTH-02) | **✓+** live-refresh on every request | ✓ | ✓ | ✓ | ✓ login-only | ✓ | **✗ broken** — never written to JWT |
 | `withAuth` also rejects deactivated accounts | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ |
@@ -140,7 +140,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 
 ### 3.5 Test conformance (BUILD_PROMPT STEP 10)
 
-| Required suite | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
+| Required suite | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|---|---|
 | 7 unit tests | ✓ 7 | ✓ 7 | ✓ 7 | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 6 |
 | 7 functional tests | ✓ 7 | ✓ 7 | ✓ 7 | ◐ 5 | ✓ 7 | ◐ 2 (missing 5: `password-invalidation`, `setup-lock`, `sale-refund-flow`, `inventory-removal-date`, `refund-impact`) | ◐ 3 |
@@ -163,7 +163,7 @@ Legend: ✓ pass · ◐ partial · ✗ fail · — N/A
 | `build-pi-glm-5.1` | 26 | 37 | 10 | 2 | 75 |
 | `build-opencode-glm-5.1` | 60 | 36 | 1 | 0 | 97 |
 
-Both Claude branches are fully type-safe in `src/`. `build-vscode-glm-5.2` is very close — its single `as any` is in `db.ts` line 43 (`(actualDb as any)[prop]`) inside the lazy Proxy pattern, a pragmatic escape for dynamic property forwarding. `build-pi-glm-5.2` has 50 type-escape occurrences spread across route handlers (`status as any`, `platform as any`, `role as any` for Drizzle column comparisons), client components (`initialItems as any`, `initialSales as any` for Server→Client prop passing), session access (`(session.user as any).passwordChangedAt` — the NextAuth module augmentation omits `iat`/`passwordChangedAt` from the typed session), and backup serialization (`allUsers as any` etc.). The session-typing escapes mirror opencode-1.17.4's pattern (silencing the type checker rather than completing the NextAuth `declare module` augmentation), though pi-5.2 does declare a `Session` augmentation — it just doesn't extend it far enough to cover `iat`/`passwordChangedAt` on the JWT token type. opencode-1.17.4 has 97 type-escape occurrences concentrated in `auth.ts` session callbacks (e.g., `(session.user as any).id`), which silence the type checker rather than fix the missing NextAuth module augmentation. Claude, opencode-5.2, pi-5.2, and vscode-5.2 all ship proper `declare module 'next-auth'` augmentation; vscode-5.2 and claude-5.2 also augment `@auth/core/jwt`.
+Both Claude branches are fully type-safe in `src/`. `build-vscode-glm-5.2` is very close — its single `as any` is in `db.ts` line 43 (`(actualDb as any)[prop]`) inside the lazy Proxy pattern, a pragmatic escape for dynamic property forwarding. `build-pi-glm-5.2` has 50 type-escape occurrences spread across route handlers (`status as any`, `platform as any`, `role as any` for Drizzle column comparisons), client components (`initialItems as any`, `initialSales as any` for Server→Client prop passing), session access (`(session.user as any).passwordChangedAt` — the NextAuth module augmentation omits `iat`/`passwordChangedAt` from the typed session), and backup serialization (`allUsers as any` etc.). The session-typing escapes mirror opencode-5.1's pattern (silencing the type checker rather than completing the NextAuth `declare module` augmentation), though pi-5.2 does declare a `Session` augmentation — it just doesn't extend it far enough to cover `iat`/`passwordChangedAt` on the JWT token type. opencode-5.1 has 97 type-escape occurrences concentrated in `auth.ts` session callbacks (e.g., `(session.user as any).id`), which silence the type checker rather than fix the missing NextAuth module augmentation. Claude, opencode-5.2, pi-5.2, and vscode-5.2 all ship proper `declare module 'next-auth'` augmentation; vscode-5.2 and claude-5.2 also augment `@auth/core/jwt`.
 
 ### 4.2 Lint outcomes
 
@@ -226,7 +226,7 @@ Because `token.passwordChangedAt` is never written, `session.user.passwordChange
 
 **`build-claude-glm-5.2` goes further than the spec requires** — its `jwt` callback refreshes `passwordChangedAt`, `role`, `canViewAll`, and `isActive` from the database on every request (not just at login), so role changes, `canViewAll` toggles, and deactivations take effect on existing JWTs. It also handles deleted users by forcing `passwordChangedAt = MAX_SAFE_INTEGER`. Additionally, `withAuth` checks `isActive === false` and rejects deactivated accounts immediately, which no other branch does.
 
-The other five branches (claude-5.1, opencode-1.17.4, opencode-5.2, **pi-5.2**, vscode-5.2) correctly propagate `passwordChangedAt` through the `jwt` callback at login time, but do not live-refresh it — so an admin password reset sets `passwordChangedAt` on the user row, but existing JWTs issued before the reset still carry the old (lower) `passwordChangedAt` and are not rejected until the token expires. `build-pi-glm-5.2` is in this group: AUTH-02 is satisfied at login, but the functional E2E REG-06 scenario (admin resets password → existing session invalidated) will fail because the JWT's `passwordChangedAt` is frozen at login time. `build-vscode-glm-5.2` uses proper `declare module '@auth/core/jwt'` augmentation (like claude-5.2) so the token fields are typed without `as any`.
+The other five branches (claude-5.1, opencode-5.1, opencode-5.2, **pi-5.2**, vscode-5.2) correctly propagate `passwordChangedAt` through the `jwt` callback at login time, but do not live-refresh it — so an admin password reset sets `passwordChangedAt` on the user row, but existing JWTs issued before the reset still carry the old (lower) `passwordChangedAt` and are not rejected until the token expires. `build-pi-glm-5.2` is in this group: AUTH-02 is satisfied at login, but the functional E2E REG-06 scenario (admin resets password → existing session invalidated) will fail because the JWT's `passwordChangedAt` is frozen at login time. `build-vscode-glm-5.2` uses proper `declare module '@auth/core/jwt'` augmentation (like claude-5.2) so the token fields are typed without `as any`.
 
 ### 5.3 Cookie hardening (SEC-01)
 
@@ -242,11 +242,11 @@ cookies: {
 },
 ```
 
-The other four (claude-5.1, opencode-1.17.4, pi-5.1, vscode-5.2) rely on NextAuth defaults, which set `sameSite=lax` (not `strict`). The spec (AUTH-04) states "Session cookies are set with `SameSite=Strict`". **Only claude-5.2, opencode-5.2, and pi-5.2 satisfy this literally.** Severity: Medium.
+The other four (claude-5.1, opencode-5.1, pi-5.1, vscode-5.2) rely on NextAuth defaults, which set `sameSite=lax` (not `strict`). The spec (AUTH-04) states "Session cookies are set with `SameSite=Strict`". **Only claude-5.2, opencode-5.2, and pi-5.2 satisfy this literally.** Severity: Medium.
 
 ### 5.4 Input validation, secrets, info leakage
 
-| Check | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
+| Check | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|---|---|
 | `eval(` / `dangerouslySetInnerHTML` | none | none | none | none | none | none | none |
 | Raw SQL template literals | none | none | none | none | none | none | none |
@@ -286,7 +286,7 @@ The other four (claude-5.1, opencode-1.17.4, pi-5.1, vscode-5.2) rely on NextAut
 
 ## 7. Variances Between Branches
 
-| Dimension | claude-5.2 | claude-5.1 | opencode-1.17.4-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
+| Dimension | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | vscode-5.2 | pi-5.1 |
 |---|---|---|---|---|---|---|---|
 | `withAuth` signature | `export const POST = withAuth(...)` — matches spec | same as claude-5.2 | same as claude-5.2 | wraps inside `async function POST` | wraps inside `async function POST` | `export const POST = withAuth(...)` — matches spec | `withAuth(req, handler)` — different signature |
 | Middleware filename | `src/proxy.ts` (spec) | `src/proxy.ts` (spec) | `src/middleware.ts` (Next.js) | `src/proxy.ts` (spec) | `src/proxy.ts` (spec) | `src/proxy.ts` (spec) | `src/middleware.ts` (Next.js) |
@@ -313,11 +313,11 @@ The other four (claude-5.1, opencode-1.17.4, pi-5.1, vscode-5.2) rely on NextAut
 Notable interpretation differences:
 - **JWT refresh strategy:** claude-5.2 is the only branch that refreshes `passwordChangedAt`/`role`/`canViewAll`/`isActive` from the DB on every request inside the `jwt` callback. The other six copy these fields only at login, meaning role/canViewAll changes don't propagate to existing JWTs until the token expires or the password is reset. pi-5.2 is in this login-only group but, unlike pi-5.1, at least writes `passwordChangedAt` at login so the AUTH-02 minimum is met.
 - **`calculateSalesTaxFromPrice` formula:** vscode-5.2 is the only branch that deviates from the spec formula. The spec requires `taxAmount = price - (price / (1 + rate))` (extract tax from a tax-inclusive price), but vscode-5.2 implements `price * rate` (compute tax to add to a tax-exclusive price). These produce different results: for price=100 and rate=0.0825, the spec formula yields 7.62, while vscode-5.2 yields 8.25. Its test passes because it asserts the implementation's output, not the spec's expected value. pi-5.2 uses the spec formula correctly.
-- **Timestamp/boolean schema modes:** opencode-1.17.4 uses `{ mode: 'timestamp' }` (Date); opencode-5.2 and pi-5.2 use `{ mode: 'boolean' }` / `{ mode: 'number' }`, which makes the inferred TS types `boolean`/`number` instead of raw integers. This is more ergonomic and avoids the `toBool`/`fromBool` conversion boilerplate. Claude-5.2, claude-5.1, pi-5.1, and vscode-5.2 store raw unix integers and avoid the conversion; claude-5.2 additionally ships `toBool`/`fromBool` helpers.
+- **Timestamp/boolean schema modes:** opencode-5.1 uses `{ mode: 'timestamp' }` (Date); opencode-5.2 and pi-5.2 use `{ mode: 'boolean' }` / `{ mode: 'number' }`, which makes the inferred TS types `boolean`/`number` instead of raw integers. This is more ergonomic and avoids the `toBool`/`fromBool` conversion boilerplate. Claude-5.2, claude-5.1, pi-5.1, and vscode-5.2 store raw unix integers and avoid the conversion; claude-5.2 additionally ships `toBool`/`fromBool` helpers.
 - **`withAuth` signature:** pi-5.1's signature (`withAuth(req, handler)`) is the largest API-shape deviation. pi-5.2 and opencode-5.2 use the `async function POST(req){ return withAuth(...) }` form (functionally equivalent, deviates from canonical). vscode-5.2 and both Claude branches use the canonical `export const POST = withAuth(...)` form.
 - **`validateOriginOrReferer` exemptions:** pi-5.2 regressed vs pi-5.1 — pi-5.1 exempted both `/api/auth/*` and `/api/setup`, but pi-5.2 exempts neither. This is shared with opencode-5.2 and vscode-5.2. Only claude-5.2 (both paths) and pi-5.1 (both paths) fully comply; claude-5.1 partially complies (`/api/auth/*` only).
 - **bcrypt cost:** claude-5.2 centralizes cost 10 in `config.ts` via a `hashPassword()` helper — the cleanest approach. claude-5.1 uses cost 12 in app code but 10 in seed (inconsistent). The others (including pi-5.2 and vscode-5.2) hardcode 10 at each call site.
-- **Seed admin email:** pi-5.2 (like opencode-1.17.4) seeds `security@lawsonsoft.com`, not `admin@example.com`. This matters for functional E2E: the canonical specs assume `admin@example.com`, so the pi-5.2 worktree's seed must be read to get the correct admin credentials. pi-5.2's seed creates only the admin user (no regular `user@example.com`), so functional tests that need a standard user must create one via the admin API.
+- **Seed admin email:** pi-5.2 (like opencode-5.1) seeds `security@lawsonsoft.com`, not `admin@example.com`. This matters for functional E2E: the canonical specs assume `admin@example.com`, so the pi-5.2 worktree's seed must be read to get the correct admin credentials. pi-5.2's seed creates only the admin user (no regular `user@example.com`), so functional tests that need a standard user must create one via the admin API.
 
 ---
 
@@ -331,7 +331,7 @@ Notable interpretation differences:
 | **Med** | `build-opencode-glm-5.1`, `build-opencode-glm-5.2`, `build-pi-glm-5.2`, `build-vscode-glm-5.2` | `validateOriginOrReferer` does not exempt `/api/auth/*` (AUTH-04 deviation) | `src/lib/api-utils.ts` / `http-utils.ts` |
 | **Med** | `build-claude-glm-5.1`, `build-opencode-glm-5.1`, `build-pi-glm-5.1`, `build-vscode-glm-5.2` | No explicit `SameSite=Strict` on session cookie (relies on NextAuth default `lax`) | `src/lib/auth.ts` |
 | **Med** | `build-pi-glm-5.1` | Missing `/api/mileage/export` and `/api/mileage/reports` endpoints (MILE-02, MILE-03) | `src/app/api/mileage/` |
-| **Med** | claude-5.1, opencode-1.17.4-5.1, opencode-5.2, pi-5.2, pi-5.1, vscode-5.2 | No integration tests produced (spec requires 9 under `tests/integration/api/`) | `tests/integration/` absent |
+| **Med** | claude-5.1, opencode-5.1, opencode-5.2, pi-5.2, pi-5.1, vscode-5.2 | No integration tests produced (spec requires 9 under `tests/integration/api/`) | `tests/integration/` absent |
 | **Med** | `build-pi-glm-5.2`, `build-claude-glm-5.1`, `build-opencode-glm-5.1`, `build-opencode-glm-5.2`, `build-pi-glm-5.1`, `build-vscode-glm-5.2` | JWT refresh is login-only — `passwordChangedAt`/`role`/`canViewAll`/`isActive` not refreshed from DB on every request (AUTH-02 minimum met, but REG-06 functional scenario fails) | `src/lib/auth.ts` jwt callback |
 | **Med** | `build-vscode-glm-5.2` | Only 2 of 7 required functional tests (missing `password-invalidation`, `setup-lock`, `sale-refund-flow`, `inventory-removal-date`, `refund-impact`) | `tests/functional/` |
 | **Low** | `build-opencode-glm-5.1`, `build-pi-glm-5.1` | Middleware named `src/middleware.ts` not `src/proxy.ts` (BUILD_PROMPT STEP 6) | `src/` |

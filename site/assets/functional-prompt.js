@@ -176,12 +176,12 @@ Write the report with exactly this structure (the GitHub Pages site parses it):
     ## 4. Cross-Branch Comparison Matrix
 
     ### 4.1 E2E flows
-    | Flow | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+    | Flow | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
     |---|---|---|---|---|---|---|
     | auth | pass | pass | ... | ... | ... | ... |
 
     ### 4.2 Regression scenarios (REG-01..REG-18)
-    | ID | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.1 | vscode-5.2 |
+    | ID | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.1 | vscode-5.2 |
     |---|---|---|---|---|---|---|
     | REG-01 | pass | pass | ... | ... | ... | ... |
 

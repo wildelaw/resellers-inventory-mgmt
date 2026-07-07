@@ -22,7 +22,7 @@ Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm
 - Playwright version: 1.61.1
 - Node version: v24.15.0 (npm 11.12.1)
 - Boot mode: `next dev` (Docker Compose skipped — no production TLS certificates available in the eval environment; the dev fallback is documented in FUNCTIONAL_EVAL_PROMPT.md STEP 2). All builds target Next.js 16.2.x with Turbopack.
-- Admin bootstrapping: each branch's native `seed.ts` was attempted first; where the seed script crashed (opencode-5.2, vscode-5.2 — missing `dotenv/config`) or the app did not auto-migrate (opencode-1.17.4, opencode-5.2, pi-5.1, vscode-5.2), the documented fallbacks were used: `npx drizzle-kit migrate` (OPERATIONS.md §1.3) and/or `POST /api/setup` (SETUP-01). No build branches were patched.
+- Admin bootstrapping: each branch's native `seed.ts` was attempted first; where the seed script crashed (opencode-5.2, vscode-5.2 — missing `dotenv/config`) or the app did not auto-migrate (opencode-5.1, opencode-5.2, pi-5.1, vscode-5.2), the documented fallbacks were used: `npx drizzle-kit migrate` (OPERATIONS.md §1.3) and/or `POST /api/setup` (SETUP-01). No build branches were patched.
 - Boot modes per branch:
   | Branch | Agent version | Boot mode | Admin created via | Notes |
   |---|---|---|---|---|
@@ -368,7 +368,7 @@ _(no failures)_
 ## 4. Cross-Branch Comparison Matrix
 
 ### 4.1 E2E flows
-| Flow | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
+| Flow | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
 |---|---|---|---|---|---|---|---|
 | auth | pass | fail | fail | fail | fail | fail | fail |
 | inventory | pass | fail | fail | pass | pass | fail | pass |
@@ -377,7 +377,7 @@ _(no failures)_
 | rbac | pass | fail | fail | fail | pass | fail | pass |
 
 ### 4.2 Regression scenarios (REG-01..REG-18)
-| ID | claude-5.2 | claude-5.1 | opencode-1.17.4 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
+| ID | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
 |---|---|---|---|---|---|---|---|
 | REG-01 | pass | fail | fail | pass | pass | fail | pass |
 | REG-02 | pass | fail | fail | pass | pass | fail | pass |
@@ -476,7 +476,7 @@ _(no failures)_
 
 **Functional winner:** `build-claude-glm-5.2`
 
-**Recommendation:** `build-claude-glm-5.2` is the only build that passes the full functional E2E suite (26/26, 100/100). It is the only build with working session invalidation (REG-06), the only build where sale/inventory creation does not return 500, and the only build where admin user management (REG-11) works end-to-end. This corroborates the static-analysis ranking in BUILD_EVALUATION.md, which also ranked claude-5.2 #1. Adopt it as the production baseline. The new `build-pi-glm-5.2` is a co-runner-up alongside `build-vscode-glm-5.2` (both 96/100, failing only REG-06) — both are strong candidates for a second-tier baseline, and pi-5.2 is the most-improved build in the cohort (+34 points over pi-5.1). Their only shared failure is the REG-06 session-invalidation gap, a single moderate-effort fix (add live JWT refresh of passwordChangedAt in the jwt callback). The `build-opencode-glm-5.2` build (88/100) is fourth; its broken seed.ts should be fixed before any adoption. The remaining three builds (opencode-1.17.4, pi-5.1, claude-5.1) all have a broken sale-creation endpoint that cascades to 5+ regression failures and require substantial remediation before they are functionally viable.
+**Recommendation:** `build-claude-glm-5.2` is the only build that passes the full functional E2E suite (26/26, 100/100). It is the only build with working session invalidation (REG-06), the only build where sale/inventory creation does not return 500, and the only build where admin user management (REG-11) works end-to-end. This corroborates the static-analysis ranking in BUILD_EVALUATION.md, which also ranked claude-5.2 #1. Adopt it as the production baseline. The new `build-pi-glm-5.2` is a co-runner-up alongside `build-vscode-glm-5.2` (both 96/100, failing only REG-06) — both are strong candidates for a second-tier baseline, and pi-5.2 is the most-improved build in the cohort (+34 points over pi-5.1). Their only shared failure is the REG-06 session-invalidation gap, a single moderate-effort fix (add live JWT refresh of passwordChangedAt in the jwt callback). The `build-opencode-glm-5.2` build (88/100) is fourth; its broken seed.ts should be fixed before any adoption. The remaining three builds (opencode-5.1, pi-5.1, claude-5.1) all have a broken sale-creation endpoint that cascades to 5+ regression failures and require substantial remediation before they are functionally viable.
 
 ## Appendix
 - Raw Playwright reports: `/tmp/opencode/eval-func/<branch>/results-run-{1,2,3}/`
