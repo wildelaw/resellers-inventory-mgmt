@@ -1,0 +1,8 @@
+services:
+  app:
+    build:
+      target: dev
+    environment:
+      - NODE_ENV=development
+    read_only: false
+    ports: ["3000:3000"]
