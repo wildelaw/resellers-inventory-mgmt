@@ -1,9 +1,10 @@
 # Functional Evaluation Report — Resell Inventory Manager v2
 
-> Date: 2026-07-06 (updated)
-> Scope: Playwright E2E evaluation of 7 completed builds against docs/TEST_STRATEGY.md.
+> Date: 2026-07-08 (updated)
+> Scope: Playwright E2E evaluation of 8 completed builds against docs/TEST_STRATEGY.md.
 > Methodology: isolated git worktrees, `next dev` boot (Docker Compose skipped — no TLS certs in eval env), Playwright chromium, 3 retries per flow. Admin bootstrapped per-branch via the branch's native `seed.ts` where working, else via the documented `/api/setup` first-run endpoint. Migrations run via `npx drizzle-kit migrate` (per OPERATIONS.md §1.3) where the app did not auto-migrate.
-> Re-evaluation log: 2026-07-06 — added `build-pi-glm-5.2`. Functional E2E run on pi-5.2 only; existing 6 branches were NOT re-evaluated (per the strict-`>` re-run rule: pi-5.2's score of 96/100 does not exceed the current leader's 100/100, so no re-run was triggered). pi-5.2 enters at functional rank #2 (tied with vscode-5.2 at 96/100).
+> Re-evaluation log: 2026-07-08 — added `build-codex-glm-5.2` (Codex CLI 0.142.5 / GLM 5.2). Functional E2E run on codex-5.2 only; existing 7 branches were NOT re-evaluated (per the strict-`>` re-run rule: codex-5.2's score of 0/100 does not exceed the current leader's 100/100, so no re-run was triggered). codex-5.2 enters at functional rank #8 (new last place) — the app does not boot (`src/proxy.ts` exports `middleware` instead of `proxy`, the Next.js 16 required name; every endpoint returns HTTP 500). All 26 E2E checks marked `fail` with the boot error recorded.
+> Prior: 2026-07-06 — added `build-pi-glm-5.2`. pi-5.2's score of 96/100 does not exceed claude-5.2's 100/100 ceiling; no re-run. pi-5.2 enters at functional rank #2 (co-runner-up with vscode-5.2 at 96/100).
 
 ## 1. Executive Summary
 
@@ -33,6 +34,7 @@ Notable per-branch surprises: (1) `build-opencode-glm-5.2` and `build-vscode-glm
   | build-pi-glm-5.2 | pi 0.79.2 | dev (seed auto-migrates via runMigrations; AUTH_SECRET env required) | native seed (security@lawsonsoft.com) | seed.ts calls runMigrations() then creates admin; requires AUTH_SECRET env var (NextAuth throws MissingSecret without it); seed creates only admin (no standard user); admin email is security@lawsonsoft.com |
   | build-pi-glm-5.1 | pi 0.79.2 | dev (drizzle-kit migrate required) | native seed (admin@example.com) | app does not auto-migrate; `drizzle-kit migrate` + ADMIN_EMAIL env required |
   | build-vscode-glm-5.2 | VS Code 1.126.0 (GitHub Copilot) | dev (drizzle-kit migrate + /api/setup fallback; seed script broken: missing dotenv) | /api/setup (admin@example.com) | seed.ts crashes (missing dotenv); admin created via /api/setup fallback |
+  | build-codex-glm-5.2 | Codex CLI 0.142.5 | dev (does not boot — src/proxy.ts exports `middleware` not `proxy`, the Next.js 16 required name; every route returns 500) | native seed (security@lawsonsoft.com) — works, but app does not boot so E2E skipped | seed.ts + drizzle-kit migrate both succeed; boot failure is purely the proxy function-name mismatch (file named proxy.ts but function exported as middleware); AUTH_SECRET env var required; admin email security@lawsonsoft.com / AdminP@ss1 |
 - Retry count: 3 full runs of the 26-test suite per branch (78 test executions per branch).
 - Caddy 429 handling: N/A — Caddy was not in the dev boot path; no rate-limit 429s were observed.
 - Canonical E2E specs: 5 spec files (`auth.spec.ts`, `inventory.spec.ts`, `sales.spec.ts`, `import.spec.ts`, `rbac.spec.ts`) written from `docs/TEST_STRATEGY.md §2.4` and `§4.1`. The specs are API-contract-focused (the API surface is fixed by the spec; UI selectors vary between builds), with one browser-driven logout test. Specs were written into each worktree as throwaway files (not committed).
@@ -365,55 +367,107 @@ _(no failures)_
 
 **Summary:** Co-runner-up (25/26 pass, tied with vscode-5.2 at 96/100). The single failure is REG-06 (session invalidation) — pi-5.2 copies `passwordChangedAt` into the JWT at login but does not live-refresh it, so an admin password change bumps `passwordChangedAt` on the user row but the existing JWT (frozen at the old value) is not rejected. This is the same shared gap as vscode-5.2, opencode-5.2, opencode-5.1, pi-5.1, and claude-5.1. Every other flow passes: sale creation (no 500, unlike pi-5.1), status transitions (incl. returned→available clearing removalDate, unlike pi-5.1), refunds, RBAC (incl. admin user management — REG-11 passes, unlike pi-5.1), CSV import (inventory + sales + mileage all work), and backup-restore validation. The seed script works natively (no missing-dotenv crash) and auto-migrates via its own `runMigrations()`, but it requires `AUTH_SECRET` to be set as an env var (NextAuth throws `MissingSecret` without it) and seeds only the admin user (no standard `user@example.com`), so the functional specs create a regular user via the admin API before testing user-scoped flows. This is the most-improved build in the cohort functionally: +34 points over pi-5.1 (62→96).
 
+### 3.8 build-codex-glm-5.2
+
+**Agent:** Codex CLI 0.142.5 · **Boot:** dev (does not boot — `src/proxy.ts` exports `middleware` not `proxy`, the Next.js 16 required name) · **Admin:** security@lawsonsoft.com (via native seed, which works) · **Functional score:** 0/100 (0/26 tests pass — app does not boot)
+
+#### Boot failure (recorded in lieu of E2E flow results)
+The dev server starts (`npm run dev`) but **every endpoint returns HTTP 500** because `src/proxy.ts` exports `export async function middleware(req)` instead of the Next.js 16 required `export async function proxy(req)`. Next.js 16 renamed the middleware file from `src/middleware.ts` to `src/proxy.ts` and requires the exported function to be named `proxy` (or a default export). codex-5.2 correctly named the file `src/proxy.ts` (passing the static check) but left the function named `middleware` (the old name), so Next.js 16 fails to find the expected export and serves a 500 error page on every route — including `/api/health`, `/api/auth/csrf`, and `/login`. The error message is explicit: `Proxy is missing expected function export name. This function is what Next.js runs for every request handled by this proxy (previously called middleware).`
+
+This is a boot-blocking defect, not a per-flow failure. Per FUNCTIONAL_EVAL_PROMPT.md STEP 2: "If a build fails to boot, record the error and skip E2E for that branch — but still include it in the report with all flows marked `fail` and the boot error in the methodology." All 5 E2E flows and all 18 regression scenarios are marked `fail` with the boot error below; no Playwright tests were executed (the app never reached a booted state).
+
+The seed script (`npx tsx src/scripts/seed.ts`) works independently — it calls its own `runMigrations()` (a custom in-app migrator, not `drizzle-kit`) and creates the admin user `security@lawsonsoft.com` / `AdminP@ss1` with `canViewAll=true`. `npx drizzle-kit migrate` also succeeds. So the boot failure is purely the `proxy` function-name mismatch, not a migration or seed issue.
+
+#### E2E flow results
+| Flow | Status | Attempts | Error |
+|---|---|---|---|
+| auth | fail | 0/0 (app did not boot) | HTTP 500 on every route — `src/proxy.ts` exports `middleware` not `proxy`; Next.js 16 cannot find the proxy function export |
+| inventory | fail | 0/0 (app did not boot) | HTTP 500 on every route — same boot error |
+| sales | fail | 0/0 (app did not boot) | HTTP 500 on every route — same boot error |
+| import | fail | 0/0 (app did not boot) | HTTP 500 on every route — same boot error |
+| rbac | fail | 0/0 (app did not boot) | HTTP 500 on every route — same boot error |
+
+#### Regression scenarios
+| ID | Scenario | Status | Error |
+|---|---|---|---|
+| REG-01 | Create item → record sale → item status becomes "sold" | fail | app did not boot (proxy export-name bug) |
+| REG-02 | Record sale → process refund_with_return → item becomes "returned" | fail | app did not boot (proxy export-name bug) |
+| REG-03 | Record sale → process refund_no_return → item stays "sold", refund recorded | fail | app did not boot (proxy export-name bug) |
+| REG-04 | Delete sale → item status reverts to "available" | fail | app did not boot (proxy export-name bug) |
+| REG-05 | Bulk update items to "donated" → removalDate set, no $0 sales created | fail | app did not boot (proxy export-name bug) |
+| REG-06 | Password change invalidates existing JWT sessions | fail | app did not boot (proxy export-name bug) |
+| REG-07 | Origin header required on all POST/PUT/DELETE/PATCH requests | fail | app did not boot (proxy export-name bug) |
+| REG-08 | Origin header mismatched returns 403 INVALID_ORIGIN | fail | app did not boot (proxy export-name bug) |
+| REG-09 | Standard user cannot access another user's items | fail | app did not boot (proxy export-name bug) |
+| REG-10 | canViewAll user can view all data but only edit own | fail | app did not boot (proxy export-name bug) |
+| REG-11 | Admin can manage users and edit any data | fail | app did not boot (proxy export-name bug) |
+| REG-12 | Invalid status transition rejected (e.g., sold → available) | fail | app did not boot (proxy export-name bug) |
+| REG-13 | Status transition to "donated" sets removalDate | fail | app did not boot (proxy export-name bug) |
+| REG-14 | Status transition "returned" → "available" clears removalDate | fail | app did not boot (proxy export-name bug) |
+| REG-15 | Backup restore with invalid data → no DB changes | fail | app did not boot (proxy export-name bug) |
+| REG-16 | Setup lock prevents second admin creation | fail | app did not boot (proxy export-name bug) |
+| REG-17 | Photo upload requires item ownership | fail | app did not boot (proxy export-name bug) |
+| REG-18 | Profit calculation produces correct results for all null/zero combinations | fail | app did not boot (proxy export-name bug) |
+
+#### Failures & remediation
+| Flow / scenario | Error | Effort | Remediation prompt |
+|---|---|---|---|
+| boot (all flows) | HTTP 500 on every route — `src/proxy.ts` exports `middleware` not `proxy`; Next.js 16 cannot find the proxy function export | S | Fix src/proxy.ts per BUILD_PROMPT STEP 6: rename `export async function middleware` to `export async function proxy` (the Next.js 16 required name for src/proxy.ts). |
+| auth / REG-06 | (blocked by boot failure — not separately testable; static analysis shows JWT refresh is login-only, so REG-06 would fail even if boot were fixed) | M | Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions. |
+
+**Summary:** New last place (0/100, 0/26 pass). The app does not boot — a single boot-blocking bug in `src/proxy.ts` (function exported as `middleware` instead of the Next.js 16 required `proxy`) causes HTTP 500 on every route, preventing any E2E test from running. This is the only build in the cohort that fails to boot. The seed script and migrations work, so the defect is purely the proxy function-name mismatch — a trivial one-line fix (rename `middleware` → `proxy`), but it was not patched (per the no-patching fidelity rule). Notably, codex-5.2 correctly named the file `src/proxy.ts` (passing the static check at §3.3 of BUILD_EVALUATION.md) but left the function named `middleware` — the static check verified the filename, not the export name. Even if the boot bug were fixed, the static analysis predicts REG-06 would still fail (login-only JWT refresh, same as pi-5.2/vscode-5.2/opencode-5.2/opencode-5.1/claude-5.1). The build ships all 5 e2e spec files (auth, inventory, sales, import, rbac) and a `playwright.config.ts`, but none could be executed.
+
 ## 4. Cross-Branch Comparison Matrix
 
 ### 4.1 E2E flows
-| Flow | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
-|---|---|---|---|---|---|---|---|
-| auth | pass | fail | fail | fail | fail | fail | fail |
-| inventory | pass | fail | fail | pass | pass | fail | pass |
-| sales | pass | fail | fail | pass | pass | fail | pass |
-| import | pass | pass | pass | fail | pass | pass | pass |
-| rbac | pass | fail | fail | fail | pass | fail | pass |
+| Flow | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 | codex-5.2 |
+|---|---|---|---|---|---|---|---|---|
+| auth | pass | fail | fail | fail | fail | fail | fail | fail (boot) |
+| inventory | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
+| sales | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
+| import | pass | pass | pass | fail | pass | pass | pass | fail (boot) |
+| rbac | pass | fail | fail | fail | pass | fail | pass | fail (boot) |
 
 ### 4.2 Regression scenarios (REG-01..REG-18)
-| ID | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 |
-|---|---|---|---|---|---|---|---|
-| REG-01 | pass | fail | fail | pass | pass | fail | pass |
-| REG-02 | pass | fail | fail | pass | pass | fail | pass |
-| REG-03 | pass | fail | fail | pass | pass | fail | pass |
-| REG-04 | pass | fail | fail | pass | pass | fail | pass |
-| REG-05 | pass | fail | pass | pass | pass | pass | pass |
-| REG-06 | pass | fail | fail | fail | fail | fail | fail |
-| REG-07 | pass | pass | pass | pass | pass | pass | pass |
-| REG-08 | pass | pass | pass | pass | pass | pass | pass |
-| REG-09 | pass | pass | pass | pass | pass | pass | pass |
-| REG-10 | pass | fail | pass | pass | pass | pass | pass |
-| REG-11 | pass | fail | fail | fail | pass | fail | pass |
-| REG-12 | pass | fail | pass | pass | pass | pass | pass |
-| REG-13 | pass | fail | pass | pass | pass | fail | pass |
-| REG-14 | pass | fail | fail | pass | pass | fail | pass |
-| REG-15 | pass | fail | pass | pass | pass | pass | pass |
-| REG-16 | pass | pass | pass | pass | pass | pass | pass |
-| REG-17 | pass | fail | pass | pass | pass | pass | pass |
-| REG-18 | pass | fail | fail | pass | pass | fail | pass |
+| ID | claude-5.2 | claude-5.1 | opencode-5.1 | opencode-5.2 | pi-5.2 | pi-5.1 | vscode-5.2 | codex-5.2 |
+|---|---|---|---|---|---|---|---|---|
+| REG-01 | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
+| REG-02 | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
+| REG-03 | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
+| REG-04 | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
+| REG-05 | pass | fail | pass | pass | pass | pass | pass | fail (boot) |
+| REG-06 | pass | fail | fail | fail | fail | fail | fail | fail (boot) |
+| REG-07 | pass | pass | pass | pass | pass | pass | pass | fail (boot) |
+| REG-08 | pass | pass | pass | pass | pass | pass | pass | fail (boot) |
+| REG-09 | pass | pass | pass | pass | pass | pass | pass | fail (boot) |
+| REG-10 | pass | fail | pass | pass | pass | pass | pass | fail (boot) |
+| REG-11 | pass | fail | fail | fail | pass | fail | pass | fail (boot) |
+| REG-12 | pass | fail | pass | pass | pass | pass | pass | fail (boot) |
+| REG-13 | pass | fail | pass | pass | pass | fail | pass | fail (boot) |
+| REG-14 | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
+| REG-15 | pass | fail | pass | pass | pass | pass | pass | fail (boot) |
+| REG-16 | pass | pass | pass | pass | pass | pass | pass | fail (boot) |
+| REG-17 | pass | fail | pass | pass | pass | pass | pass | fail (boot) |
+| REG-18 | pass | fail | fail | pass | pass | fail | pass | fail (boot) |
 
 ## 5. Aggregate Findings & Severity
 
 | Sev | Branch | Finding | Flow | Scenario |
 |---|---|---|---|---|
+| High | build-codex-glm-5.2 | App does not boot: `src/proxy.ts` exports `middleware` not `proxy`; Next.js 16 returns 500 on every route | boot | all flows + all REG-01..REG-18 |
 | High | build-claude-glm-5.1 | POST /api/sales and /api/inventory return HTTP 500 (broken creation handler) | sales/inventory | REG-01/REG-05/REG-12/REG-17/REG-18 |
 | High | build-opencode-glm-5.1 | POST /api/sales returns 500; sale workflow non-functional | sales | REG-01..REG-04/REG-18 |
 | High | build-pi-glm-5.1 | POST /api/sales returns 500; inventory GET returns undefined fields | sales/inventory | REG-01..REG-04/REG-13/REG-14/REG-18 |
 | High | build-opencode-glm-5.2, build-vscode-glm-5.2 | seed.ts crashes: Cannot find module 'dotenv/config' (broken boot script) | boot | — |
-| Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02) | auth | REG-06 |
+| Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2, build-codex-glm-5.2 | REG-06 fails: jwt callback copies passwordChangedAt only at login — no live refresh (AUTH-02). codex-5.2 is blocked by the boot bug, but static analysis confirms login-only JWT refresh, so REG-06 would fail even if boot were fixed | auth | REG-06 |
 | Med | build-claude-glm-5.1, build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1 | REG-11 fails: admin user-management endpoint returns wrong status/shape | rbac | REG-11 |
 | Med | build-opencode-glm-5.1 | REG-14 fails: refund_with_return leaves item in 'sold' state instead of 'returned' | inventory | REG-14 |
 | Med | build-opencode-glm-5.2 | Mileage CSV import (type=mileage) fails; inventory/sales imports work | import | — |
+| Low | build-codex-glm-5.2 | Boot-blocking: `src/proxy.ts` exports `middleware` not `proxy` (Next.js 16 required name); trivial S-effort fix but unfixed, so app never reaches a booted state | boot | all flows |
 | Low | build-claude-glm-5.2 | /api/setup POST throws 500 when drizzle-kit has run (tag column mismatch in custom migrator) | boot | — |
-| Low | build-pi-glm-5.2 | Requires AUTH_SECRET env var or NextAuth throws MissingSecret (no config default in dev) | boot | — |
+| Low | build-pi-glm-5.2, build-codex-glm-5.2 | Requires AUTH_SECRET env var or NextAuth throws MissingSecret (no config default in dev) | boot | — |
 | Low | build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2 | App does not auto-migrate on dev boot; requires manual `npx drizzle-kit migrate` (OPERATIONS.md §1.3) | boot | — |
-| Info | all branches except build-claude-glm-5.2 | Session invalidation (REG-06) is the single most-shared functional gap — only claude-5.2 implements live JWT refresh | auth | REG-06 |
+| Info | all branches except build-claude-glm-5.2 | Session invalidation (REG-06) is the single most-shared functional gap — only claude-5.2 implements live JWT refresh. codex-5.2 is blocked by boot, so its REG-06 failure is inferred from static analysis, not directly observed | auth | REG-06 |
 
 ## 6. Effort Estimates Summary
 
@@ -426,8 +480,9 @@ _(no failures)_
 | build-opencode-glm-5.1 | 8 | 1 | 7 | 0 | 0 | 7.2 |
 | build-pi-glm-5.1 | 10 | 2 | 8 | 0 | 0 | 8.5 |
 | build-claude-glm-5.1 | 17 | 1 | 16 | 0 | 0 | 16.2 |
+| build-codex-glm-5.2 | 27 | 1 (boot) + 1 (REG-06 once bootable) | 1 | 0 | 0 | 2.0 (boot fix S + REG-06 M; remaining 25 boot-blocked failures resolve automatically once the proxy export is renamed) |
 
-**Total estimated remediation across all branches: 36.1 hours.**
+**Total estimated remediation across all branches: 38.1 hours.**
 
 ## 7. Remediation Prompts (indexed)
 
@@ -471,12 +526,14 @@ _(no failures)_
 38. `Fix per USR-01: fix the admin user-management route to return correct status/JSON for create/list/delete.` — build-pi-glm-5.1 (rbac / REG-11)
 39. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-vscode-glm-5.2 (auth / REG-06)
 40. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-pi-glm-5.2 (auth / REG-06)
+41. `Fix src/proxy.ts per BUILD_PROMPT STEP 6: rename export async function middleware to export async function proxy (Next.js 16 required name for src/proxy.ts).` — build-codex-glm-5.2 (boot / all flows blocked)
+42. `Fix per AUTH-02: refresh passwordChangedAt from DB in the jwt callback on every request so iat<pca rejects old sessions.` — build-codex-glm-5.2 (auth / REG-06 — inferred from static analysis; blocked by boot failure)
 
 ## 8. Functional Winner & Recommendation
 
 **Functional winner:** `build-claude-glm-5.2`
 
-**Recommendation:** `build-claude-glm-5.2` is the only build that passes the full functional E2E suite (26/26, 100/100). It is the only build with working session invalidation (REG-06), the only build where sale/inventory creation does not return 500, and the only build where admin user management (REG-11) works end-to-end. This corroborates the static-analysis ranking in BUILD_EVALUATION.md, which also ranked claude-5.2 #1. Adopt it as the production baseline. The new `build-pi-glm-5.2` is a co-runner-up alongside `build-vscode-glm-5.2` (both 96/100, failing only REG-06) — both are strong candidates for a second-tier baseline, and pi-5.2 is the most-improved build in the cohort (+34 points over pi-5.1). Their only shared failure is the REG-06 session-invalidation gap, a single moderate-effort fix (add live JWT refresh of passwordChangedAt in the jwt callback). The `build-opencode-glm-5.2` build (88/100) is fourth; its broken seed.ts should be fixed before any adoption. The remaining three builds (opencode-5.1, pi-5.1, claude-5.1) all have a broken sale-creation endpoint that cascades to 5+ regression failures and require substantial remediation before they are functionally viable.
+**Recommendation:** `build-claude-glm-5.2` is the only build that passes the full functional E2E suite (26/26, 100/100). It is the only build with working session invalidation (REG-06), the only build where sale/inventory creation does not return 500, and the only build where admin user management (REG-11) works end-to-end. This corroborates the static-analysis ranking in BUILD_EVALUATION.md, which also ranked claude-5.2 #1. Adopt it as the production baseline. The `build-pi-glm-5.2` build is a co-runner-up alongside `build-vscode-glm-5.2` (both 96/100, failing only REG-06) — both are strong candidates for a second-tier baseline, and pi-5.2 is the most-improved build in the cohort (+34 points over pi-5.1). Their only shared failure is the REG-06 session-invalidation gap, a single moderate-effort fix (add live JWT refresh of passwordChangedAt in the jwt callback). The `build-opencode-glm-5.2` build (88/100) is fourth; its broken seed.ts should be fixed before any adoption. The remaining three builds (opencode-5.1, pi-5.1, claude-5.1) all have a broken sale-creation endpoint that cascades to 5+ regression failures and require substantial remediation before they are functionally viable. The newly added `build-codex-glm-5.2` is the only build that does not boot at all — a single boot-blocking bug (`src/proxy.ts` exports `middleware` instead of the Next.js 16 required `proxy`) causes HTTP 500 on every route, so its functional score is 0/100 (0/26). This is a trivial S-effort fix (rename one function), but it was not patched (per the no-patching fidelity rule), so the app never reached a booted state and no E2E tests could run. codex-5.2 enters at functional rank #8 (new last place), below pi-5.1 (62/100) and claude-5.1 (35/100).
 
 ## Appendix
 - Raw Playwright reports: `/tmp/opencode/eval-func/<branch>/results-run-{1,2,3}/`
@@ -485,7 +542,7 @@ _(no failures)_
 - Playwright config (throwaway, written into each worktree, not committed): `baseURL: http://localhost:3000`, `workers: 1`, `fullyParallel: false`, chromium project, `webServer` disabled (server booted manually with env vars).
 - Canonical E2E specs (throwaway, written into each worktree from TEST_STRATEGY.md §2.4 + §4.1, not committed): `tests/e2e/{auth,inventory,sales,import,rbac}.spec.ts` — API-contract-focused with one browser-driven logout test.
 - Seed commands: native `npx tsx src/scripts/seed.ts` (per branch) where working; fallback `POST /api/setup` with `{name,email,password}` per SETUP-01; migrations via `npx drizzle-kit migrate` per OPERATIONS.md §1.3.
-- Admin credentials: `AdminP@ss1` for all branches; admin email varies per branch's seed default (admin@example.com, admin@resalemanager.com, security@lawsonsoft.com) — see §2 table. pi-5.2 additionally requires `AUTH_SECRET` to be set as an env var.
+- Admin credentials: `AdminP@ss1` for all branches; admin email varies per branch's seed default (admin@example.com, admin@resalemanager.com, security@lawsonsoft.com) — see §2 table. pi-5.2 and codex-5.2 additionally require `AUTH_SECRET` to be set as an env var. codex-5.2's app did not boot, so its admin credentials were verified only via the seed script output, not via login.
 
 ---
 
@@ -493,4 +550,5 @@ _(no failures)_
 
 | Date | Branch added | Functional E2E run | Functional re-run triggered? | Score | Rank deltas |
 |---|---|---|---|---|---|
+| 2026-07-08 | `build-codex-glm-5.2` (Codex CLI 0.142.5 / GLM 5.2) | Run on codex-5.2 only (attempted; app did not boot — 0 Playwright tests executed; all 26 E2E checks marked fail with the boot error) | No — codex-5.2's score of 0/100 does not strictly exceed the current leader's 100/100; per the strict-`>` re-run rule, no existing branches were re-evaluated | 0/100 (0/26 pass — app does not boot: `src/proxy.ts` exports `middleware` not `proxy`) | codex-5.2 enters at functional rank #8 (new last place, below pi-5.1's 62/100 and claude-5.1's 35/100). No existing branch's rank changed (claude-5.2 remains #1). |
 | 2026-07-06 | `build-pi-glm-5.2` (pi 0.79.2 / GLM 5.2) | Run on pi-5.2 only (35 Playwright tests × 3 retries, fresh DB + dev-server restart per run) | No — pi-5.2's score of 96/100 does not strictly exceed the current leader's 100/100; per the strict-`>` re-run rule, no existing branches were re-evaluated | 96/100 (25/26 pass; only REG-06 fails) | pi-5.2 enters at functional rank #2 (co-runner-up with vscode-5.2 at 96/100). No existing branch's rank changed (claude-5.2 remains #1). |

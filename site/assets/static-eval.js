@@ -10,7 +10,8 @@
     'build-opencode-glm-5.2': 'opencode-5.2',
     'build-pi-glm-5.2': 'pi-5.2',
     'build-pi-glm-5.1': 'pi-5.1',
-    'build-vscode-glm-5.2': 'vscode-5.2'
+    'build-vscode-glm-5.2': 'vscode-5.2',
+    'build-codex-glm-5.2': 'codex-5.2'
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -80,6 +81,7 @@
           { key: 'pi52', label: 'pi-5.2', chip: true, render: function (v) { return statusChip(v); } },
           { key: 'pi51', label: 'pi-5.1', chip: true, render: function (v) { return statusChip(v); } },
           { key: 'vscode52', label: 'vscode-5.2', chip: true, render: function (v) { return statusChip(v); } },
+          { key: 'codex52', label: 'codex-5.2', chip: true, render: function (v) { return statusChip(v); } },
           { key: 'evidence', label: 'Evidence', wrap: true }
         ], rows);
       });
@@ -133,7 +135,8 @@
         { key: 'opencode52', label: 'opencode-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
         { key: 'pi52', label: 'pi-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
         { key: 'pi51', label: 'pi-5.1', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
-        { key: 'vscode52', label: 'vscode-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } }
+        { key: 'vscode52', label: 'vscode-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
+        { key: 'codex52', label: 'codex-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } }
       ], data.variances);
     }
 

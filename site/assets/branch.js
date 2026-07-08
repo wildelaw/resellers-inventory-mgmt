@@ -12,7 +12,8 @@
       'build-opencode-glm-5.2': 'opencode52',
       'build-pi-glm-5.2': 'pi52',
       'build-pi-glm-5.1': 'pi51',
-      'build-vscode-glm-5.2': 'vscode52'
+      'build-vscode-glm-5.2': 'vscode52',
+      'build-codex-glm-5.2': 'codex52'
     }[branch];
   }
 

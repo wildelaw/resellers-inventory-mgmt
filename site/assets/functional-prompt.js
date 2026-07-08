@@ -1,6 +1,6 @@
 /* Stores the functional-eval prompt text for the prompt-functional-eval.html page.
    Kept in sync with docs/FUNCTIONAL_EVAL_PROMPT.md (the canonical source). */
-window.FUNCTIONAL_PROMPT_TEXT = `You are a coding agent. Your task is to run a full functional end-to-end evaluation of six builds of the Resell Inventory Manager v2 application and write the results to docs/FUNCTIONAL_EVALUATION.md. You must also update site/assets/data.js so the GitHub Pages site renders the results.
+window.FUNCTIONAL_PROMPT_TEXT = `You are a coding agent. Your task is to run a full functional end-to-end evaluation of all completed builds of the Resell Inventory Manager v2 application and write the results to docs/FUNCTIONAL_EVALUATION.md. You must also update site/assets/data.js so the GitHub Pages site renders the results.
 
 ### Read first (in this order, completely)
 
