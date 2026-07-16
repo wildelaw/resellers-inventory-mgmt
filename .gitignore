@@ -1,1 +1,60 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Next.js
+.next/
+out/
+build/
+
+# Production
+*.tgz
+*.tar.gz
+
+# Misc
 .DS_Store
+*.pem
+*.key
+*.pem.crt
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env*.local
+.env.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Data
+data/
+sqlite.db
+sqlite.db-journal
+sqlite.db-shm
+sqlite.db-wal
+uploads/
+backups/
+
+# Certificates
+certs/
+
+# Test artifacts
+tests/.tmp/
+tests/temp/
