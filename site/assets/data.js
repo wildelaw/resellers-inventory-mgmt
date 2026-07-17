@@ -19,15 +19,16 @@ window.EVAL_DATA = {
   },
 
   // ---------- Rankings (from BUILD_EVALUATION.md §1) ----------
-  // Each row now includes `testSignalStar` (1-5, per BUILD_EVAL_PROMPT.md STEP 6.1 rubric)
-  // and `composite` (weighted score per STEP 6.2), so the rank is always backed by a visible score.
+  // Each row includes `testSignalStar` (1-5, per BUILD_EVAL_PROMPT.md STEP 6.1 rubric)
+  // and `composite` (weighted score per STEP 6.2). Ranks 1..9 are assigned by composite
+  // descending (the rank determinant per rev 3) — no rank is asserted without its score.
   rankings: [
     { rank: 1, branch: 'build-claude-glm-5.2',         spec: 5, maintain: 5, security: 5, complexity: 4, testSignalStar: 5, composite: 4.85, functionalScore: 100, testSignal: '23 files / 186 tests / lint exit 0' },
-    { rank: 2, branch: 'build-claude-glm-5.1',         spec: 5, maintain: 5, security: 4, complexity: 4, testSignalStar: 3, composite: 3.96, functionalScore: 35,  testSignal: '14 files / 121 tests / lint exit 1 (11 err)' },
-    { rank: 3, branch: 'build-opencode-minimax-m3',    spec: 4, maintain: 4, security: 3, complexity: 4, testSignalStar: 3, composite: 3.82, functionalScore: 96,  testSignal: '15 files / 135 tests / lint script broken' },
-    { rank: 4, branch: 'build-opencode-glm-5.2',       spec: 4, maintain: 4, security: 5, complexity: 3, testSignalStar: 3, composite: 4.01, functionalScore: 88,  testSignal: '12 files / 134 tests / lint script broken' },
-    { rank: 5, branch: 'build-pi-glm-5.2',             spec: 4, maintain: 3, security: 4, complexity: 5, testSignalStar: 3, composite: 3.97, functionalScore: 96,  testSignal: '14 files / 137 tests / lint script broken' },
-    { rank: 6, branch: 'build-vscode-glm-5.2',         spec: 4, maintain: 4, security: 4, complexity: 4, testSignalStar: 3, composite: 4.02, functionalScore: 96,  testSignal: '9 files / 100 tests / lint script broken' },
+    { rank: 2, branch: 'build-vscode-glm-5.2',         spec: 4, maintain: 4, security: 4, complexity: 4, testSignalStar: 3, composite: 4.02, functionalScore: 96,  testSignal: '9 files / 100 tests / lint script broken' },
+    { rank: 3, branch: 'build-opencode-glm-5.2',       spec: 4, maintain: 4, security: 5, complexity: 3, testSignalStar: 3, composite: 4.01, functionalScore: 88,  testSignal: '12 files / 134 tests / lint script broken' },
+    { rank: 4, branch: 'build-pi-glm-5.2',             spec: 4, maintain: 3, security: 4, complexity: 5, testSignalStar: 3, composite: 3.97, functionalScore: 96,  testSignal: '14 files / 137 tests / lint script broken' },
+    { rank: 5, branch: 'build-claude-glm-5.1',         spec: 5, maintain: 5, security: 4, complexity: 4, testSignalStar: 3, composite: 3.96, functionalScore: 35,  testSignal: '14 files / 121 tests / lint exit 1 (11 err)' },
+    { rank: 6, branch: 'build-opencode-minimax-m3',    spec: 4, maintain: 4, security: 3, complexity: 4, testSignalStar: 3, composite: 3.82, functionalScore: 96,  testSignal: '15 files / 135 tests / lint script broken' },
     { rank: 7, branch: 'build-opencode-glm-5.1', spec: 4, maintain: 3, security: 4, complexity: 4, testSignalStar: 3, composite: 3.62, functionalScore: 69,  testSignal: '14 files / 115 tests / lint exit 1 (119 err)' },
     { rank: 8, branch: 'build-pi-glm-5.1',             spec: 3, maintain: 3, security: 2, complexity: 4, testSignalStar: 3, composite: 2.96, functionalScore: 62,  testSignal: '9 files / 95 tests / lint script broken' },
     { rank: 9, branch: 'build-codex-glm-5.2',          spec: 4, maintain: 2, security: 3, complexity: 5, testSignalStar: 1, composite: 2.65, functionalScore: 0,   testSignal: '7 files (77 pass / 16 fail) / tsc exit 1 (101 err) / lint script broken' }
