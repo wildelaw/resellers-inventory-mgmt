@@ -8,6 +8,7 @@
     return {
       'build-claude-glm-5.2': 'claude52',
       'build-claude-glm-5.1': 'claude51',
+      'build-opencode-minimax-m3': 'opencodeM3',
       'build-opencode-glm-5.1': 'opencode17174',
       'build-opencode-glm-5.2': 'opencode52',
       'build-pi-glm-5.2': 'pi52',

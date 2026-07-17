@@ -6,6 +6,7 @@
   const SHORT = {
     'build-claude-glm-5.2': 'claude-5.2',
     'build-claude-glm-5.1': 'claude-5.1',
+    'build-opencode-minimax-m3': 'opencode-m3',
     'build-opencode-glm-5.1': 'opencode-5.1',
     'build-opencode-glm-5.2': 'opencode-5.2',
     'build-pi-glm-5.2': 'pi-5.2',
@@ -76,6 +77,7 @@
           { key: 'req', label: 'Requirement', sticky: true, wrap: true },
           { key: 'claude52', label: 'claude-5.2', chip: true, render: function (v) { return statusChip(v); } },
           { key: 'claude51', label: 'claude-5.1', chip: true, render: function (v) { return statusChip(v); } },
+          { key: 'opencodeM3', label: 'opencode-m3', chip: true, render: function (v) { return statusChip(v); } },
           { key: 'opencode17174', label: 'opencode-5.1', chip: true, render: function (v) { return statusChip(v); } },
           { key: 'opencode52', label: 'opencode-5.2', chip: true, render: function (v) { return statusChip(v); } },
           { key: 'pi52', label: 'pi-5.2', chip: true, render: function (v) { return statusChip(v); } },
@@ -131,6 +133,7 @@
         { key: 'dimension', label: 'Dimension', sticky: true, wrap: true },
         { key: 'claude52', label: 'claude-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
         { key: 'claude51', label: 'claude-5.1', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
+        { key: 'opencodeM3', label: 'opencode-m3', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
         { key: 'opencode17174', label: 'opencode-5.1', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
         { key: 'opencode52', label: 'opencode-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },
         { key: 'pi52', label: 'pi-5.2', wrap: true, render: function (v) { return el('span', { class: 'mono', style: 'font-size:12px;' }, v); } },

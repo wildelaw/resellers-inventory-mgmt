@@ -24,7 +24,7 @@
       const profiles = data.profiles || [];
       const incomplete = profiles.filter(function (p) { return p.branch === 'build-ibm-bob' || (p.note && /incomplete|did not complete/i.test(p.note)); }).length;
       const completedCount = profiles.length - incomplete;
-      const word = completedCount === 1 ? 'One' : completedCount === 2 ? 'Two' : completedCount === 3 ? 'Three' : completedCount === 4 ? 'Four' : completedCount === 5 ? 'Five' : completedCount === 6 ? 'Six' : completedCount === 7 ? 'Seven' : completedCount === 8 ? 'Eight' : String(completedCount);
+      const word = completedCount === 1 ? 'One' : completedCount === 2 ? 'Two' : completedCount === 3 ? 'Three' : completedCount === 4 ? 'Four' : completedCount === 5 ? 'Five' : completedCount === 6 ? 'Six' : completedCount === 7 ? 'Seven' : completedCount === 8 ? 'Eight' : completedCount === 9 ? 'Nine' : completedCount === 10 ? 'Ten' : String(completedCount);
       bcCap.forEach(function (node) { node.textContent = word; });
     }
     const bcLc = document.querySelectorAll('[data-branch-count-completed-lc]');
@@ -32,7 +32,7 @@
       const profiles = data.profiles || [];
       const incomplete = profiles.filter(function (p) { return p.branch === 'build-ibm-bob' || (p.note && /incomplete|did not complete/i.test(p.note)); }).length;
       const completedCount = profiles.length - incomplete;
-      const word = completedCount === 1 ? 'one' : completedCount === 2 ? 'two' : completedCount === 3 ? 'three' : completedCount === 4 ? 'four' : completedCount === 5 ? 'five' : completedCount === 6 ? 'six' : completedCount === 7 ? 'seven' : completedCount === 8 ? 'eight' : String(completedCount);
+      const word = completedCount === 1 ? 'one' : completedCount === 2 ? 'two' : completedCount === 3 ? 'three' : completedCount === 4 ? 'four' : completedCount === 5 ? 'five' : completedCount === 6 ? 'six' : completedCount === 7 ? 'seven' : completedCount === 8 ? 'eight' : completedCount === 9 ? 'nine' : completedCount === 10 ? 'ten' : String(completedCount);
       bcLc.forEach(function (node) { node.textContent = word; });
     }
 
