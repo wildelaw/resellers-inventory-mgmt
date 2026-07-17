@@ -13,7 +13,7 @@ window.FUNCTIONAL_PROMPT_TEXT = `You are a coding agent. Your task is to run a f
 
 ### Scope
 
-Evaluate the six completed build branches:
+Evaluate the nine completed build branches:
 
 - build-claude-glm-5.2
 - build-claude-glm-5.1
@@ -21,6 +21,9 @@ Evaluate the six completed build branches:
 - build-opencode-glm-5.2
 - build-pi-glm-5.1
 - build-vscode-glm-5.2
+- build-pi-glm-5.2
+- build-codex-glm-5.2
+- build-opencode-minimax-m3
 
 Exclude build-ibm-bob — it did not complete. Do not evaluate it.
 
@@ -33,10 +36,10 @@ Exclude build-ibm-bob — it did not complete. Do not evaluate it.
 
 ### STEP 1 — Prepare worktrees
 
-For each of the six branches, create an isolated git worktree:
+For each of the nine branches, create an isolated git worktree:
 
     mkdir -p /tmp/opencode/eval-func
-    for b in build-claude-glm-5.2 build-claude-glm-5.1 build-opencode-glm-5.1 build-opencode-glm-5.2 build-pi-glm-5.1 build-vscode-glm-5.2; do
+    for b in build-claude-glm-5.2 build-claude-glm-5.1 build-opencode-glm-5.1 build-opencode-glm-5.2 build-pi-glm-5.1 build-vscode-glm-5.2 build-pi-glm-5.2 build-codex-glm-5.2 build-opencode-minimax-m3; do
       git worktree add /tmp/opencode/eval-func/$b $b
     done
 

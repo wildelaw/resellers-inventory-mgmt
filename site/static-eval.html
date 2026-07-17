@@ -15,9 +15,7 @@
         <h1>Static Analysis Results</h1>
         <p class="lead">Source: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/BUILD_EVALUATION.md" target="_blank" rel="noopener">docs/BUILD_EVALUATION.md</a>. Methodology: static source review + real <code>npm ci</code> / lint / <code>tsc --noEmit</code> / <code>vitest run</code> per branch in isolated git worktrees. Branches were not patched, preserving single one-shot-prompt fidelity.</p>
 
-        <div class="callout">
-          <p><strong>Executive summary.</strong> Seven branches compile clean and pass their own suites. <span class="mono">build-claude-glm-5.2</span> leads: only branch shipping all 9 required integration tests, only branch with zero lint errors/warnings, only branch with live-JWT-refresh of role/canViewAll/isActive on existing sessions, and combines strengths of the prior leaders. <span class="mono">build-ibm-bob</span> was excluded — agent exhausted its usage quota mid-build.</p>
-        </div>
+        <div id="exec-summary" class="callout"></div>
       </section>
 
       <section>

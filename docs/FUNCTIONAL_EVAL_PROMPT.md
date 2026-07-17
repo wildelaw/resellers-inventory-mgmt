@@ -38,13 +38,45 @@ The set of branches to evaluate is dynamic. The report sections (§3.<n>, §4 ma
 
 Stars and ranks are **relative to the current cohort**, not absolute:
 
-1. **5★ = current cohort leader** per dimension, not a fixed bar. When a new branch is added, the whole cohort is re-ranked (renumber 1..N) and stars rescaled so the leader = 5★ on each dimension.
+1. **5★ = current cohort leader** per dimension, not a fixed bar. When a new branch is added, the whole cohort is re-ranked (renumbered 1..N) and stars rescaled so the leader = 5★ on each dimension.
 2. **Adding a branch requires:**
    - (a) Full static + functional eval of the new branch only (the new branch is evaluated from scratch).
    - (b) **Re-ranking the entire cohort** (renumber ranks; rescale stars so the leader = 5★; recompute per-dimension winners and the overall recommendation if leadership changed).
    - (c) Updating `docs/BUILD_EVALUATION.md`, `docs/FUNCTIONAL_EVALUATION.md`, and `site/assets/data.js` with the new branch's column/row everywhere.
 3. **Functional re-run trigger rule:** re-execute E2E on existing branches **only** when the new branch's `functionalScore` **strictly exceeds** the current leader's score (raises the bar). If the new branch does not raise the bar (e.g. the leader is already at 100/100, the ceiling), existing functional results stand and only the new branch is appended. Rationale: the 5★ ceiling means a new branch cannot exceed a perfect leader; re-running a leader that already passes 26/26 would burn time without changing rankings.
-4. **Re-evaluation log:** append a dated entry to both `docs/BUILD_EVALUATION.md` and `docs/FUNCTIONAL_EVALUATION.md` (and `site/assets/data.js` if it has a log section) recording: date, branch added, whether functional re-runs were triggered (and why/why not), the new branch's score, and any rank deltas.
+4. **Re-evaluation log:** append a dated entry to both `docs/BUILD_EVALUATION.md` and `docs/FUNCTIONAL_EVALUATION.md` (and `site/assets/data.js` if it has a log section) recording: date, branch added, whether functional re-runs were triggered (and why/why not), the new branch's score, and any rank deltas. The `Rank deltas` column must list **every branch whose ordinal changed**, with `before→after` per branch — never the misleading shorthand "no existing branch's rank changed" when a new branch inserted mid-cohort shifted others down.
+
+### Functional dimensions (5 flows + 18 regression scenarios)
+
+The functional evaluation scores six dimensions, mirroring the static prompt's five-dimension structure. Each branch is scored on:
+
+- **auth flow** (login, logout, redirect-when-unauthenticated) — exercises REG-06, REG-07, REG-08, REG-16
+- **inventory flow** (CRUD items) — exercises REG-05, REG-12, REG-13, REG-14, REG-17
+- **sales flow** (sale creation, refund) — exercises REG-01, REG-02, REG-03, REG-04, REG-18
+- **import flow** (CSV upload for inventory + sales) — no REG scenarios (covered functionally)
+- **rbac flow** (role-based access: user own data, canViewAll sees all, admin manages) — exercises REG-09, REG-10, REG-11, REG-15
+
+The aggregate `functionalScore` (0–100) is computed per branch as `passes/total * 100`, where `passes` and `total` count every flow sub-test + every REG scenario exercised for that branch (see denominator rules below). The per-flow and per-REG results are the raw sub-scores that back the score; they must always be visible alongside any rank.
+
+### Functional score denominator (per-branch, documented)
+
+The denominator is **per-branch and must be surfaced explicitly** in every score display. Different branches may have different denominators because flow sub-test counts vary (e.g. a branch that boots but ships fewer flow sub-tests). Do not silently normalize to a single denominator.
+
+- In each §3 per-branch header, write the score as `NN/100 (Y/Z tests pass; Z = <flowSubTests> flow + <regCount> REG)` — the denominator `Z` and its composition must be visible, not just the rounded percentage.
+- In the §0 Functional Rankings Table and in `functionalRankings[]` in `data.js`, include a `denominator` field and a `passFraction` field (e.g. `25/26`) alongside the score, so the raw pass count backing every rank is always visible.
+- In the re-evaluation log `Score` column, write the score as `NN/100 (Y/Z)` — never just `NN/100`.
+
+### Tie-breaker (equal functionalScore)
+
+When two or more branches have equal `functionalScore` (to the integer percentage), break the tie in this order and record the tie-breaker invoked in the rankings table and re-eval log:
+
+1. **Higher raw pass count** (Y in Y/Z) — a branch passing more tests at the same percentage wins.
+2. **Critical-scenario pass** — REG-06 (session invalidation) pass wins. If both pass/fail REG-06 identically, use REG-01 (non-500 sale creation), then REG-09 (RBAC user-scope isolation).
+3. **Higher flow pass count** — sum of passing flow sub-tests (excluding REGs).
+4. **Larger denominator** — a branch scored on more tests at the same percentage wins (more thoroughly exercised).
+5. **Alphabetical branch name** (ascending) as the final deterministic fallback.
+
+The tie-breaker is what resolves, e.g., a 96/100 tie between a branch passing 25/26 and one passing 24/25: the 25/26 branch wins on rule 1 (higher raw pass count), and the rankings table must show the pass fraction so the resolution is visible.
 
 ### Fidelity rules (critical)
 
@@ -199,6 +231,16 @@ Write/update the report with exactly this structure (the GitHub Pages site parse
 
 <2-4 paragraphs: overall functional winner, biggest shared gaps, notable per-branch surprises.>
 
+## 1a. Functional Rankings Table
+
+| Rank | Branch | Functional score | Pass fraction | Denominator (Z = flow + REG) | Tie-break note |
+|---|---|---|---|---|---|
+| 1 | <branch> | 100 | 26/26 | 8 flow + 18 REG | — |
+| 2 | <branch> | 96 | 25/26 | 8 flow + 18 REG | wins tie on rule 1 (higher raw pass) |
+| ... | ... | ... | ... | ... | ... |
+
+Sorted by score descending, then tie-breaker. The denominator composition column makes the per-branch denominator visible (see "Functional score denominator" in the ranking policy). No rank row may assert an ordinal without its score, pass fraction, and denominator.
+
 ## 2. Methodology
 
 - Playwright version: <version>
@@ -215,7 +257,7 @@ Write/update the report with exactly this structure (the GitHub Pages site parse
 
 ### 3.1 <best-ranked branch>
 
-**Agent:** <agent> · **Boot:** <mode> · **Admin:** <email> (via <seed/setup>) · **Functional score:** NN/100 (NN/26 tests pass)
+**Agent:** <agent> · **Boot:** <mode> · **Admin:** <email> (via <seed/setup>) · **Functional score:** NN/100 (Y/Z tests pass; Z = <flowSubTests> flow + <regCount> REG)
 
 #### E2E flow results
 | Flow | Status | Attempts | Error |
@@ -269,13 +311,13 @@ Write/update the report with exactly this structure (the GitHub Pages site parse
 2. ...
 
 ## 8. Functional Winner & Recommendation
-**Functional winner:** <branch>
+**Functional winner:** <branch> — **<score>/100 (<Y>/<Z> pass)** (the winner line must restate the score and pass fraction, not just the branch name)
 **Recommendation:** <one paragraph>
 
 ## 9. Re-evaluation Log
 | Date | Branch added | Functional E2E run | Functional re-run triggered? | Score | Rank deltas |
 |---|---|---|---|---|---|
-| <date> | <branch> | <scope> | <yes/no — reason> | <score> | <deltas> |
+| <date> | <branch> | <scope> | <yes/no — reason> | <NN/100 (Y/Z)> | <explicit before→after per affected branch, e.g. "opencode-5.2 4→5, vscode-5.2 5→6; new branch enters at #2"> |
 
 ## Appendix
 - Raw Playwright reports: /tmp/opencode/eval-func/<branch>/results/
@@ -296,7 +338,8 @@ Update the `functional` block in `site/assets/data.js` so the site renders the r
 - `functional.crossBranchMatrix` (optional; the site derives matrices from per-branch data)
 - `functional.aggregateFindings` (array of `{sev, branch, finding, flowId, scenarioId}`)
 - `functional.effortSummary` (array of `{branch, total, S, M, L, XL, estimatedHours}`)
-- `functional.functionalWinner` (branch name)
+- `functional.functionalWinner` — an object `{ branch: <name>, score: <0-100>, passFraction: <"Y/Z"> }`, not a bare branch-name string. The winner assertion must always carry the score that produced it.
+- `functional.functionalRankings[]` — new array of N entries (one per completed branch) ranked 1..N, each `{ rank, branch, score, passFraction, denominator, tieBreakNote }`. This is the data source for the site's functional leaderboard (mirrors the static `rankings[]`). No rank without its score.
 - `functional.recommendation` (string)
 - `functional.appendix` (optional string)
 
@@ -366,6 +409,7 @@ Report back:
 - The prompt **auto-discovers** `build-*` branches via `git branch -r`, so new model/agent branches are picked up without editing this file. The only hard-coded exclusion is `build-ibm-bob` (incomplete).
 - **Relative star ratings:** 5★ = current cohort leader per dimension, not an absolute bar. Adding a stronger branch rescales everyone's stars; adding a weaker branch may push existing branches down a rank.
 - **Functional re-run trigger:** existing branches are re-evaluated only when the new branch's score strictly exceeds the current leader's. Since the leader is often at 100/100 (the ceiling), most new branches will NOT trigger a re-run — only the new branch is evaluated and appended.
+- **Per-branch denominator + tie-breaker:** the functional score denominator is per-branch and must be surfaced explicitly in every score display (§3 headers, §1a Rankings Table, §8 winner, §9 re-eval log). When two branches tie on integer percentage, the tie-breaker (raw pass count → critical scenario → flow count → denominator → alphabetical) resolves the order and is recorded in the rankings table and re-eval log.
 - The GitHub Pages site's `site/functional-eval.html` automatically renders the results once `site/assets/data.js` is updated, **but the JS renderers (`static-eval.js`, `branch.js`) have hard-coded branch-column maps that must be extended per new branch, and a new `site/branches/<branch>.html` detail page must be created.** See STEP 10b. No site rebuild needed beyond those edits.
 - The prompt forbids patching build branches so the single one-shot-prompt fidelity of the experiment is preserved — only the canonical Playwright specs may be written into worktrees, and they are never committed.
 
@@ -373,6 +417,7 @@ Report back:
 
 ## CHANGELOG
 
+- **2026-07-17 (rev 3):** Added the "Functional dimensions" enumeration (5 flows + 18 REGs), the per-branch denominator rule (score displayed as `NN/100 (Y/Z; Z = flow + REG)`), the tie-breaker for equal functionalScore, the §1a Functional Rankings Table in the report template, and changed `functional.functionalWinner` from a bare branch name to `{ branch, score, passFraction }`. Added `functional.functionalRankings[]` to `data.js`. The §9 re-eval log `Rank deltas` column now requires explicit before→after per affected branch (closes the "no existing branch's rank changed" misleading shorthand).
 - **2026-07-06 (rev 2):** Added STEP 10b — explicit instructions to update site JS renderers (`static-eval.js`, `branch.js`), create the `site/branches/<branch>.html` detail page, verify `index.html`/`leaderboard.js`/`shared.js` dynamic meta row, and fix stale prose counts. Updated commit list to include all touched site files. Added `node -c` syntax-check verification.
 - **2026-07-06:** Generalized from a hard-coded 6-branch list to branch auto-discovery. Added the ranking policy (relative stars, re-run trigger rule, re-evaluation log). Added NextAuth CSRF-token login instructions, AUTH_SECRET boot requirement, and REG-06 password-restore hygiene. Added import route contract check (JSON vs multipart).
 - **2026-06-30:** Initial version (hard-coded 6 branches: claude-5.2, claude-5.1, opencode-5.1, opencode-5.2, pi-5.1, vscode-5.2).

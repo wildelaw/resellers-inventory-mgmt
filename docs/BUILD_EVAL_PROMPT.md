@@ -167,10 +167,53 @@ Grade each branch against the conformance matrix (all 12 simplifications, 43 end
 
 After analyzing the new branch:
 
-1. Re-number ranks 1..N across all branches (best first).
-2. Rescale stars per dimension so the leader = 5★. Other branches are scaled relative to the leader (e.g. if the leader has 0 type escapes and the next has 1, the next gets 4★; if the leader has 186 tests and the next has 137, the next gets 4★ on test signal).
-3. Recompute `dimensionWinners` (per-dimension leader) and the overall `recommendation` (baseline branch).
-4. Record rank deltas in the re-evaluation log (which branches moved up/down).
+1. **Rescale stars per dimension** so the leader = 5★, using the **explicit per-dimension rubric** below (not qualitative judgment). The rubric is defined in absolute raw-metric thresholds; because the leader on each dimension is guaranteed 5★ by construction, any branch meeting the 5★ thresholds also gets 5★.
+2. **Compute the composite score** for every branch using the weighted formula below, then **re-number ranks 1..N** by composite descending (best first).
+3. **Apply the tie-breaker** (defined below) when two branches have equal composite scores.
+4. Recompute `dimensionWinners` (per-dimension leader) and the overall `recommendation` (baseline branch = rank #1 by composite).
+5. Record rank deltas in the re-evaluation log (which branches moved up/down), **including the composite score and star profile for every ranked branch** so no rank is ever asserted without its underlying score.
+
+#### 6.1 Star-rating rubric (per dimension, from raw metrics collected in STEP 2–5)
+
+Each dimension is scored 1–5★ from the raw metrics already collected. Thresholds are absolute; the cohort leader on each dimension is guaranteed 5★ (if no branch meets the 5★ thresholds, the best branch in the cohort is awarded 5★ and the rest are scaled down by the gap).
+
+| Dimension | Raw metric(s) | 5★ | 4★ | 3★ | 2★ | 1★ |
+|---|---|---|---|---|---|---|
+| **Spec conformance** | §5 conformance matrix: count of ✓ / ◐ / ✗ across 12 simplifications + 43 endpoints + ops + RBAC + test tiers | 0 ✗ and 0 ◐ | 0 ✗ and ≤2 ◐ | ≤1 ✗ or ≤4 ◐ | 2–3 ✗ | >3 ✗ |
+| **Maintainability** | type escapes (`asAny`+`: any`+`<any>`+`@ts-ignore` in src/), `tsc --noEmit` exit, `npm run lint` exit + err/warn count | 0 escapes AND tsc exit 0 AND lint exit 0 | ≤2 escapes AND (tsc exit 0 OR lint exit 0) | ≤10 escapes OR tsc ≤10 err OR lint script broken (eslint runs) | tsc >10 err OR >10 escapes OR lint emits errors | tsc broken AND lint broken AND >20 escapes |
+| **Security** | §5 vulnerability findings by severity (High/Medium/Low) | 0 High and 0 Medium | 0 High and ≤2 Medium | 0 High and ≤5 Medium OR 1 High | ≤2 High | >2 High |
+| **Complexity** | ts/tsx byte total (STEP 3 census); leader = smallest | ≤1.00× leader bytes | ≤1.25× leader | ≤1.5× leader | ≤2× leader | >2× leader |
+| **Test signal** | vitest test count (cohort max = leader), vitest exit, tsc exit, lint exit | leader test count AND vitest exit 0 AND tsc exit 0 AND lint exit 0 | ≥80% leader test count AND vitest exit 0 | ≥60% leader count AND vitest exit 0, OR lint script broken but vitest passes | vitest exit 1 OR <60% leader count | vitest cannot run OR tsc broken |
+
+When a branch's raw metrics fall between two rows, round down (use the lower star). Document the raw metric values alongside each star in the §1 Rankings table and §4 Maintainability so the score backing every star is visible.
+
+#### 6.2 Overall rank aggregation — weighted composite formula
+
+The overall 1..N rank is determined by a **weighted composite score**, not by qualitative judgment:
+
+```
+composite = 0.20 * spec  + 0.20 * maintain  + 0.20 * security
+         + 0.15 * complexity + 0.10 * testSignal
+         + 0.15 * (functionalScore / 20)     # functional scaled from /100 to /5
+```
+
+- `spec`, `maintain`, `security`, `complexity`, `testSignal` are the 1–5 star values from §6.1.
+- `functionalScore` is the 0–100 value from `docs/FUNCTIONAL_EVALUATION.md`. If the functional eval has not been run yet, redistribute the 0.15 functional weight proportionally across the five static dimensions (each becomes 0.2353 / 0.1765 / ... — see the report template for the exact redistribution).
+- `composite` ranges 1.00–5.00. Rank 1..N by composite descending.
+- **Every ranked row must echo its composite and star profile.** The §1 Rankings table, the `rankings[]` array in `data.js`, the §10 Bottom Line, and the `recommendation` callout must all include the `composite` field. A rank is never asserted without the score that produced it.
+- This formula is what reconciles, e.g., a 5★ Complexity branch ranking last overall (its low stars on test signal / maintainability drag the composite down) — the composite column makes the reconciliation visible.
+
+#### 6.3 Tie-breaker
+
+When two branches have equal `composite` (to 2 decimal places), break the tie in this order:
+
+1. Higher `functionalScore` (raw /100)
+2. Higher raw vitest pass count (tests passing, not just test files)
+3. Fewer High-severity findings (§5 vulnerabilities)
+4. Smaller ts/tsx byte total (simpler wins)
+5. Alphabetical branch name (ascending) as the final deterministic fallback
+
+Record the tie-breaker invoked for any tied pair in the re-evaluation log so the resolution is auditable.
 
 ### STEP 7 — Write `docs/BUILD_EVALUATION.md`
 
@@ -185,6 +228,7 @@ Write/update the report with this 11-section structure (the GitHub Pages site pa
 > Re-evaluation log: <date> — added <branch>; static analysis on new branch only; rank deltas.
 
 ## 1. Executive Summary
+  ### Rankings (table with columns: Rank | Branch | Spec | Maintain | Security | Complexity | Test signal | Functional | Composite)
 ## 2. Branch Profiles (table with one column per branch)
 ## 3. Spec Conformance Matrix
   ### 3.1 Architecture & simplifications
@@ -209,7 +253,7 @@ Write/update the report with this 11-section structure (the GitHub Pages site pa
   ### Raw verification results
   ### Endpoint inventory (per branch)
   ### Test files present (per branch)
-## 10. Bottom Line
+## 10. Bottom Line (restates the composite score and star profile for each ranked branch — no rank without its score)
 ## 11. Re-evaluation Log
 ```
 
@@ -221,7 +265,7 @@ Update the static-analysis block in `site/assets/data.js`:
 
 - `meta.staticEvalDate` → report date
 - `profiles[]` → add a row per new branch (agent, agentVersion, model, commit, tsFiles, tsBytes, apiRoutes, pages, unit, functional, integration, e2e, asAny, colonAny, tsIgnore, middleware, lintScript, eslintConfig, npmCi, tsc, vitest, lintResult, extraDeps, nextAuth, zod, bcryptApp, sameSite)
-- `rankings[]` → re-render with N entries, renumbered 1..N
+- `rankings[]` → re-render with N entries, renumbered 1..N. **Each row must include `composite` (the weighted score from STEP 6.2) and the five star fields + `functionalScore` that produced it.** No rank row may assert an ordinal without its composite.
 - `dimensionWinners[]` → update any dimension whose leader changed
 - `recommendation` → update if the baseline changed
 - All spec-conformance / variance / findings / lint tables → add a key/column for the new branch
@@ -287,7 +331,7 @@ Report back:
 - This prompt is the static-analysis counterpart to `docs/FUNCTIONAL_EVAL_PROMPT.md`. Run this prompt first (static analysis), then run the functional prompt (E2E). Both prompts auto-discover branches and share the same ranking policy.
 - It is **resumable**: if an agent is interrupted, a fresh agent can re-run from STEP 1 (worktrees are recreated idempotently) or from any later step.
 - The prompt **auto-discovers** `build-*` branches via `git branch -r`, so new model/agent branches are picked up without editing this file. The only hard-coded exclusion is `build-ibm-bob` (incomplete).
-- **Relative star ratings:** 5★ = current cohort leader per dimension, not an absolute bar. Adding a stronger branch rescales everyone's stars; adding a weaker branch may push existing branches down a rank.
+- **Relative star ratings:** 5★ = current cohort leader per dimension, not an absolute bar. Adding a stronger branch rescales everyone's stars; adding a weaker branch may push existing branches down a rank. The per-dimension thresholds in STEP 6.1 make the raw-metric-to-star mapping explicit and reproducible; the composite formula in STEP 6.2 makes the overall rank deterministic.
 - **No re-analysis of existing branches:** static properties (file counts, type escapes, lint results) do not change between evaluations, so only the new branch is analyzed. This differs from the functional prompt, which may re-run existing branches if the new branch raises the bar.
 - The GitHub Pages site's `site/build-eval.html` automatically renders the results once `site/assets/data.js` is updated, **but the JS renderers (`static-eval.js`, `branch.js`) have hard-coded branch-column maps that must be extended per new branch, and a new `site/branches/<branch>.html` detail page must be created.** See STEP 8b. No site rebuild needed beyond those edits.
 - The prompt forbids patching build branches so the single one-shot-prompt fidelity of the experiment is preserved.
@@ -296,5 +340,6 @@ Report back:
 
 ## CHANGELOG
 
+- **2026-07-17 (rev 3):** Replaced the qualitative star-rescale examples in STEP 6 with an explicit per-dimension star-rating rubric (STEP 6.1), a weighted composite formula for overall rank (STEP 6.2), and a deterministic tie-breaker (STEP 6.3). The §1 Rankings table, `rankings[]`, §10 Bottom Line, and `recommendation` now must echo the `composite` score — no rank asserted without its underlying score. Closes the gap where a 5★ Complexity branch could rank #9 with no visible reconciliation.
 - **2026-07-06 (rev 2):** Added STEP 8b — explicit instructions to update site JS renderers (`static-eval.js`, `branch.js`), create the `site/branches/<branch>.html` detail page, verify `index.html`/`leaderboard.js`/`shared.js` dynamic meta row, and fix stale prose counts. Updated commit list to include all touched site files. Added `node -c` syntax-check verification.
 - **2026-07-06:** Initial version. Branch-agnostic, auto-discovering, with relative star ratings and a re-evaluation log. Mirrors the structure of `docs/FUNCTIONAL_EVAL_PROMPT.md` (updated the same day).

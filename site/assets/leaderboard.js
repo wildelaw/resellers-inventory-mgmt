@@ -46,10 +46,17 @@
     }
 
     // ---- recommendation ----
+    // Surface the baseline's rank #1 + composite so the "recommended baseline" label
+    // is backed by a visible score (per BUILD_EVAL_PROMPT.md rev 3).
     const recB = document.querySelector('[data-rec-branch]');
     const recS = document.querySelector('[data-rec-summary]');
     if (recB) recB.textContent = data.recommendation.baseline;
-    if (recS) recS.textContent = data.recommendation.summary;
+    if (recS) {
+      const baseBranch = data.recommendation.baseline;
+      const rk = (data.rankings || []).find(function (r) { return r.branch === baseBranch; });
+      const prefix = rk ? 'Static rank #' + rk.rank + ' · composite ' + (rk.composite != null ? rk.composite.toFixed(2) : '—') + '. ' : '';
+      recS.textContent = prefix + data.recommendation.summary;
+    }
 
     // ---- leaderboard ----
     const lb = document.getElementById('leaderboard');
@@ -58,7 +65,7 @@
       const rows = completed.map(function (r) {
         const fb = data.functional && data.functional.branches && data.functional.branches[r.branch];
         return Object.assign({}, r, {
-          functionalScore: fb ? fb.functionalScore : null
+          functionalScore: fb ? fb.functionalScore : (r.functionalScore != null ? r.functionalScore : null)
         });
       });
       dataTable(lb, [
@@ -73,6 +80,7 @@
         { key: 'maintain', label: 'Maintain', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
         { key: 'security', label: 'Security', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
         { key: 'complexity', label: 'Complexity', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
+        { key: 'testSignalStar', label: 'Test sig', render: function (v) { return el('span', { class: 'chip-stars', title: (v || 0) + '/5' }, stars(v || 0)); } },
         {
           key: 'functionalScore', label: 'Functional', numeric: true,
           render: function (v) {
@@ -81,20 +89,40 @@
             return el('span', { class: cls, title: v + '/100 E2E' }, v + '/100');
           }
         },
-        { key: 'testSignal', label: 'Test signal', wrap: true }
+        {
+          key: 'composite', label: 'Composite', numeric: true,
+          render: function (v) {
+            if (v == null) return el('span', { class: 'chip chip-na' }, '—');
+            return el('span', { class: 'chip chip-info', title: 'weighted aggregate (0.20·spec + 0.20·maintain + 0.20·security + 0.15·complexity + 0.10·testSig + 0.15·functional/20)' }, v.toFixed(2));
+          }
+        },
+        { key: 'testSignal', label: 'Test signal (raw)', wrap: true }
       ], rows);
     }
 
     // ---- dimension winners ----
+    // Each card surfaces the winner's star/score on that dimension so the "winner" label
+    // is backed by a visible score (per BUILD_EVAL_PROMPT.md rev 3 — no rank without its score).
     const w = document.getElementById('winners');
     if (w) {
       clear(w);
+      const byBranch = {};
+      (data.rankings || []).forEach(function (r) { byBranch[r.branch] = r; });
+      const dimKey = { 'Spec conformance': 'spec', 'Maintainability': 'maintain', 'Vulnerabilities': 'security', 'Complexity': 'complexity', 'Test signal': 'testSignalStar' };
       data.dimensionWinners.forEach(function (d) {
         const card = el('div', { class: 'winner-card' });
         card.appendChild(el('div', { class: 'dim' }, d.dimension));
         card.appendChild(el('div', { class: 'winner' }, [
           el('a', { href: branchHref(d.winner) }, d.winner)
         ]));
+        const k = dimKey[d.dimension];
+        const wr = byBranch[d.winner];
+        if (k && wr && wr[k] != null) {
+          card.appendChild(el('div', { class: 'score', style: 'font-size:12px; margin-top:2px;' }, [
+            stars(wr[k]),
+            el('span', { class: 'dim', style: 'margin-left:6px;' }, wr[k] + '/5')
+          ]));
+        }
         card.appendChild(el('div', { class: 'note' }, d.note));
         w.appendChild(card);
       });

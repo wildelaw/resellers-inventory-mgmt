@@ -24,6 +24,7 @@
     if (!branch) return;
     const profile = data.profiles.find(function (p) { return p.branch === branch; });
     const ranking = data.rankings.find(function (r) { return r.branch === branch; });
+    const functionalRank = (data.functional && data.functional.functionalRankings || []).find(function (r) { return r.branch === branch; });
     const key = conformanceKey(branch);
 
     // title + subtitle
@@ -34,15 +35,23 @@
     }
 
     // stats
+    // Stat row shows the static rank + composite AND the functional rank + score, so the
+    // branch page no longer shows a static #N next to a functional score that implies a
+    // different order without surfacing the functional rank (per the cross-file consistency
+    // requirement in BUILD_EVAL_PROMPT.md rev 3 / FUNCTIONAL_EVAL_PROMPT.md rev 3).
     const stats = document.getElementById('branch-stats');
     if (profile && ranking) {
       clear(stats);
       [
-        ['Rank', '#' + ranking.rank],
+        ['Static rank', '#' + ranking.rank],
+        ['Composite', ranking.composite != null ? ranking.composite.toFixed(2) : '—'],
         ['Spec', stars(ranking.spec)],
         ['Maintain', stars(ranking.maintain)],
         ['Security', stars(ranking.security)],
         ['Complexity', stars(ranking.complexity)],
+        ['Test sig', stars(ranking.testSignalStar || 0)],
+        ['Functional rank', functionalRank ? '#' + functionalRank.rank : '—'],
+        ['Functional', functionalRank ? functionalRank.score + '/100' : '—'],
         ['Vitest', profile.vitest || '—'],
         ['Lint', profile.lintResult || '—']
       ].forEach(function (kv) {

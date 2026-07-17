@@ -58,7 +58,7 @@
       // hide pending section, show result sections
       const pending = document.getElementById('pending-section');
       if (pending) pending.hidden = true;
-      ['methodology-section', 'cross-section', 'regression-section', 'aggregate-section', 'effort-section', 'functional-winner-section', 'per-branch-section'].forEach(function (id) {
+      ['methodology-section', 'cross-section', 'regression-section', 'aggregate-section', 'effort-section', 'functional-leaderboard-section', 'functional-winner-section', 'per-branch-section'].forEach(function (id) {
         const s = document.getElementById(id);
         if (s) s.hidden = false;
       });
@@ -68,6 +68,32 @@
       if (f.methodology) {
         clear(meth);
         meth.appendChild(el('p', { class: 'dim', style: 'white-space:pre-wrap;' }, f.methodology));
+      }
+
+      // functional leaderboard (§1a from FUNCTIONAL_EVALUATION.md) — renders functionalRankings[]
+      // so the site shows an ordered functional ranking, not just a winner. Each row carries its
+      // score + pass fraction + denominator (no rank without its score).
+      const flb = document.getElementById('functional-leaderboard');
+      if (flb) {
+        const fr = f.functionalRankings;
+        if (fr && fr.length) {
+          dataTable(flb, [
+            { key: 'rank', label: '#', numeric: true },
+            { key: 'branch', label: 'Branch', sticky: true, render: function (v) { return el('a', { class: 'mono', href: branchHref(v), style: 'font-size:13px;' }, v); } },
+            {
+              key: 'score', label: 'Functional score', numeric: true,
+              render: function (v) {
+                const cls = v >= 90 ? 'chip chip-pass' : v >= 60 ? 'chip chip-partial' : 'chip chip-fail';
+                return el('span', { class: cls, title: v + '/100' }, v + '/100');
+              }
+            },
+            { key: 'passFraction', label: 'Pass fraction' },
+            { key: 'denominator', label: 'Denominator (Z = flow + REG)', wrap: true },
+            { key: 'tieBreakNote', label: 'Tie-break note', wrap: true }
+          ], fr);
+        } else {
+          flb.appendChild(el('p', { class: 'dim' }, 'No functional leaderboard recorded.'));
+        }
       }
 
       // cross-branch E2E flow matrix
@@ -143,14 +169,23 @@
       }
 
       // winner
+      // functionalWinner may be an object { branch, score, passFraction } (per FUNCTIONAL_EVAL_PROMPT.md
+      // rev 3 — winner must carry its score) or a legacy bare branch-name string. Handle both.
       const fw = document.getElementById('functional-winner');
       if (fw) {
         clear(fw);
-        if (f.functionalWinner) {
+        const w = f.functionalWinner;
+        if (w) {
+          const isObj = typeof w === 'object' && w !== null;
+          const winnerBranch = isObj ? w.branch : w;
+          const winnerScore = isObj ? w.score : null;
+          const winnerPass = isObj ? w.passFraction : null;
           fw.appendChild(el('h3', { style: 'border:0;padding:0;margin-bottom:6px;' }, [
             'Functional winner: ',
-            el('span', { class: 'mono' }, f.functionalWinner)
-          ]));
+            el('span', { class: 'mono' }, winnerBranch),
+            winnerScore != null ? el('span', { class: 'chip chip-pass', style: 'margin-left:10px;' }, winnerScore + '/100') : null,
+            winnerPass ? el('span', { class: 'dim', style: 'margin-left:6px; font-weight:normal;' }, '(' + winnerPass + ' pass)') : null
+          ].filter(Boolean)));
         }
         if (f.recommendation) {
           fw.appendChild(el('p', { class: 'dim' }, f.recommendation));

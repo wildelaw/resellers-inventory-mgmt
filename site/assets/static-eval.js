@@ -18,9 +18,39 @@
   document.addEventListener('DOMContentLoaded', function () {
     const data = window.EVAL_DATA;
 
+    // ---- executive summary (data-driven; replaces the former hardcoded callout) ----
+    // Surfaces the baseline branch + composite + counts derived from data, so the
+    // executive callout stays in sync with rankings (per BUILD_EVAL_PROMPT.md rev 3 —
+    // no rank assertion without its backing score).
+    const es = document.getElementById('exec-summary');
+    if (es) {
+      const rk = (data.rankings || []).slice().sort(function (a, b) { return (a.rank || 0) - (b.rank || 0); });
+      const leader = rk[0];
+      const cleanCount = rk.filter(function (r) { return /lint exit 0/i.test(r.testSignal || ''); }).length;
+      const incomplete = (data.profiles || []).filter(function (p) { return p.branch === 'build-ibm-bob' || (p.note && /incomplete|did not complete/i.test(p.note)); }).length;
+      const attempted = (data.profiles || []).length;
+      es.appendChild(el('p', {}, [
+        el('strong', {}, 'Executive summary. '),
+        document.createTextNode(
+          (cleanCount > 0 ? cleanCount + (cleanCount === 1 ? ' branch has a clean lint pipeline' : ' branches have a clean lint pipeline') + '. ' : '') +
+          (leader ? 'Leader: ' : '') + (leader ? leader.branch + ' (static rank #' + leader.rank + ', composite ' + (leader.composite != null ? leader.composite.toFixed(2) : '—') + '): ' : '') +
+          (data.recommendation && data.recommendation.summary ? data.recommendation.summary : '') +
+          (incomplete > 0 ? ' ' + incomplete + ' branch' + (incomplete === 1 ? ' was' : 'es were') + ' excluded (incomplete — agent exhausted its usage quota mid-build).' : '')
+        )
+      ]));
+    }
+
     // ---- §1 rankings ----
+    // Mirrors the index.html leaderboard: rank + 5 dimension stars + functional + composite + raw test signal.
+    // The composite column reconciles every rank with its underlying score (per BUILD_EVAL_PROMPT.md rev 3).
     const rk = document.getElementById('rankings');
     if (rk) {
+      const rows = (data.rankings || []).map(function (r) {
+        const fb = data.functional && data.functional.branches && data.functional.branches[r.branch];
+        return Object.assign({}, r, {
+          functionalScore: fb ? fb.functionalScore : (r.functionalScore != null ? r.functionalScore : null)
+        });
+      });
       dataTable(rk, [
         { key: 'rank', label: '#', numeric: true },
         { key: 'branch', label: 'Branch', sticky: true, render: function (v) { return el('a', { class: 'mono', href: branchHref(v), style: 'font-size:13px;' }, v); } },
@@ -28,8 +58,24 @@
         { key: 'maintain', label: 'Maintain', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
         { key: 'security', label: 'Security', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
         { key: 'complexity', label: 'Complex', render: function (v) { return el('span', { class: 'chip-stars' }, stars(v)); } },
-        { key: 'testSignal', label: 'Test signal', wrap: true }
-      ], data.rankings);
+        { key: 'testSignalStar', label: 'Test sig', render: function (v) { return el('span', { class: 'chip-stars', title: (v || 0) + '/5' }, stars(v || 0)); } },
+        {
+          key: 'functionalScore', label: 'Functional', numeric: true,
+          render: function (v) {
+            if (v == null) return el('span', { class: 'chip chip-na' }, '—');
+            const cls = v >= 90 ? 'chip chip-pass' : v >= 60 ? 'chip chip-partial' : 'chip chip-fail';
+            return el('span', { class: cls, title: v + '/100 E2E' }, v + '/100');
+          }
+        },
+        {
+          key: 'composite', label: 'Composite', numeric: true,
+          render: function (v) {
+            if (v == null) return el('span', { class: 'chip chip-na' }, '—');
+            return el('span', { class: 'chip chip-info', title: 'weighted aggregate' }, v.toFixed(2));
+          }
+        },
+        { key: 'testSignal', label: 'Test signal (raw)', wrap: true }
+      ], rows);
     }
 
     // ---- §2 profiles ----

@@ -45,6 +45,12 @@
         <div id="effort-summary"></div>
       </section>
 
+      <section id="functional-leaderboard-section" hidden>
+        <h2>Functional Leaderboard</h2>
+        <p class="dim">Overall functional ranking 1..9 by <code>functionalScore</code> (passes/total × 100) descending, then the tie-breaker (raw pass count → critical scenario → flow pass count → denominator → alphabetical). The denominator is per-branch and surfaced explicitly — no rank is asserted without its score, pass fraction, and denominator.</p>
+        <div id="functional-leaderboard"></div>
+      </section>
+
       <section id="functional-winner-section" hidden>
         <h2>Functional winner & recommendation</h2>
         <div id="functional-winner" class="callout"></div>
@@ -75,7 +81,7 @@
         <h3>Process</h3>
         <div class="card">
           <ol>
-            <li>For each of the 6 completed build branches, check out the branch into an isolated git worktree at <code>/tmp/opencode/eval-func/&lt;branch&gt;</code>.</li>
+            <li>For each of the 9 completed build branches, check out the branch into an isolated git worktree at <code>/tmp/opencode/eval-func/&lt;branch&gt;</code>.</li>
             <li>Boot the app the way the spec requires: <code>docker compose --profile https up -d</code> (preferred for fidelity — real Caddy TLS + rate limiting + /data volume), falling back to <code>npm run dev</code> + <code>npx tsx src/scripts/seed.ts</code>. Verify <code>/api/health</code> returns 200.</li>
             <li>If a branch is missing a Playwright spec file (common — only claude-5.2, claude-5.1, and vscode-5.2 ship any), write the canonical spec from <code>TEST_STRATEGY.md</code> into the worktree's <code>tests/e2e/</code>. This gives every build an equal functional test. Do not commit these specs.</li>
             <li>Run all 5 spec flows with the 18 regression scenarios as in-flow assertions. Run each flow 3× to surface flakiness (rate-limit 429s under Caddy are recorded as info, not failure).</li>

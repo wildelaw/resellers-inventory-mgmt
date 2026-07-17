@@ -13,12 +13,12 @@
     <div class="container">
       <section>
         <h1>Functional Evaluation Prompt</h1>
-        <p class="lead">A reusable, self-contained prompt that drives a coding agent to run the full Playwright E2E evaluation across all six completed builds and write <code>docs/FUNCTIONAL_EVALUATION.md</code>. Source of truth: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/FUNCTIONAL_EVAL_PROMPT.md" target="_blank" rel="noopener">docs/FUNCTIONAL_EVAL_PROMPT.md</a>.</p>
+        <p class="lead">A reusable, self-contained prompt that drives a coding agent to run the full Playwright E2E evaluation across all nine completed builds and write <code>docs/FUNCTIONAL_EVALUATION.md</code>. Source of truth: <a href="https://github.com/wildelaw/resellers-inventory-mgmt/blob/main/docs/FUNCTIONAL_EVAL_PROMPT.md" target="_blank" rel="noopener">docs/FUNCTIONAL_EVAL_PROMPT.md</a>.</p>
 
         <div class="callout">
           <p><strong>How to use.</strong> Copy the prompt below and paste it into any coding agent (Claude Code, opencode, VS Code Copilot, etc.) with access to this repo. The agent will:</p>
           <ol style="margin-bottom:0;">
-            <li>Check out each of the 6 completed build branches into isolated git worktrees.</li>
+            <li>Check out each of the 9 completed build branches into isolated git worktrees.</li>
             <li>Boot each build via Docker Compose (or <code>npm run dev</code> + seed as fallback).</li>
             <li>Write the canonical 5 Playwright E2E spec files from <code>TEST_STRATEGY.md</code> into each worktree if missing.</li>
             <li>Run all 5 flows with 18 regression assertions, 3 retries each.</li>
