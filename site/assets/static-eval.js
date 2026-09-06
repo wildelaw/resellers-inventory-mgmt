@@ -19,6 +19,10 @@
   document.addEventListener('DOMContentLoaded', function () {
     const data = window.EVAL_DATA;
 
+    // ---- dynamic meta: security review date ----
+    const srd = document.querySelector('[data-security-review-date]');
+    if (srd) srd.textContent = (data.meta && data.meta.securityReviewDate) || '—';
+
     // ---- executive summary (data-driven; replaces the former hardcoded callout) ----
     // Surfaces the baseline branch + composite + counts derived from data, so the
     // executive callout stays in sync with rankings (per BUILD_EVAL_PROMPT.md rev 3 —
@@ -215,6 +219,25 @@
         { key: 'finding', label: 'Finding', wrap: true },
         { key: 'location', label: 'Location', wrap: true, render: function (v) { return el('code', null, v); } }
       ], data.findings);
+    }
+
+    // ---- §5.5 dynamic security review (2026-09-05) ----
+    // Review-only pass: findings do not alter static stars/composites/ranks
+    // (per BUILD_EVALUATION.md §5.5 and the §11 re-evaluation log).
+    const sr = document.getElementById('security-review');
+    if (sr && data.securityReview) {
+      const s = data.securityReview;
+      sr.appendChild(el('p', { class: 'dim', style: 'font-size:13px;' }, s.method + ' ' + (s.summary || '')));
+      dataTable(sr, [
+        { key: 'sev', label: 'Sev', render: function (v) { return sevChip(v); } },
+        { key: 'branch', label: 'Branch', sticky: true, render: function (v) { return el('a', { class: 'mono', href: branchHref(v), style: 'font-size:13px;' }, SHORT[v] || v); } },
+        { key: 'finding', label: 'Finding', wrap: true },
+        { key: 'location', label: 'Location', wrap: true, render: function (v) { return el('code', null, v); } },
+        { key: 'filterConf', label: 'Conf', numeric: true, render: function (v) { return el('span', { class: 'chip chip-info', title: 'filter confidence / 10 (bar: >= 8)' }, String(v)); } }
+      ], s.findings);
+      if (s.belowBar) {
+        sr.appendChild(el('p', { class: 'dim', style: 'font-size:12px; margin-top:10px;' }, s.belowBar));
+      }
     }
 
     // ---- Appendix A raw verification ----

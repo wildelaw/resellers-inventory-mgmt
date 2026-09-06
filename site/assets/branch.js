@@ -135,6 +135,28 @@
       }
     }
 
+    // dynamic security review for this branch (review-only pass; does not alter
+    // static stars/composites/ranks — see BUILD_EVALUATION.md §5.5 / §11 log).
+    // Appended inside #findings via a wrapper div (dataTable clears its target).
+    const srData = data.securityReview;
+    if (fd && srData && srData.findings) {
+      const secFindings = srData.findings.filter(function (f) { return f.branch === branch; });
+      const srWrap = el('div');
+      fd.appendChild(srWrap);
+      srWrap.appendChild(el('h3', { style: 'margin-top:24px;' }, 'Dynamic security review (' + srData.date + ')'));
+      if (secFindings.length) {
+        srWrap.appendChild(el('p', { class: 'dim', style: 'font-size:13px;' }, srData.method + ' Findings below are kept at filter confidence >= ' + srData.confidenceThreshold + '/10.'));
+        dataTable(srWrap, [
+          { key: 'sev', label: 'Sev', render: function (v) { return sevChip(v); } },
+          { key: 'finding', label: 'Finding', wrap: true },
+          { key: 'location', label: 'Location', wrap: true, render: function (v) { return el('code', null, v); } },
+          { key: 'filterConf', label: 'Conf', numeric: true, render: function (v) { return el('span', { class: 'chip chip-info', title: 'filter confidence / 10 (bar: >= 8)' }, String(v)); } }
+        ], secFindings);
+      } else if (srData.cleanBranches && srData.cleanBranches.indexOf(branch) >= 0) {
+        srWrap.appendChild(el('div', { class: 'callout' }, [el('p', {}, 'Clean: no confirmed findings at filter confidence >= ' + srData.confidenceThreshold + '/10 in this review.')]));
+      }
+    }
+
     // functional evaluation for this branch
     const fe = document.getElementById('functional');
     if (fe) {
