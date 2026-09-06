@@ -45,7 +45,7 @@
 
       <section>
         <h2>§5 Vulnerabilities</h2>
-        <p class="dim">All nine implement <code>validateOriginOrReferer</code> for POST/PUT/DELETE/PATCH, returning 403 on missing/mismatched Origin/Referer. No raw SQL, no <code>eval</code>, no <code>dangerouslySetInnerHTML</code> anywhere. Key differences below.</p>
+        <p class="dim">All ten implement <code>validateOriginOrReferer</code> for POST/PUT/DELETE/PATCH, returning 403 on missing/mismatched Origin/Referer. No raw SQL, no <code>eval</code>, no <code>dangerouslySetInnerHTML</code> anywhere. Key differences below.</p>
         <ul>
           <li><strong>build-claude-glm-5.2:</strong> most robust — configurable ORIGIN_EXEMPT_PREFIXES, rejects with 403 when no host established, explicit SameSite=strict, live JWT refresh of passwordChangedAt/role/canViewAll/isActive, withAuth also rejects deactivated accounts.</li>
           <li><strong>build-pi-glm-5.1:</strong> <strong style="color:var(--red);">CRITICAL</strong> — <code>jwt</code> callback copies id/role/canViewAll but never copies <code>passwordChangedAt</code>. <code>token.passwordChangedAt</code> is always 0, so <code>withAuth</code>'s check is always false → password changes do <em>not</em> invalidate existing JWTs. Directly violates AUTH-02/SEC-03. Severity: High.</li>
@@ -60,7 +60,7 @@
 
       <section>
         <h2>§7 Variances between branches</h2>
-        <p class="dim">Key interpretation differences across the nine builds.</p>
+        <p class="dim">Key interpretation differences across the ten builds.</p>
         <div id="variances"></div>
       </section>
 
@@ -79,7 +79,7 @@
             <ol>
               <li><strong>Worktrees.</strong> Each branch checked out into an isolated git worktree under <code>/tmp/opencode/eval/&lt;branch&gt;</code>.</li>
               <li><strong>Static analysis.</strong> File censuses via <code>find</code> + <code>wc</code>. Type-escape and dangerous-pattern counts via <code>grep -rn</code> over <code>src/</code> (tests excluded unless noted).</li>
-              <li><strong>Dynamic verification.</strong> Per worktree: <code>npm ci --no-audit --no-fund</code> (or <code>npm install</code> where no lockfile shipped), then lint, then <code>npx tsc --noEmit</code>, then <code>npm test</code>. Eight of nine installed cleanly and compiled/passed tests under Node 24.15 / npm 11.12; codex-5.2 is the sole branch where <code>tsc</code> exits 1 (101 errors) and <code>vitest</code> exits 1 (16/93 fail).</li>
+              <li><strong>Dynamic verification.</strong> Per worktree: <code>npm ci --no-audit --no-fund</code> (or <code>npm install</code> where no lockfile shipped), then lint, then <code>npx tsc --noEmit</code>, then <code>npm test</code>. Nine of ten installed cleanly and compiled/passed tests under Node 24.15 / npm 11.12; codex-5.2 is the sole branch where <code>tsc</code> exits 1 (101 errors) and <code>vitest</code> exits 1 (16/93 fail).</li>
               <li><strong>No patching.</strong> Branches were not modified — broken lint or missing endpoints recorded as-is.</li>
               <li><strong>No commits.</strong> Only this report was written; nothing committed. Worktrees under <code>/tmp/opencode/eval/</code> are throwaway.</li>
               <li><strong>build-ibm-bob excluded.</strong> Did not complete (agent exhausted Pro plan quota mid-build). Branch remains in repo for reference.</li>

@@ -13,38 +13,39 @@ window.EVAL_DATA = {
     staticEvalPath: 'docs/BUILD_EVALUATION.md',
     functionalEvalPath: 'docs/FUNCTIONAL_EVALUATION.md',
     functionalPromptPath: 'docs/FUNCTIONAL_EVAL_PROMPT.md',
-    staticEvalDate: '2026-07-16',
-    functionalEvalDate: '2026-07-16', // set when FUNCTIONAL_EVALUATION.md is written
+    staticEvalDate: '2026-09-05',
+    functionalEvalDate: '2026-09-05', // set when FUNCTIONAL_EVALUATION.md is written
     functionalStatus: 'complete' // 'pending' | 'partial' | 'complete'
   },
 
   // ---------- Rankings (from BUILD_EVALUATION.md §1) ----------
   // Each row includes `testSignalStar` (1-5, per BUILD_EVAL_PROMPT.md STEP 6.1 rubric)
-  // and `composite` (weighted score per STEP 6.2). Ranks 1..9 are assigned by composite
+  // and `composite` (weighted score per STEP 6.2). Ranks 1..10 are assigned by composite
   // descending (the rank determinant per rev 3) — no rank is asserted without its score.
   rankings: [
     { rank: 1, branch: 'build-claude-glm-5.2',         spec: 5, maintain: 5, security: 5, complexity: 4, testSignalStar: 5, composite: 4.85, functionalScore: 100, testSignal: '23 files / 186 tests / lint exit 0' },
-    { rank: 2, branch: 'build-vscode-glm-5.2',         spec: 4, maintain: 4, security: 4, complexity: 4, testSignalStar: 3, composite: 4.02, functionalScore: 96,  testSignal: '9 files / 100 tests / lint script broken' },
-    { rank: 3, branch: 'build-opencode-glm-5.2',       spec: 4, maintain: 4, security: 5, complexity: 3, testSignalStar: 3, composite: 4.01, functionalScore: 88,  testSignal: '12 files / 134 tests / lint script broken' },
-    { rank: 4, branch: 'build-pi-glm-5.2',             spec: 4, maintain: 3, security: 4, complexity: 5, testSignalStar: 3, composite: 3.97, functionalScore: 96,  testSignal: '14 files / 137 tests / lint script broken' },
-    { rank: 5, branch: 'build-claude-glm-5.1',         spec: 5, maintain: 5, security: 4, complexity: 4, testSignalStar: 3, composite: 3.96, functionalScore: 35,  testSignal: '14 files / 121 tests / lint exit 1 (11 err)' },
-    { rank: 6, branch: 'build-opencode-minimax-m3',    spec: 4, maintain: 4, security: 3, complexity: 4, testSignalStar: 3, composite: 3.82, functionalScore: 96,  testSignal: '15 files / 135 tests / lint script broken' },
-    { rank: 7, branch: 'build-opencode-glm-5.1', spec: 4, maintain: 3, security: 4, complexity: 4, testSignalStar: 3, composite: 3.62, functionalScore: 69,  testSignal: '14 files / 115 tests / lint exit 1 (119 err)' },
-    { rank: 8, branch: 'build-pi-glm-5.1',             spec: 3, maintain: 3, security: 2, complexity: 4, testSignalStar: 3, composite: 2.96, functionalScore: 62,  testSignal: '9 files / 95 tests / lint script broken' },
-    { rank: 9, branch: 'build-codex-glm-5.2',          spec: 4, maintain: 2, security: 3, complexity: 5, testSignalStar: 1, composite: 2.65, functionalScore: 0,   testSignal: '7 files (77 pass / 16 fail) / tsc exit 1 (101 err) / lint script broken' }
+    { rank: 2, branch: 'build-claude-glm-5.3-flash', spec: 5, maintain: 4, security: 4, complexity: 4, testSignalStar: 4, composite: 4.35, functionalScore: 100, testSignal: '23 files / 213 tests / vitest+tsc exit 0 / lint script broken' },
+    { rank: 3, branch: 'build-vscode-glm-5.2',         spec: 4, maintain: 4, security: 4, complexity: 4, testSignalStar: 3, composite: 4.02, functionalScore: 96,  testSignal: '9 files / 100 tests / lint script broken' },
+    { rank: 4, branch: 'build-opencode-glm-5.2',       spec: 4, maintain: 4, security: 5, complexity: 3, testSignalStar: 3, composite: 4.01, functionalScore: 88,  testSignal: '12 files / 134 tests / lint script broken' },
+    { rank: 5, branch: 'build-pi-glm-5.2',             spec: 4, maintain: 3, security: 4, complexity: 5, testSignalStar: 3, composite: 3.97, functionalScore: 96,  testSignal: '14 files / 137 tests / lint script broken' },
+    { rank: 6, branch: 'build-claude-glm-5.1',         spec: 5, maintain: 5, security: 4, complexity: 4, testSignalStar: 3, composite: 3.96, functionalScore: 35,  testSignal: '14 files / 121 tests / lint exit 1 (11 err)' },
+    { rank: 7, branch: 'build-opencode-minimax-m3',    spec: 4, maintain: 4, security: 3, complexity: 4, testSignalStar: 3, composite: 3.82, functionalScore: 96,  testSignal: '15 files / 135 tests / lint script broken' },
+    { rank: 8, branch: 'build-opencode-glm-5.1', spec: 4, maintain: 3, security: 4, complexity: 4, testSignalStar: 3, composite: 3.62, functionalScore: 69,  testSignal: '14 files / 115 tests / lint exit 1 (119 err)' },
+    { rank: 9, branch: 'build-pi-glm-5.1',             spec: 3, maintain: 3, security: 2, complexity: 4, testSignalStar: 3, composite: 2.96, functionalScore: 62,  testSignal: '9 files / 95 tests / lint script broken' },
+    { rank: 10, branch: 'build-codex-glm-5.2',         spec: 4, maintain: 2, security: 3, complexity: 5, testSignalStar: 1, composite: 2.65, functionalScore: 0,   testSignal: '7 files (77 pass / 16 fail) / tsc exit 1 (101 err) / lint script broken' }
   ],
 
   dimensionWinners: [
-    { dimension: 'Spec conformance', winner: 'build-claude-glm-5.2', note: "Canonical withAuth wrapper, src/proxy.ts naming, exact 24-endpoint surface, full e2e suite, and the only branch with all 9 required integration tests. Co-winner: build-claude-glm-5.1." },
+    { dimension: 'Spec conformance', winner: 'build-claude-glm-5.2', note: "Canonical withAuth wrapper, src/proxy.ts naming, exact 24-endpoint surface, full e2e suite, and the first branch with all 9 required integration tests. Co-winner: build-claude-glm-5.3-flash (canonical wrapper, correct proxy, all 24 endpoints, full 4-tier suite incl. 9 integration + 5 e2e, live passwordChangedAt refresh, explicit SameSite) and build-claude-glm-5.1 (same patterns, but no integration tests and missing drizzle/meta/)." },
     { dimension: 'Maintainability',  winner: 'build-claude-glm-5.2', note: 'Zero as-any / :any / @ts-ignore in src/, proper NextAuth module augmentation, lint passes with zero errors and zero warnings, centralized bcrypt cost in config.ts.' },
     { dimension: 'Vulnerabilities',  winner: 'build-claude-glm-5.2', note: "Explicit sameSite:'strict', live JWT refresh of passwordChangedAt/role/canViewAll/isActive on every request, withAuth rejects deactivated accounts, defensive validateOriginOrReferer. Co-winner: build-opencode-glm-5.2." },
     { dimension: 'Complexity',       winner: 'build-codex-glm-5.2', note: 'Smallest byte total in the cohort (230 KB). Co-winner: build-pi-glm-5.2 (fewest files among compiling builds — 72, third-smallest bytes — 282 KB) and build-opencode-glm-5.1 (second-smallest bytes — 242 KB). Note: codex-5.2 footprint win discounted in overall rank by tsc/vitest failures. vscode-5.2 notable: 85 files / 268 KB with near-full type safety.' },
-    { dimension: 'Test signal',       winner: 'build-claude-glm-5.2', note: 'Only branch with the complete 4-tier suite (7 unit + 7 functional + 9 integration + 5 e2e) and the only branch whose lint passes clean.' }
+    { dimension: 'Test signal',       winner: 'build-claude-glm-5.2', note: 'First branch with the complete 4-tier suite (7 unit + 7 functional + 9 integration + 5 e2e) and the only branch whose lint passes clean. build-claude-glm-5.3-flash matches the 4-tier suite and ships the largest suite in the cohort (213 tests, all passing) but its broken lint pipeline caps it at 4 stars.' }
   ],
 
   recommendation: {
     baseline: 'build-claude-glm-5.2',
-    summary: 'Most spec-faithful, fully type-safe, cleanest lint, complete test suite across all four tiers, security-hardened (explicit SameSite + live JWT refresh + isActive enforcement), canonical patterns throughout. No high- or medium-severity findings.'
+    summary: 'Most spec-faithful, fully type-safe, cleanest lint, complete test suite across all four tiers, security-hardened (explicit SameSite + live JWT refresh + isActive enforcement), canonical patterns throughout. No high- or medium-severity findings. The new #2, build-claude-glm-5.3-flash (composite 4.35, functional 100/100), is the strongest alternative baseline ever produced: matches claude-5.2 at the functional ceiling (25/25 E2E), the 9-integration-test completeness, and the core security posture, with a smaller footprint (285 KB vs 357 KB) — but its non-functional lint pipeline, passwordChangedAt-only live refresh, and missing isActive gate leave claude-5.2 ahead on 3 of 5 dimensions.'
   },
 
   // ---------- Branch profiles (§2) ----------
@@ -56,6 +57,14 @@ window.EVAL_DATA = {
       asAny: 0, colonAny: 0, tsIgnore: 0, middleware: 'src/proxy.ts', lintScript: 'eslint . (works)',
       eslintConfig: true, npmCi: true, tsc: true, vitest: '186 pass', lintResult: 'exit 0 (0 err / 0 warn)',
       extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '10 (centralized in config.ts)', sameSite: "explicit 'strict'"
+    },
+    {
+      branch: 'build-claude-glm-5.3-flash', agent: 'Claude Code', agentVersion: '2.1.261', model: 'GLM 5.3 Flash', commit: 'e3946ee',
+      tsFiles: 79, tsBytes: 285480, apiRoutes: 24, pages: 17,
+      unit: 7, functional: 7, integration: 9, e2e: 5,
+      asAny: 0, colonAny: 0, tsIgnore: 0, middleware: 'src/proxy.ts', lintScript: 'next lint (broken in Next 16)',
+      eslintConfig: false, npmCi: true, tsc: true, vitest: '213 pass', lintResult: "exit 1 — next lint removed; no ESLint config shipped at all (no eslint.config.mjs, no legacy .eslintrc.json); npx eslint . fallback also fails",
+      extraDeps: '—', nextAuth: '5.0.0-beta.30', zod: '^4.3.6', bcryptApp: '10 (hardcoded at each call site)', sameSite: "explicit 'strict' (__Secure- name switching)"
     },
     {
       branch: 'build-claude-glm-5.1', agent: 'Claude Code', agentVersion: '2.1.176', model: 'GLM 5.1', commit: '4ce31a9',
@@ -135,51 +144,52 @@ window.EVAL_DATA = {
   // ---------- Spec conformance (§3) ----------
   conformance: {
     '3.1 Architecture & simplifications': [
-      { req: '2 roles + canViewAll (no power_user)',            claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: "all schema.ts: role enum ['admin','user'] + canViewAll" },
-      { req: 'No CSRF token system',                            claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'no csrf.ts / csrf-provider.tsx / useCsrfToken.ts in any branch' },
-      { req: 'No revoked_tokens table',                         claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all schemas: 6 tables only' },
-      { req: 'No account lockout columns',                      claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'no failed_login_attempts/locked_until' },
-      { req: 'No in-app rate limiter',                           claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'no rate-limit.ts' },
-      { req: 'Single-source profit (TS only)',                   claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all reports/route.ts use calculateProfit; 0 SQL profit expressions' },
-      { req: 'No auto $0 sales on donate/discard',               claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all set only removalDate; no sales insert on transition' },
-      { req: 'app_config single-row table',                      claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all schemas: appConfig with id default(1)' },
-      { req: 'Removed tables absent',                            claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all schemas' },
-      { req: 'withAuth wrapper pattern',                         claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'partial', pi51: 'partial', vscode52: 'pass', pi52: 'partial', codex52: 'partial', opencodeM3: 'pass', evidence: 'claude52/51, opencode17174, vscode52 use export const POST = withAuth(...); opencode52, pi-5.2, pi-5.1, codex-5.2 wrap inside async function POST (functionally equivalent, deviates from canonical form)' },
-      { req: 'Server Components for data pages',                 claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'inventory/page.tsx, sales/page.tsx, reports/page.tsx, app/page.tsx' },
-      { req: 'calculateSalesTaxFromPrice formula matches spec',  claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'FAIL', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'vscode52 uses price * rate (add tax) instead of price - price/(1+rate) (extract from tax-inclusive); pi-5.2 and codex-5.2 use the spec formula correctly' }
+      { req: '2 roles + canViewAll (no power_user)',            claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: "all schema.ts: role enum ['admin','user'] + canViewAll" },
+      { req: 'No CSRF token system',                            claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'no csrf.ts / csrf-provider.tsx / useCsrfToken.ts in any branch' },
+      { req: 'No revoked_tokens table',                         claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all schemas: 6 tables only' },
+      { req: 'No account lockout columns',                      claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'no failed_login_attempts/locked_until' },
+      { req: 'No in-app rate limiter',                           claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'no rate-limit.ts' },
+      { req: 'Single-source profit (TS only)',                   claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all reports/route.ts use calculateProfit; 0 SQL profit expressions' },
+      { req: 'No auto $0 sales on donate/discard',               claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all set only removalDate; no sales insert on transition' },
+      { req: 'app_config single-row table',                      claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all schemas: appConfig with id default(1)' },
+      { req: 'Removed tables absent',                            claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'all schemas' },
+      { req: 'withAuth wrapper pattern',                         claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'partial', pi51: 'partial', vscode52: 'pass', pi52: 'partial', codex52: 'partial', opencodeM3: 'pass', evidence: 'claude52/51, opencode17174, vscode52 use export const POST = withAuth(...); opencode52, pi-5.2, pi-5.1, codex-5.2 wrap inside async function POST (functionally equivalent, deviates from canonical form)' },
+      { req: 'Server Components for data pages',                 claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'inventory/page.tsx, sales/page.tsx, reports/page.tsx, app/page.tsx' },
+      { req: 'calculateSalesTaxFromPrice formula matches spec',  claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'FAIL', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: 'vscode52 uses price * rate (add tax) instead of price - price/(1+rate) (extract from tax-inclusive); pi-5.2 and codex-5.2 use the spec formula correctly' }
     ],
     '3.2 API surface': [
-      { req: 'All 43 spec endpoints present',      claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass (+1 extra /sales/export)', pi51: 'FAIL (-/mileage/export, -/mileage/reports)', vscode52: 'pass', pi52: 'pass', codex52: 'pass (all 24 present)', opencodeM3: 'pass (all 24 present)', evidence: '' },
-      { req: 'Removed endpoints absent',           claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
-      { req: '/api/auth/* exempt from Origin check', claude52: 'pass (also /api/setup)', claude51: 'pass', opencode17174: 'FAIL', opencode52: 'partial (no explicit exemption)', pi51: 'pass (also /api/setup POST)', vscode52: 'FAIL (no exemption)', pi52: 'FAIL (no exemption — regression vs pi-5.1)', codex52: 'FAIL (no exemption)', opencodeM3: 'FAIL (no exemption)', evidence: '' }
+      { req: 'All 43 spec endpoints present',      claude52: 'pass', claude53f: 'pass (all 24 present)', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass (+1 extra /sales/export)', pi51: 'FAIL (-/mileage/export, -/mileage/reports)', vscode52: 'pass', pi52: 'pass', codex52: 'pass (all 24 present)', opencodeM3: 'pass (all 24 present)', evidence: '' },
+      { req: 'Removed endpoints absent',           claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
+      { req: '/api/auth/* exempt from Origin check', claude52: 'pass (also /api/setup)', claude53f: 'pass (also POST /api/setup)', claude51: 'pass', opencode17174: 'FAIL', opencode52: 'partial (no explicit exemption)', pi51: 'pass (also /api/setup POST)', vscode52: 'FAIL (no exemption)', pi52: 'FAIL (no exemption — regression vs pi-5.1)', codex52: 'FAIL (no exemption)', opencodeM3: 'FAIL (no exemption)', evidence: '' }
     ],
     '3.3 Config & ops': [
-      { req: 'src/proxy.ts middleware (named per spec)',   claude52: 'pass', claude51: 'pass', opencode17174: 'FAIL (src/middleware.ts)', opencode52: 'pass', pi51: 'FAIL (src/middleware.ts)', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
-      { req: 'next.config.ts security headers + CSP',      claude52: 'pass (+serverExternalPackages)', claude51: 'pass', opencode17174: 'pass (+serverExternalPackages)', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass (+serverExternalPackages)', evidence: '' },
-      { req: 'Caddyfile rate limit 5/15min auth + 100/15min api', claude52: 'pass (scoped via handle)', claude51: 'pass', opencode17174: 'pass (scoped via handle_path)', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass (global zones)', codex52: 'pass (global zones)', opencodeM3: 'pass (global zones)', evidence: '' },
-      { req: 'Dockerfile multi-stage + /data + non-root user', claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
-      { req: 'bcrypt cost factor 10 (SEC-02)',              claude52: 'pass (centralized)', claude51: 'partial (12 app, 10 seed)', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
-      { req: 'drizzle.config.ts → ./src/lib/schema.ts',     claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
-      { req: 'Migration .sql + meta/ journal',              claude52: 'pass', claude51: 'partial (missing meta/)', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'partial (missing meta/ — only 0000_initial.sql)', opencodeM3: 'pass', evidence: '' }
+      { req: 'src/proxy.ts middleware (named per spec)',   claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'FAIL (src/middleware.ts)', opencode52: 'pass', pi51: 'FAIL (src/middleware.ts)', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
+      { req: 'next.config.ts security headers + CSP',      claude52: 'pass (+serverExternalPackages)', claude53f: 'pass (+serverExternalPackages)', claude51: 'pass', opencode17174: 'pass (+serverExternalPackages)', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass (+serverExternalPackages)', evidence: '' },
+      { req: 'Caddyfile rate limit 5/15min auth + 100/15min api', claude52: 'pass (scoped via handle)', claude53f: 'pass (scoped via match)', claude51: 'pass', opencode17174: 'pass (scoped via handle_path)', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass (global zones)', codex52: 'pass (global zones)', opencodeM3: 'pass (global zones)', evidence: '' },
+      { req: 'Dockerfile multi-stage + /data + non-root user', claude52: 'pass', claude53f: 'pass (+dedicated migrate-deps stage)', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
+      { req: 'bcrypt cost factor 10 (SEC-02)',              claude52: 'pass (centralized)', claude53f: 'pass', claude51: 'partial (12 app, 10 seed)', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
+      { req: 'drizzle.config.ts → ./src/lib/schema.ts',     claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
+      { req: 'Migration .sql + meta/ journal',              claude52: 'pass', claude53f: 'pass', claude51: 'partial (missing meta/)', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'partial (missing meta/ — only 0000_initial.sql)', opencodeM3: 'pass', evidence: '' }
     ],
     '3.4 RBAC & auth': [
-      { req: 'passwordChangedAt session invalidation (AUTH-02)', claude52: 'pass+ (live-refresh every request)', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'FAIL (broken — never written to JWT)', vscode52: 'pass', pi52: 'pass (login-only)', codex52: 'pass (login-only)', opencodeM3: 'pass (login-only)', evidence: '' },
-      { req: 'withAuth also rejects deactivated accounts',  claude52: 'pass', claude51: 'FAIL', opencode17174: 'FAIL', opencode52: 'FAIL', pi51: 'FAIL', vscode52: 'FAIL', pi52: 'FAIL', codex52: 'FAIL', opencodeM3: 'FAIL', evidence: '' },
-      { req: 'SEC-11 admin cannot deactivate/role-change own account', claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
-      { req: 'USR-02 password policy (8–128 + 4 char classes)', claude52: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
-      { req: 'SameSite=Strict cookie (SEC-01)',            claude52: 'pass (explicit)', claude51: 'partial (default)', opencode17174: 'partial (default)', opencode52: 'pass (explicit)', pi51: 'partial (default)', vscode52: 'partial (default)', pi52: 'pass (explicit)', codex52: 'partial (default)', opencodeM3: 'partial (default)', evidence: '' }
+      { req: 'passwordChangedAt session invalidation (AUTH-02)', claude52: 'pass+ (live-refresh every request)', claude53f: 'pass+ (live refresh of passwordChangedAt; role/canViewAll/isActive login-only)', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'FAIL (broken — never written to JWT)', vscode52: 'pass', pi52: 'pass (login-only)', codex52: 'pass (login-only)', opencodeM3: 'pass (login-only)', evidence: '' },
+      { req: 'withAuth also rejects deactivated accounts',  claude52: 'pass', claude53f: 'FAIL', claude51: 'FAIL', opencode17174: 'FAIL', opencode52: 'FAIL', pi51: 'FAIL', vscode52: 'FAIL', pi52: 'FAIL', codex52: 'FAIL', opencodeM3: 'FAIL', evidence: '' },
+      { req: 'SEC-11 admin cannot deactivate/role-change own account', claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
+      { req: 'USR-02 password policy (8–128 + 4 char classes)', claude52: 'pass', claude53f: 'pass', claude51: 'pass', opencode17174: 'pass', opencode52: 'pass', pi51: 'pass', vscode52: 'pass', pi52: 'pass', codex52: 'pass', opencodeM3: 'pass', evidence: '' },
+      { req: 'SameSite=Strict cookie (SEC-01)',            claude52: 'pass (explicit)', claude53f: 'pass (explicit + __Secure- name switching)', claude51: 'partial (default)', opencode17174: 'partial (default)', opencode52: 'pass (explicit)', pi51: 'partial (default)', vscode52: 'partial (default)', pi52: 'pass (explicit)', codex52: 'partial (default)', opencodeM3: 'partial (default)', evidence: '' }
     ],
     '3.5 Test conformance': [
-      { req: '7 unit tests',        claude52: '7', claude51: '7', opencode17174: '7', opencode52: '7', pi51: '6', vscode52: '7', pi52: '7', codex52: '7 (5 pass / 2 fail: api-auth, api-utils)', opencodeM3: '8', evidence: '' },
-      { req: '7 functional tests',   claude52: '7', claude51: '7', opencode17174: '7', opencode52: '5', pi51: '3', vscode52: '2 (missing 5: password-invalidation, setup-lock, sale-refund-flow, inventory-removal-date, refund-impact)', pi52: '7', codex52: '7 (1 pass / 6 fail — workflows crash with Cannot read properties of undefined)', opencodeM3: '7', evidence: '' },
-      { req: '9 integration tests', claude52: '9', claude51: '0', opencode17174: '0', opencode52: '0', pi51: '0', vscode52: '0', pi52: '0', codex52: '1 (origin-validation, failing)', opencodeM3: '0', evidence: '' },
-      { req: '5 e2e specs',         claude52: '5', claude51: '5', opencode17174: '0', opencode52: '0', pi51: '0', vscode52: '1 (auth only)', pi52: '0', codex52: '5 (auth, inventory, sales, import, rbac — not run statically)', opencodeM3: '5', evidence: '' }
+      { req: '7 unit tests',        claude52: '7', claude53f: '7', claude51: '7', opencode17174: '7', opencode52: '7', pi51: '6', vscode52: '7', pi52: '7', codex52: '7 (5 pass / 2 fail: api-auth, api-utils)', opencodeM3: '8', evidence: '' },
+      { req: '7 functional tests',   claude52: '7', claude53f: '7', claude51: '7', opencode17174: '7', opencode52: '5', pi51: '3', vscode52: '2 (missing 5: password-invalidation, setup-lock, sale-refund-flow, inventory-removal-date, refund-impact)', pi52: '7', codex52: '7 (1 pass / 6 fail — workflows crash with Cannot read properties of undefined)', opencodeM3: '7', evidence: '' },
+      { req: '9 integration tests', claude52: '9', claude53f: '9', claude51: '0', opencode17174: '0', opencode52: '0', pi51: '0', vscode52: '0', pi52: '0', codex52: '1 (origin-validation, failing)', opencodeM3: '0', evidence: '' },
+      { req: '5 e2e specs',         claude52: '5', claude53f: '5', claude51: '5', opencode17174: '0', opencode52: '0', pi51: '0', vscode52: '1 (auth only)', pi52: '0', codex52: '5 (auth, inventory, sales, import, rbac — not run statically)', opencodeM3: '5', evidence: '' }
     ]
   },
 
   // ---------- Type discipline (§4.1) ----------
   typeDiscipline: [
     { branch: 'build-claude-glm-5.2',          asAny: 0,  colonAny: 0,  anyGeneric: 0, tsIgnore: 0, total: 0 },
+    { branch: 'build-claude-glm-5.3-flash',    asAny: 0,  colonAny: 0,  anyGeneric: 0, tsIgnore: 0, total: 0 },
     { branch: 'build-claude-glm-5.1',          asAny: 0,  colonAny: 0,  anyGeneric: 0, tsIgnore: 0, total: 0 },
     { branch: 'build-opencode-minimax-m3',     asAny: 0,  colonAny: 0,  anyGeneric: 0, tsIgnore: 0, total: 0 },
     { branch: 'build-codex-glm-5.2',           asAny: 0,  colonAny: 0,  anyGeneric: 0, tsIgnore: 0, total: 0 },
@@ -193,6 +203,7 @@ window.EVAL_DATA = {
   // ---------- Lint outcomes (§4.2) ----------
   lintOutcomes: [
     { branch: 'build-claude-glm-5.2',          command: 'eslint .',  result: 'exit 0 — 0 errors, 0 warnings' },
+    { branch: 'build-claude-glm-5.3-flash',    command: 'next lint', result: 'exit 1 — command removed in Next 16; no ESLint config shipped at all (no eslint.config.mjs, no legacy .eslintrc.json; npx eslint . fallback also fails); lint pipeline non-functional' },
     { branch: 'build-claude-glm-5.1',          command: 'eslint',    result: 'exit 1 — 11 errors, 81 warnings (all errors are no-explicit-any in test files)' },
     { branch: 'build-opencode-minimax-m3',     command: 'next lint', result: 'exit 1 — command removed in Next 16; no eslint.config.mjs (legacy .eslintrc.json unreadable by ESLint v9); lint pipeline non-functional' },
     { branch: 'build-opencode-glm-5.1', command: 'eslint .',  result: 'exit 1 — 119 errors, 72 warnings (errors spread across src/ and tests)' },
@@ -211,6 +222,7 @@ window.EVAL_DATA = {
     { branch: 'build-pi-glm-5.1',              tsBytes: 251928, files: 80,  largestModule: 'auth.ts ~4 KB',          extraModules: '0' },
     { branch: 'build-vscode-glm-5.2',           tsBytes: 267796, files: 85,  largestModule: 'reports/route.ts 104 lines', extraModules: '0' },
     { branch: 'build-pi-glm-5.2',               tsBytes: 282459, files: 72,  largestModule: 'reports/route.ts',        extraModules: '0' },
+    { branch: 'build-claude-glm-5.3-flash',     tsBytes: 285480, files: 79,  largestModule: 'backup.ts 267 lines',     extraModules: '+1 (status-effects)' },
     { branch: 'build-opencode-glm-5.2',        tsBytes: 327706, files: 97,  largestModule: 'inventory-queries.ts 3.8 KB + sales-queries.ts', extraModules: '+4 (http-utils, inventory-queries, sales-queries, rbac)' },
     { branch: 'build-claude-glm-5.1',          tsBytes: 354587, files: 96,  largestModule: 'reports/route.ts 99 lines', extraModules: '0' },
     { branch: 'build-claude-glm-5.2',          tsBytes: 356980, files: 111, largestModule: 'reports/route.ts 112 lines', extraModules: '+4 (api-client, inventory-logic, app-shell, client-shell)' }
@@ -222,7 +234,7 @@ window.EVAL_DATA = {
     { sev: 'High',   branch: 'build-codex-glm-5.2',                           finding: 'tsc --noEmit exits 1 with 101 errors (62 in src/: TS7053 implicit-any indexing of Drizzle builders, TS2719 dual-User-type conflicts; 38 in tests/) — only branch that does not compile', location: 'src/app/api/admin/users/route.ts, src/app/api/admin/users/[id]/route.ts, src/app/admin/users/page.tsx, tests/**' },
     { sev: 'High',   branch: 'build-codex-glm-5.2',                           finding: 'vitest run exits 1: 16 of 93 tests fail (all 7 functional workflows, 2 unit auth, 1 integration) with Cannot read properties of undefined (reading id) from misused .returning() chain', location: 'tests/functional/workflows/*, tests/unit/api-auth.test.ts, tests/unit/api-utils.test.ts, tests/integration/api/origin-validation.test.ts' },
     { sev: 'High',   branch: 'build-pi-glm-5.1',                           finding: 'passwordChangedAt never written to JWT → session invalidation always no-ops (AUTH-02/SEC-03 broken)', location: 'src/lib/auth.ts:90-97' },
-    { sev: 'High',   branch: 'build-opencode-glm-5.2, build-pi-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2, build-codex-glm-5.2', finding: "lint script uses removed next lint; no eslint.config.mjs; lint pipeline non-functional", location: 'package.json scripts' },
+    { sev: 'High',   branch: 'build-opencode-glm-5.2, build-pi-glm-5.2, build-pi-glm-5.1, build-vscode-glm-5.2, build-codex-glm-5.2, build-opencode-minimax-m3, build-claude-glm-5.3-flash', finding: "lint script uses removed next lint; no eslint.config.mjs; lint pipeline non-functional", location: 'package.json scripts' },
     { sev: 'Med',    branch: 'build-vscode-glm-5.2',                       finding: "calculateSalesTaxFromPrice uses price * rate instead of spec's price - price/(1+rate) (SALE-04 deviation)", location: 'src/lib/financial.ts:48' },
     { sev: 'Med',    branch: 'build-opencode-glm-5.1, build-opencode-glm-5.2, build-pi-glm-5.2, build-vscode-glm-5.2, build-codex-glm-5.2, build-opencode-minimax-m3', finding: 'validateOriginOrReferer does not exempt /api/auth/* (AUTH-04 deviation)', location: 'src/lib/api-utils.ts / http-utils.ts' },
     { sev: 'Med',    branch: 'build-claude-glm-5.1, build-opencode-glm-5.1, build-pi-glm-5.1, build-vscode-glm-5.2, build-codex-glm-5.2, build-opencode-minimax-m3', finding: 'No explicit SameSite=Strict on session cookie (relies on NextAuth default lax)', location: 'src/lib/auth.ts' },
@@ -246,12 +258,15 @@ window.EVAL_DATA = {
     { sev: 'Info',   branch: 'build-pi-glm-5.1',                           finding: '13 console.log in src/ (highest density)', location: 'various' },
     { sev: 'Info',   branch: 'build-vscode-glm-5.2',                       finding: '1 as any in db.ts Proxy pattern (pragmatic escape for dynamic property forwarding)', location: 'src/lib/db.ts:43' },
     { sev: 'Info',   branch: 'build-codex-glm-5.2',                        finding: 'Smallest byte total in the cohort (230 KB) and zero explicit type escapes — but the zero-escape count is misleading: tsc surfaces 62 implicit-any errors in src/, so the source does not actually type-check. Ships all 5 e2e spec files (matching claude-5.2) and a playwright.config.ts', location: 'src/app/api/admin/users/, tsc log' },
-    { sev: 'Info',   branch: 'build-opencode-minimax-m3',                   finding: 'First build generated by a non-GLM model (MiniMax M3); zero explicit type escapes, tsc clean, 135 tests pass, 5 e2e specs, canonical withAuth + proxy naming, complete NextAuth module augmentation', location: 'src/' }
+    { sev: 'Info',   branch: 'build-opencode-minimax-m3',                   finding: 'First build generated by a non-GLM model (MiniMax M3); zero explicit type escapes, tsc clean, 135 tests pass, 5 e2e specs, canonical withAuth + proxy naming, complete NextAuth module augmentation', location: 'src/' },
+    { sev: 'Med',   branch: 'build-claude-glm-5.3-flash', finding: 'Live JWT refresh covers passwordChangedAt only — role/canViewAll/isActive changes do not propagate to existing JWTs until re-login, and withAuth does not gate on isActive (deactivated accounts retain access until token expiry)', location: 'src/lib/auth.ts jwt callback, src/lib/api-utils.ts withAuth' },
+    { sev: 'Info',   branch: 'build-claude-glm-5.3-flash', finding: 'First GLM-5.3-family build; second branch ever with the full 4-tier suite incl. all 9 integration tests; largest suite in the cohort (213 tests); complete next-auth + next-auth/jwt augmentations; live passwordChangedAt refresh (REG-06 passes); explicit SameSite with __Secure- name switching; best complexity-to-capability ratio (285 KB with full test tiers)', location: 'src/, tests/' }
   ],
 
   // ---------- Raw verification (Appendix A) ----------
   rawVerification: [
     { branch: 'build-claude-glm-5.2',          npmCi: 'exit 0', lint: 'exit 0 — 0 err / 0 warn',       tsc: 'exit 0 (clean)', vitest: 'exit 0 — 23 files, 186 tests' },
+    { branch: 'build-claude-glm-5.3-flash',   npmCi: 'exit 0', lint: 'exit 1 — next lint removed; no ESLint config shipped at all (npx eslint . also fails)', tsc: 'exit 0 (clean)', vitest: 'exit 0 — 23 files, 213 tests' },
     { branch: 'build-claude-glm-5.1',          npmCi: 'exit 0', lint: 'exit 1 — 11 err / 81 warn',     tsc: 'exit 0 (clean)', vitest: 'exit 0 — 14 files, 121 tests' },
     { branch: 'build-opencode-minimax-m3',     npmCi: 'exit 0', lint: 'exit 1 — next lint removed; legacy .eslintrc.json unreadable by ESLint v9', tsc: 'exit 0 (clean)', vitest: 'exit 0 — 15 files, 135 tests' },
     { branch: 'build-opencode-glm-5.1', npmCi: 'exit 0', lint: 'exit 1 — 119 err / 72 warn',   tsc: 'exit 0 (clean)', vitest: 'exit 0 — 14 files, 115 tests' },
@@ -264,29 +279,29 @@ window.EVAL_DATA = {
 
   // ---------- Variances between branches (§7) — key dimensions ----------
   variances: [
-    { dimension: 'withAuth signature', claude52: 'export const POST = withAuth(...) — matches spec', claude51: 'same as claude-5.2', opencode17174: 'same as claude-5.2', opencode52: 'wraps inside async function POST', pi51: 'withAuth(req, handler) — different signature', vscode52: 'export const POST = withAuth(...) — matches spec', pi52: 'wraps inside async function POST', codex52: 'wraps inside async function POST', opencodeM3: 'export const POST = withAuth(...) — matches spec' },
-    { dimension: 'Middleware filename', claude52: 'src/proxy.ts (spec)', claude51: 'src/proxy.ts (spec)', opencode17174: 'src/middleware.ts (Next.js)', opencode52: 'src/proxy.ts (spec)', pi51: 'src/middleware.ts (Next.js)', vscode52: 'src/proxy.ts (spec)', pi52: 'src/proxy.ts (spec)', codex52: 'src/proxy.ts (spec)', opencodeM3: 'src/proxy.ts (spec)' },
-    { dimension: 'lint script', claude52: 'eslint . (works, clean)', claude51: 'eslint (works)', opencode17174: 'eslint . (works)', opencode52: 'next lint (broken)', pi51: 'next lint (broken)', vscode52: 'next lint (broken)', pi52: 'next lint (broken)', codex52: 'next lint (broken)', opencodeM3: 'next lint (broken)' },
-    { dimension: 'eslint.config.mjs', claude52: 'yes', claude51: 'yes', opencode17174: 'yes', opencode52: 'no', pi51: 'no', vscode52: 'no', pi52: 'no (legacy .eslintrc.json)', codex52: 'no', opencodeM3: 'no (legacy .eslintrc.json)' },
-    { dimension: 'Schema timestamp mode', claude52: 'raw integer (unix s)', claude51: 'raw integer (unix s)', opencode17174: "{ mode: 'timestamp' } (Date)", opencode52: 'raw integer (unix s)', pi51: 'raw integer (unix s)', vscode52: 'raw integer (unix s)', pi52: "{ mode: 'number' } (typed number)", codex52: "{ mode: 'number' } (typed number)", opencodeM3: "{ mode: 'number' } (typed number)" },
-    { dimension: 'Schema boolean mode', claude52: 'raw 0/1 + toBool/fromBool helpers', claude51: 'raw 0/1 integer', opencode17174: "{ mode: 'boolean' }", opencode52: "{ mode: 'boolean' }", pi51: 'raw 0/1 integer', vscode52: 'raw 0/1 integer', pi52: "{ mode: 'boolean' }", codex52: "{ mode: 'boolean' }", opencodeM3: "{ mode: 'boolean' }" },
-    { dimension: 'JWT callback refreshes live fields from DB', claude52: 'every request', claude51: 'login-only', opencode17174: 'login-only', opencode52: 'login-only', pi51: 'login-only (broken)', vscode52: 'login-only', pi52: 'login-only', codex52: 'login-only', opencodeM3: 'login-only' },
-    { dimension: 'withAuth rejects deactivated accounts', claude52: 'yes', claude51: 'no', opencode17174: 'no', opencode52: 'no', pi51: 'no', vscode52: 'no', pi52: 'no', codex52: 'no', opencodeM3: 'no' },
-    { dimension: 'calculateSalesTaxFromPrice formula', claude52: 'spec: price - price/(1+rate)', claude51: 'same', opencode17174: 'same', opencode52: 'same', pi51: 'same', vscode52: 'differs: price * rate (adds tax, not extracts)', pi52: 'same', codex52: 'spec: price - price/(1+rate)', opencodeM3: 'spec: price - price/(1+rate)' },
-    { dimension: 'NextAuth module augmentation', claude52: 'next-auth + @auth/core/jwt', claude51: 'next-auth + @auth/core/jwt', opencode17174: 'next-auth only', opencode52: 'next-auth only', pi51: 'none (uses as any)', vscode52: 'next-auth + @auth/core/jwt', pi52: 'next-auth only (incomplete — iat/pca untyped)', codex52: 'none (uses inline as { ... } casts)', opencodeM3: 'next-auth only (complete — covers iat/passwordChangedAt)' },
-    { dimension: 'Extra dependency', claude52: '—', claude51: '—', opencode17174: 'uuid@^14 + @types/uuid', opencode52: '—', pi51: '—', vscode52: '—', pi52: '—', codex52: '—', opencodeM3: '—' },
-    { dimension: 'zod version', claude52: 'v4', claude51: 'v4', opencode17174: 'v3', opencode52: 'v4', pi51: 'v4', vscode52: 'v4', pi52: 'v4', codex52: 'v4', opencodeM3: 'v4' },
-    { dimension: 'Extra API endpoint', claude52: '—', claude51: '—', opencode17174: '—', opencode52: '+ /api/sales/export', pi51: '—', vscode52: '—', pi52: '—', codex52: '—', opencodeM3: '—' },
-    { dimension: 'Missing API endpoints', claude52: '—', claude51: '—', opencode17174: '—', opencode52: '—', pi51: '- /mileage/export, - /mileage/reports', vscode52: '—', pi52: '—', codex52: '—', opencodeM3: '—' },
-    { dimension: 'Migration meta/ journal', claude52: 'yes', claude51: 'no (missing)', opencode17174: 'yes', opencode52: 'yes', pi51: 'yes', vscode52: 'yes', pi52: 'yes', codex52: 'no (missing — only 0000_initial.sql)', opencodeM3: 'yes' },
-    { dimension: 'bcrypt cost (app code)', claude52: '10 (centralized in config.ts)', claude51: '12 (inconsistent w/ seed)', opencode17174: '10', opencode52: '10', pi51: '10', vscode52: '10', pi52: '10', codex52: '10 (hardcoded at each call site)', opencodeM3: '10' },
-    { dimension: 'SameSite cookie config', claude52: "explicit 'strict'", claude51: 'default', opencode17174: 'default', opencode52: "explicit 'strict'", pi51: 'default', vscode52: 'default', pi52: "explicit 'strict'", codex52: 'default', opencodeM3: 'default' },
-    { dimension: 'serverExternalPackages in next.config', claude52: 'yes', claude51: 'no', opencode17174: 'yes', opencode52: 'no', pi51: 'no', vscode52: 'no', pi52: 'no', codex52: 'no', opencodeM3: 'yes' },
-    { dimension: 'Caddyfile rate-limit scoping', claude52: 'scoped via handle /api/auth/*', claude51: 'global zones', opencode17174: 'scoped via handle_path /api/auth/*', opencode52: 'global zones', pi51: 'global zones', vscode52: 'global zones', pi52: 'global zones', codex52: 'global zones', opencodeM3: 'global zones' },
-    { dimension: 'Extra modules (beyond spec list)', claude52: 'api-client, inventory-logic, app-shell, client-shell', claude51: '0', opencode17174: '0', opencode52: 'http-utils, inventory-queries, sales-queries, rbac', pi51: '0', vscode52: '0', pi52: '0', codex52: '0', opencodeM3: '0' },
-    { dimension: 'Seed admin email', claude52: 'admin@example.com', claude51: 'admin@resalemanager.com', opencode17174: 'security@lawsonsoft.com', opencode52: 'admin@example.com (via /api/setup)', pi51: 'admin@example.com', vscode52: 'admin@example.com (via /api/setup)', pi52: 'security@lawsonsoft.com', codex52: 'security@lawsonsoft.com', opencodeM3: 'admin@example.com' },
-    { dimension: 'tsc --noEmit', claude52: '✓ exit 0', claude51: '✓ exit 0', opencode17174: '✓ exit 0', opencode52: '✓ exit 0', pi51: '✓ exit 0', vscode52: '✓ exit 0', pi52: '✓ exit 0', codex52: '✗ exit 1 (101 errors)', opencodeM3: '✓ exit 0' },
-    { dimension: 'vitest run', claude52: '✓ 186 pass', claude51: '✓ 121 pass', opencode17174: '✓ 115 pass', opencode52: '✓ 134 pass', pi51: '✓ 95 pass', vscode52: '✓ 100 pass', pi52: '✓ 137 pass', codex52: '✗ 77 pass / 16 fail', opencodeM3: '✓ 135 pass' }
+    { dimension: 'withAuth signature', claude52: 'export const POST = withAuth(...) — matches spec', claude53f: 'export const POST = withAuth(...) — matches spec', claude51: 'same as claude-5.2', opencode17174: 'same as claude-5.2', opencode52: 'wraps inside async function POST', pi51: 'withAuth(req, handler) — different signature', vscode52: 'export const POST = withAuth(...) — matches spec', pi52: 'wraps inside async function POST', codex52: 'wraps inside async function POST', opencodeM3: 'export const POST = withAuth(...) — matches spec' },
+    { dimension: 'Middleware filename', claude52: 'src/proxy.ts (spec)', claude53f: '`src/proxy.ts` (spec)', claude51: 'src/proxy.ts (spec)', opencode17174: 'src/middleware.ts (Next.js)', opencode52: 'src/proxy.ts (spec)', pi51: 'src/middleware.ts (Next.js)', vscode52: 'src/proxy.ts (spec)', pi52: 'src/proxy.ts (spec)', codex52: 'src/proxy.ts (spec)', opencodeM3: 'src/proxy.ts (spec)' },
+    { dimension: 'lint script', claude52: 'eslint . (works, clean)', claude53f: '`next lint` (broken)', claude51: 'eslint (works)', opencode17174: 'eslint . (works)', opencode52: 'next lint (broken)', pi51: 'next lint (broken)', vscode52: 'next lint (broken)', pi52: 'next lint (broken)', codex52: 'next lint (broken)', opencodeM3: 'next lint (broken)' },
+    { dimension: 'eslint.config.mjs', claude52: 'yes', claude53f: 'no (no config at all)', claude51: 'yes', opencode17174: 'yes', opencode52: 'no', pi51: 'no', vscode52: 'no', pi52: 'no (legacy .eslintrc.json)', codex52: 'no', opencodeM3: 'no (legacy .eslintrc.json)' },
+    { dimension: 'Schema timestamp mode', claude52: 'raw integer (unix s)', claude53f: '`{ mode: \'timestamp_ms\' }` (Date) for dates; raw seconds for password_changed_at', claude51: 'raw integer (unix s)', opencode17174: "{ mode: 'timestamp' } (Date)", opencode52: 'raw integer (unix s)', pi51: 'raw integer (unix s)', vscode52: 'raw integer (unix s)', pi52: "{ mode: 'number' } (typed number)", codex52: "{ mode: 'number' } (typed number)", opencodeM3: "{ mode: 'number' } (typed number)" },
+    { dimension: 'Schema boolean mode', claude52: 'raw 0/1 + toBool/fromBool helpers', claude53f: '`{ mode: \'boolean\' }`', claude51: 'raw 0/1 integer', opencode17174: "{ mode: 'boolean' }", opencode52: "{ mode: 'boolean' }", pi51: 'raw 0/1 integer', vscode52: 'raw 0/1 integer', pi52: "{ mode: 'boolean' }", codex52: "{ mode: 'boolean' }", opencodeM3: "{ mode: 'boolean' }" },
+    { dimension: 'JWT callback refreshes live fields from DB', claude52: 'every request', claude53f: 'passwordChangedAt only (every request); role/canViewAll/isActive login-only', claude51: 'login-only', opencode17174: 'login-only', opencode52: 'login-only', pi51: 'login-only (broken)', vscode52: 'login-only', pi52: 'login-only', codex52: 'login-only', opencodeM3: 'login-only' },
+    { dimension: 'withAuth rejects deactivated accounts', claude52: 'yes', claude53f: 'no', claude51: 'no', opencode17174: 'no', opencode52: 'no', pi51: 'no', vscode52: 'no', pi52: 'no', codex52: 'no', opencodeM3: 'no' },
+    { dimension: 'calculateSalesTaxFromPrice formula', claude52: 'spec: price - price/(1+rate)', claude53f: 'spec: `price - price/(1+rate)`', claude51: 'same', opencode17174: 'same', opencode52: 'same', pi51: 'same', vscode52: 'differs: price * rate (adds tax, not extracts)', pi52: 'same', codex52: 'spec: price - price/(1+rate)', opencodeM3: 'spec: price - price/(1+rate)' },
+    { dimension: 'NextAuth module augmentation', claude52: 'next-auth + @auth/core/jwt', claude53f: '`next-auth` + `next-auth/jwt` (complete)', claude51: 'next-auth + @auth/core/jwt', opencode17174: 'next-auth only', opencode52: 'next-auth only', pi51: 'none (uses as any)', vscode52: 'next-auth + @auth/core/jwt', pi52: 'next-auth only (incomplete — iat/pca untyped)', codex52: 'none (uses inline as { ... } casts)', opencodeM3: 'next-auth only (complete — covers iat/passwordChangedAt)' },
+    { dimension: 'Extra dependency', claude52: '—', claude53f: '—', claude51: '—', opencode17174: 'uuid@^14 + @types/uuid', opencode52: '—', pi51: '—', vscode52: '—', pi52: '—', codex52: '—', opencodeM3: '—' },
+    { dimension: 'zod version', claude52: 'v4', claude53f: 'v4', claude51: 'v4', opencode17174: 'v3', opencode52: 'v4', pi51: 'v4', vscode52: 'v4', pi52: 'v4', codex52: 'v4', opencodeM3: 'v4' },
+    { dimension: 'Extra API endpoint', claude52: '—', claude53f: '—', claude51: '—', opencode17174: '—', opencode52: '+ /api/sales/export', pi51: '—', vscode52: '—', pi52: '—', codex52: '—', opencodeM3: '—' },
+    { dimension: 'Missing API endpoints', claude52: '—', claude53f: '—', claude51: '—', opencode17174: '—', opencode52: '—', pi51: '- /mileage/export, - /mileage/reports', vscode52: '—', pi52: '—', codex52: '—', opencodeM3: '—' },
+    { dimension: 'Migration meta/ journal', claude52: 'yes', claude53f: 'yes', claude51: 'no (missing)', opencode17174: 'yes', opencode52: 'yes', pi51: 'yes', vscode52: 'yes', pi52: 'yes', codex52: 'no (missing — only 0000_initial.sql)', opencodeM3: 'yes' },
+    { dimension: 'bcrypt cost (app code)', claude52: '10 (centralized in config.ts)', claude53f: '10 (hardcoded at each call site)', claude51: '12 (inconsistent w/ seed)', opencode17174: '10', opencode52: '10', pi51: '10', vscode52: '10', pi52: '10', codex52: '10 (hardcoded at each call site)', opencodeM3: '10' },
+    { dimension: 'SameSite cookie config', claude52: "explicit 'strict'", claude53f: 'explicit \'strict\' (+`__Secure-` name switching)', claude51: 'default', opencode17174: 'default', opencode52: "explicit 'strict'", pi51: 'default', vscode52: 'default', pi52: "explicit 'strict'", codex52: 'default', opencodeM3: 'default' },
+    { dimension: 'serverExternalPackages in next.config', claude52: 'yes', claude53f: 'yes', claude51: 'no', opencode17174: 'yes', opencode52: 'no', pi51: 'no', vscode52: 'no', pi52: 'no', codex52: 'no', opencodeM3: 'yes' },
+    { dimension: 'Caddyfile rate-limit scoping', claude52: 'scoped via handle /api/auth/*', claude53f: 'scoped via `match` (auth path + mutation method)', claude51: 'global zones', opencode17174: 'scoped via handle_path /api/auth/*', opencode52: 'global zones', pi51: 'global zones', vscode52: 'global zones', pi52: 'global zones', codex52: 'global zones', opencodeM3: 'global zones' },
+    { dimension: 'Extra modules (beyond spec list)', claude52: 'api-client, inventory-logic, app-shell, client-shell', claude53f: '1 (`status-effects`)', claude51: '0', opencode17174: '0', opencode52: 'http-utils, inventory-queries, sales-queries, rbac', pi51: '0', vscode52: '0', pi52: '0', codex52: '0', opencodeM3: '0' },
+    { dimension: 'Seed admin email', claude52: 'admin@example.com', claude53f: '`security@lawsonsoft.com` (env-overridable)', claude51: 'admin@resalemanager.com', opencode17174: 'security@lawsonsoft.com', opencode52: 'admin@example.com (via /api/setup)', pi51: 'admin@example.com', vscode52: 'admin@example.com (via /api/setup)', pi52: 'security@lawsonsoft.com', codex52: 'security@lawsonsoft.com', opencodeM3: 'admin@example.com' },
+    { dimension: 'tsc --noEmit', claude52: '✓ exit 0', claude53f: '✓ exit 0', claude51: '✓ exit 0', opencode17174: '✓ exit 0', opencode52: '✓ exit 0', pi51: '✓ exit 0', vscode52: '✓ exit 0', pi52: '✓ exit 0', codex52: '✗ exit 1 (101 errors)', opencodeM3: '✓ exit 0' },
+    { dimension: 'vitest run', claude52: '✓ 186 pass', claude53f: '✓ 213 pass', claude51: '✓ 121 pass', opencode17174: '✓ 115 pass', opencode52: '✓ 134 pass', pi51: '✓ 95 pass', vscode52: '✓ 100 pass', pi52: '✓ 137 pass', codex52: '✗ 77 pass / 16 fail', opencodeM3: '✓ 135 pass' }
   ],
 
   // ---------- Spec docs (for the specs overview page) ----------
@@ -345,8 +360,8 @@ window.EVAL_DATA = {
   // functionalScore (0-100), summary.
   functional: {
   "status": "complete",
-  "dateCompleted": "2026-07-06",
-  "methodology": "Playwright 1.61.1 chromium, next dev boot, 3 retries/flow, admin via native seed or /api/setup fallback, drizzle-kit migrate where required, AUTH_SECRET env set where required",
+  "dateCompleted": "2026-09-05",
+  "methodology": "Playwright 1.59.1/1.61.x chromium, next dev boot, 3 full-suite runs per branch (fresh DB + dev-server restart per run), admin via native seed or /api/setup fallback, drizzle-kit migrate where required, AUTH_SECRET env set where required",
   "branches": {
     "build-claude-glm-5.2": {
       "bootMode": "dev (auto-migrate via lazy proxy)",
@@ -530,7 +545,40 @@ window.EVAL_DATA = {
       ],
       "failures": [],
       "functionalScore": 100,
-      "summary": "The only fully-functional build. All 5 flows pass and all 18 regression scenarios pass. Live JWT refresh of passwordChangedAt makes REG-06 work. No remediation required."
+      "summary": "Fully-functional build (now co-holder of the 100/100 ceiling with claude-5.3-flash, which it beats on raw pass count 26 vs 25). All 5 flows pass and all 18 regression scenarios pass. Live JWT refresh of passwordChangedAt makes REG-06 work. No remediation required."
+    },
+    "build-claude-glm-5.3-flash": {
+      "bootMode": "dev (seed auto-migrates via own idempotent migrator; no AUTH_SECRET required in dev)",
+      "flows": [
+        { "id": "auth", "status": "pass", "attempts": "6/6 tests pass", "error": "" },
+        { "id": "inventory", "status": "pass", "attempts": "6/6 tests pass", "error": "" },
+        { "id": "sales", "status": "pass", "attempts": "5/5 tests pass", "error": "" },
+        { "id": "import", "status": "pass", "attempts": "4/4 tests pass", "error": "" },
+        { "id": "rbac", "status": "pass", "attempts": "4/4 tests pass", "error": "" }
+      ],
+      "regressions": [
+        { "id": "REG-01", "scenario": "Create item → record sale → item status becomes \"sold\"", "category": "Functional", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-02", "scenario": "Record sale → process refund_with_return → item becomes \"returned\"", "category": "Functional", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-03", "scenario": "Record sale → process refund_no_return → item stays \"sold\", refund recorded", "category": "Functional", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-04", "scenario": "Delete sale → item status reverts to \"available\"", "category": "Functional", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-05", "scenario": "Bulk update items to \"donated\" → removalDate set, no $0 sales created", "category": "Functional", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-06", "scenario": "Password change invalidates existing JWT sessions", "category": "Auth", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-07", "scenario": "Origin header required on all POST/PUT/DELETE/PATCH requests", "category": "Security", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-08", "scenario": "Origin header mismatched returns 403 INVALID_ORIGIN", "category": "Security", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-09", "scenario": "Standard user cannot access another user's items", "category": "RBAC", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-10", "scenario": "canViewAll user can view all data but only edit own", "category": "RBAC", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-11", "scenario": "Admin can manage users and edit any data", "category": "RBAC", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-12", "scenario": "Invalid status transition rejected (e.g., sold → available)", "category": "Validation", "priority": "Critical", "status": "pass", "error": "" },
+        { "id": "REG-13", "scenario": "Status transition to \"donated\" sets removalDate", "category": "Business Logic", "priority": "High", "status": "pass", "error": "" },
+        { "id": "REG-14", "scenario": "Status transition \"returned\" → \"available\" clears removalDate", "category": "Business Logic", "priority": "High", "status": "pass", "error": "" },
+        { "id": "REG-15", "scenario": "Backup restore with invalid data → no DB changes", "category": "Backup", "priority": "High", "status": "pass", "error": "" },
+        { "id": "REG-16", "scenario": "Setup lock prevents second admin creation", "category": "Auth", "priority": "High", "status": "pass", "error": "" },
+        { "id": "REG-17", "scenario": "Photo upload requires item ownership", "category": "Security", "priority": "High", "status": "pass", "error": "" },
+        { "id": "REG-18", "scenario": "Profit calculation produces correct results for all null/zero combinations", "category": "Financial", "priority": "High", "status": "pass", "error": "" }
+      ],
+      "failures": [],
+      "functionalScore": 100,
+      "summary": "Perfect functional score (100/100, 25/25 pass — first build ever to match claude-5.2's percentage; enters at #2 losing the tie-break on raw pass count 25 < 26). All 5 flows pass and all 18 regression scenarios pass across all 3 runs (fresh DB + dev-server restart per run). REG-06 works via the live DB refresh of passwordChangedAt in the jwt callback (pre-change JWT rejected with 401 Session invalidated). REG-07/08 pass with /api/auth/* + POST /api/setup Origin exemptions. REG-15 passes with atomic restore validation. Cleanest boot in the cohort: native seed auto-migrates and upserts admin + app_config in one script (security@lawsonsoft.com / Admin123!@#, env-overridable). No remediation required."
     },
     "build-claude-glm-5.1": {
       "bootMode": "dev (auto-migrate via app + drizzle-kit)",
@@ -1956,15 +2004,31 @@ window.EVAL_DATA = {
     },
     {
       "sev": "Info",
-      "branch": "all branches except build-claude-glm-5.2",
-      "finding": "Session invalidation (REG-06) is the single most-shared functional gap — only claude-5.2 implements live JWT refresh. codex-5.2 is blocked by boot, so its REG-06 failure is inferred from static analysis, not directly observed.",
+      "branch": "all branches except build-claude-glm-5.2 and build-claude-glm-5.3-flash",
+      "finding": "Session invalidation (REG-06) is the single most-shared functional gap — only claude-5.2 and claude-5.3-flash implement live JWT refresh of passwordChangedAt. codex-5.2 is blocked by boot, so its REG-06 failure is inferred from static analysis, not directly observed.",
       "flowId": "auth",
       "scenarioId": "REG-06"
+    },
+    {
+      "sev": "Info",
+      "branch": "build-claude-glm-5.3-flash",
+      "finding": "Cleanest boot in the cohort: native seed auto-migrates (own idempotent migrator) and upserts admin + app_config in one script — no dotenv crash, no manual drizzle-kit migrate, no AUTH_SECRET requirement in dev. Ties claude-5.2 at 100/100 (25/25 vs 26/26); REG-06 passes via live passwordChangedAt refresh.",
+      "flowId": "boot",
+      "scenarioId": "—"
     }
   ],
   "effortSummary": [
     {
       "branch": "build-claude-glm-5.2",
+      "total": 0,
+      "S": 0,
+      "M": 0,
+      "L": 0,
+      "XL": 0,
+      "estimatedHours": 0.0
+    },
+    {
+      "branch": "build-claude-glm-5.3-flash",
       "total": 0,
       "S": 0,
       "M": 0,
@@ -2049,23 +2113,24 @@ window.EVAL_DATA = {
   // the winner assertion always carries the score that produced it, not just a branch name.
   "functionalWinner": { branch: 'build-claude-glm-5.2', score: 100, passFraction: '26/26' },
 
-  // functionalRankings: ordered 1..9 by functionalScore desc, then tie-breaker
+  // functionalRankings: ordered 1..10 by functionalScore desc, then tie-breaker
   // (raw pass count -> critical scenario -> flow pass count -> denominator -> alphabetical).
   // Per FUNCTIONAL_EVALUATION.md §1a. Each row carries the score + pass fraction + denominator
   // so no functional rank is ever asserted without its underlying score.
   "functionalRankings": [
-    { rank: 1, branch: 'build-claude-glm-5.2',      score: 100, passFraction: '26/26', denominator: '8 flow + 18 REG', tieBreakNote: 'clear winner (only REG-06 pass)' },
-    { rank: 2, branch: 'build-pi-glm-5.2',          score: 96,  passFraction: '25/26', denominator: '8 flow + 18 REG', tieBreakNote: 'wins #2 vs vscode-5.2 on rule 5 (alphabetical)' },
-    { rank: 3, branch: 'build-vscode-glm-5.2',      score: 96,  passFraction: '25/26', denominator: '8 flow + 18 REG', tieBreakNote: 'loses #2 to pi-5.2 on rule 5 (alphabetical)' },
-    { rank: 4, branch: 'build-opencode-minimax-m3', score: 96,  passFraction: '24/25', denominator: '7 flow + 18 REG', tieBreakNote: 'loses #2/3 tie on rule 1 (raw pass 24 < 25); per-branch denominator 25' },
-    { rank: 5, branch: 'build-opencode-glm-5.2',    score: 88,  passFraction: '23/26', denominator: '8 flow + 18 REG', tieBreakNote: '—' },
-    { rank: 6, branch: 'build-opencode-glm-5.1',    score: 69,  passFraction: '18/26', denominator: '8 flow + 18 REG', tieBreakNote: '—' },
-    { rank: 7, branch: 'build-pi-glm-5.1',          score: 62,  passFraction: '16/26', denominator: '8 flow + 18 REG', tieBreakNote: '—' },
-    { rank: 8, branch: 'build-claude-glm-5.1',      score: 35,  passFraction: '9/26',  denominator: '8 flow + 18 REG', tieBreakNote: '—' },
-    { rank: 9, branch: 'build-codex-glm-5.2',       score: 0,   passFraction: '0/26',  denominator: '8 flow + 18 REG', tieBreakNote: 'app does not boot (proxy name mismatch)' }
+    { rank: 1, branch: 'build-claude-glm-5.2',      score: 100, passFraction: '26/26', denominator: '8 flow + 18 REG', tieBreakNote: 'wins the 100/100 tie on rule 1 (raw pass 26 > 25)' },
+    { rank: 2, branch: 'build-claude-glm-5.3-flash', score: 100, passFraction: '25/25', denominator: '7 flow + 18 REG', tieBreakNote: 'loses the 100/100 tie on rule 1 (raw pass 25 < 26; per-branch denominator 25); REG-06 passes — one of only two' },
+    { rank: 3, branch: 'build-pi-glm-5.2',          score: 96,  passFraction: '25/26', denominator: '8 flow + 18 REG', tieBreakNote: 'wins #3 vs vscode-5.2 on rule 5 (alphabetical)' },
+    { rank: 4, branch: 'build-vscode-glm-5.2',      score: 96,  passFraction: '25/26', denominator: '8 flow + 18 REG', tieBreakNote: 'loses #3 to pi-5.2 on rule 5 (alphabetical)' },
+    { rank: 5, branch: 'build-opencode-minimax-m3', score: 96,  passFraction: '24/25', denominator: '7 flow + 18 REG', tieBreakNote: 'loses #3/4 tie on rule 1 (raw pass 24 < 25); per-branch denominator 25' },
+    { rank: 6, branch: 'build-opencode-glm-5.2',    score: 88,  passFraction: '23/26', denominator: '8 flow + 18 REG', tieBreakNote: '—' },
+    { rank: 7, branch: 'build-opencode-glm-5.1',    score: 69,  passFraction: '18/26', denominator: '8 flow + 18 REG', tieBreakNote: '—' },
+    { rank: 8, branch: 'build-pi-glm-5.1',          score: 62,  passFraction: '16/26', denominator: '8 flow + 18 REG', tieBreakNote: '—' },
+    { rank: 9, branch: 'build-claude-glm-5.1',      score: 35,  passFraction: '9/26',  denominator: '8 flow + 18 REG', tieBreakNote: '—' },
+    { rank: 10, branch: 'build-codex-glm-5.2',       score: 0,   passFraction: '0/26',  denominator: '8 flow + 18 REG', tieBreakNote: 'app does not boot (proxy name mismatch)' }
   ],
 
-  "recommendation": "build-claude-glm-5.2 is the only build that passes the full functional E2E suite (26/26, 100/100) — the only build with working session invalidation (REG-06), non-500 sale creation, and working admin user management. Corroborates the static-analysis #1 ranking. Runner-ups: build-pi-glm-5.2 (#2, 96/100, 25/26) and build-vscode-glm-5.2 (#3, 96/100, 25/26) — both fail only REG-06 and are strong second-tier baselines. build-opencode-minimax-m3 (#4, 96/100, 24/25 — per-branch denominator 25) is the first build generated by a non-GLM model (MiniMax M3); it loses the 96/100 tie-break to pi-5.2/vscode-5.2 on raw pass count (rule 1). Adopt claude-5.2 as the production baseline.",
+  "recommendation": "The 100/100 ceiling now has two occupants: build-claude-glm-5.2 (26/26) and the newly added build-claude-glm-5.3-flash (25/25; Z = 25 = 7 flow + 18 REG). claude-5.2 wins the tie on raw pass count (rule 1) and remains the recommended baseline — corroborating the static-analysis composite ranking (4.85 vs 4.35). claude-5.3-flash is the strongest second baseline the cohort has produced: it matches the leader on every functional strength (REG-06 via live passwordChangedAt refresh, REG-11, non-500 sale creation) and has the cleanest boot path (native seed auto-migrates in one script). The 96/100 tier follows: pi-5.2 (#3, 25/26), vscode-5.2 (#4, 25/26 — lost to pi-5.2 on the alphabetical tie-break), opencode-minimax-m3 (#5, 24/25 — loses on raw pass count; first non-GLM build). Their only shared failure is REG-06. Adopt claude-5.2 as the production baseline; adopt claude-5.3-flash if a smaller-footprint (285 KB vs 357 KB) co-perfect alternative is preferred.",
   "appendix": "Raw reports: /tmp/opencode/eval-func/<branch>/results-run-{1,2,3}/. Per-run logs: /tmp/opencode/eval-func/<branch>-run-{1,2,3}.log. Dev logs: /tmp/opencode/eval-func/<branch>-dev.log. codex-5.2 produced no Playwright reports (app did not boot); only the dev-server log and seed output were captured."
 }
 };

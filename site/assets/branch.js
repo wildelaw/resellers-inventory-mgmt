@@ -7,6 +7,7 @@
   function conformanceKey(branch) {
     return {
       'build-claude-glm-5.2': 'claude52',
+      'build-claude-glm-5.3-flash': 'claude53f',
       'build-claude-glm-5.1': 'claude51',
       'build-opencode-minimax-m3': 'opencodeM3',
       'build-opencode-glm-5.1': 'opencode17174',
