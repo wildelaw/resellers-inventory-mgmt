@@ -1,0 +1,26 @@
+# dependencies — copied fresh inside the container so native modules
+# (better-sqlite3) are compiled for Linux, not macOS
+node_modules
+
+# build output
+.next
+out
+build
+dist
+
+# local data
+*.db
+*.db-wal
+*.db-shm
+data
+
+# git / docs / dev files
+.git
+.github
+docs
+tests
+coverage
+*.log
+.DS_Store
+.env
+.env.*

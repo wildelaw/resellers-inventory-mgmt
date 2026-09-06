@@ -1,0 +1,50 @@
+{
+    auto_https off
+    debug
+}
+
+:443 {
+    tls {$TLS_CERT} {$TLS_KEY}
+    reverse_proxy app:3000
+
+    # Rate limiting (handled at proxy layer, not in application code)
+    rate_limit {
+        zone auth_zone {
+            match {
+                path /api/auth/*
+            }
+            key    {remote_host}
+            events 5
+            window 15m
+        }
+        zone api_zone {
+            match {
+                method POST PUT DELETE PATCH
+                not path /api/auth/*
+            }
+            key    {remote_host}
+            events 100
+            window 15m
+        }
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}
+
+:8443 {
+    tls {$TLS_CERT} {$TLS_KEY}
+    reverse_proxy app:3000
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy strict-origin-when-cross-origin
+    }
+}
+
+:80 {
+    redir https://{host}{uri} permanent
+}
